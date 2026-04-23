@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dashboard · Simon</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg:             #F2F2F7;
+    --card:           #FFFFFF;
+    --card-inner:     #F2F2F7;
+    --text-primary:   #1C1C1E;
+    --text-secondary: #8E8E93;
+    --text-tertiary:  #C7C7CC;
+    --border:         rgba(0,0,0,0.06);
+    --shadow:         0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    --radius:         18px;
+    --radius-sm:      13px;
+    --accent-purple:  #5E5CE6;
+    --accent-green:   #30D158;
+    --accent-orange:  #FF9F0A;
+    --accent-blue:    #0A84FF;
+    --accent-red:     #FF453A;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Haupt-Grid ── */
+  .screen {
+    width: 100vw;
+    height: 100dvh;
+    padding: 20px;
+    display: grid;
+    grid-template-rows: 96px 1fr 90px;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ─────────────────────────────────────
+     ROW 1: Zeit + Wetter
+  ───────────────────────────────────── */
+  .row-top {
+    display: grid;
+    grid-template-columns: 1fr 148px;
+    gap: 12px;
+  }
+
+  .card-time {
+    padding: 16px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .time-display {
+    font-size: clamp(46px, 7vw, 66px);
+    font-weight: 200;
+    color: var(--text-primary);
+    letter-spacing: -2.5px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .time-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-top: 5px;
+    letter-spacing: -0.2px;
+  }
+
+  .card-weather {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .weather-icon  { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+  .weather-temp  { font-size: 36px; font-weight: 200; color: var(--text-primary); letter-spacing: -1.5px; line-height: 1; }
+  .weather-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .weather-feel  { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .weather-city  { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+
+  /* ─────────────────────────────────────
+     ROW 2: Kalender + Pipeline
+  ───────────────────────────────────── */
+  .row-middle {
+    display: grid;
+    grid-template-columns: 1fr 298px;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  /* Section-Header (wiederverwendbar) */
+  .section-header {
+    padding: 11px 16px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .section-badge {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  /* Kalender */
+  .card-calendar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .calendar-iframe-wrap {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .calendar-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* Pipeline */
+  .card-pipeline {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .pipeline-list {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .pipeline-item {
+    background: var(--card-inner);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 0;
+  }
+
+  .pipeline-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .pipeline-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .pipeline-date {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .pipeline-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pipeline-action {
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+
+  .pipeline-amount {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent-purple);
+    margin-top: 3px;
+  }
+
+  /* Fehler / leer Zustand */
+  .state-msg {
+    padding: 16px;
+    font-size: 12.5px;
+    color: var(--text-tertiary);
+  }
+
+  /* ─────────────────────────────────────
+     ROW 3: Fokus + Cashflow
+  ───────────────────────────────────── */
+  .row-bottom {
+    display: grid;
+    grid-template-columns: 1fr 210px;
+    gap: 12px;
+  }
+
+  .card-fokus {
+    padding: 12px 20px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .fokus-text {
+    font-size: clamp(15px, 1.8vw, 20px);
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-cashflow {
+    padding: 12px 18px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .cashflow-row {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    margin-top: 2px;
+  }
+
+  .cashflow-value {
+    font-size: 26px;
+    font-weight: 200;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .cashflow-sep {
+    font-size: 16px;
+    font-weight: 200;
+    color: var(--text-tertiary);
+  }
+
+  .cashflow-goal {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cashflow-sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .cashflow-bar-wrap {
+    height: 3px;
+    background: var(--card-inner);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .cashflow-bar-fill {
+    height: 100%;
+    background: var(--accent-green);
+    border-radius: 2px;
+    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  /* ─────────────────────────────────────
+     Skeleton / Loading
+  ───────────────────────────────────── */
+  .skel {
+    display: block;
+    background: linear-gradient(90deg, #ebebf0 25%, #e2e2e8 50%, #ebebf0 75%);
+    background-size: 300% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 5px;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 300% 0; }
+    100% { background-position: -300% 0; }
+  }
+
+  .weather-skel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    gap: 4px;
+  }
+
+  /* ─────────────────────────────────────
+     Animationen
+  ───────────────────────────────────── */
+  .fade-in {
+    animation: fadeIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen">
+
+  <!-- ── ROW 1: Zeit + Wetter ── -->
+  <div class="row-top">
+
+    <div class="card card-time">
+      <div class="time-display" id="clock">00:00</div>
+      <div class="time-date"    id="datestr">Laden…</div>
+    </div>
+
+    <div class="card card-weather" id="weather-card">
+      <div class="weather-skel">
+        <div>
+          <span class="skel" style="width:28px;height:20px;margin-bottom:6px;"></span>
+          <span class="skel" style="width:64px;height:34px;"></span>
+        </div>
+        <div>
+          <span class="skel" style="width:80px;height:12px;margin-bottom:4px;"></span>
+          <span class="skel" style="width:52px;height:11px;margin-bottom:2px;"></span>
+          <span class="skel" style="width:44px;height:11px;"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 2: Kalender + Pipeline ── -->
+  <div class="row-middle">
+
+    <div class="card card-calendar">
+      <div class="section-header">
+        <span class="section-label">Kalender</span>
+        <span class="section-badge" id="cal-date"></span>
+      </div>
+      <div class="calendar-iframe-wrap">
+        <iframe
+          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFFFF&color=%235E5CE6"
+          scrolling="no"
+          allowtransparency="true">
+        </iframe>
+      </div>
+    </div>
+
+    <div class="card card-pipeline">
+      <div class="section-header">
+        <span class="section-label">Pipeline</span>
+        <span class="section-badge" id="pipeline-badge"></span>
+      </div>
+      <div class="pipeline-list" id="pipeline-list">
+        <!-- Skeleton -->
+        <div class="pipeline-item">
+          <span class="skel" style="width:72%;height:13px;"></span>
+          <span class="skel" style="width:52%;height:12px;margin-top:5px;"></span>
+          <span class="skel" style="width:84%;height:11px;margin-top:4px;"></span>
+        </div>
+        <div class="pipeline-item">
+          <span class="skel" style="width:64%;height:13px;"></span>
+          <span class="skel" style="width:44%;height:12px;margin-top:5px;"></span>
+          <span class="skel" style="width:76%;height:11px;margin-top:4px;"></span>
+        </div>
+        <div class="pipeline-item">
+          <span class="skel" style="width:58%;height:13px;"></span>
+          <span class="skel" style="width:48%;height:12px;margin-top:5px;"></span>
+          <span class="skel" style="width:68%;height:11px;margin-top:4px;"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 3: Fokus + Cashflow ── -->
+  <div class="row-bottom">
+
+    <div class="card card-fokus">
+      <span class="section-label">Fokus heute</span>
+      <div class="fokus-text" id="fokus-text">
+        <span class="skel" style="display:inline-block;width:78%;height:17px;"></span>
+      </div>
+    </div>
+
+    <div class="card card-cashflow">
+      <span class="section-label">Cashflow</span>
+      <div id="cashflow-inner">
+        <div class="cashflow-row">
+          <span class="skel" style="display:inline-block;width:110px;height:24px;"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /.screen -->
+
+<script>
+'use strict';
+
+// ── Konstanten ────────────────────────────────────────────────
+const WEATHER_KEY = '1f71b21255f6c1acd98a8f8406770053';
+const WEATHER_CITY = 'Laubach,DE';
+
+const DB = {
+  pipeline: '34b5f290ef7181d68ab4e00967e47bde',
+  fokus:    '34b5f290ef718101a4baf1eb95eadee6',
+  cashflow: '34b5f290ef718187a3bfc8e17c2cb06e',
+};
+
+const DAYS   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+const WEATHER_ICONS = {
+  '01d':'☀️','01n':'🌙','02d':'⛅️','02n':'⛅️',
+  '03d':'☁️','03n':'☁️','04d':'☁️','04n':'☁️',
+  '09d':'🌧','09n':'🌧','10d':'🌦','10n':'🌧',
+  '11d':'⛈','11n':'⛈','13d':'❄️','13n':'❄️',
+  '50d':'🌫','50n':'🌫',
+};
+
+const WEATHER_DE = {
+  'clear sky':'Klarer Himmel','few clouds':'Leicht bewölkt',
+  'scattered clouds':'Bewölkt','broken clouds':'Stark bewölkt',
+  'overcast clouds':'Bedeckt','light rain':'Leichter Regen',
+  'moderate rain':'Regen','heavy intensity rain':'Starker Regen',
+  'very heavy rain':'Starker Regen','extreme rain':'Starker Regen',
+  'light snow':'Leichter Schnee','snow':'Schnee','heavy snow':'Starker Schnee',
+  'mist':'Nebel','fog':'Nebel','haze':'Dunst',
+  'thunderstorm':'Gewitter','drizzle':'Nieselregen',
+  'light intensity drizzle':'Nieselregen','shower rain':'Schauer',
+  'light intensity shower rain':'Leichter Schauer',
+};
+
+// ── Hilfsfunktionen ───────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtNum(n, unit) {
+  if (n === null || n === undefined || isNaN(Number(n))) return '—';
+  const formatted = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Number(n));
+  return unit ? formatted + '\u202F' + unit : formatted;
+}
+
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s + 'T00:00:00');
+  return d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
+}
+
+// Notion-Property flexibel auslesen (versucht mehrere Typen)
+function getProp(page, ...names) {
+  for (const name of names) {
+    const prop = page.properties?.[name];
+    if (!prop) continue;
+    switch (prop.type) {
+      case 'title':        { const v = prop.title.map(t => t.plain_text).join(''); if (v) return v; break; }
+      case 'rich_text':    { const v = prop.rich_text.map(t => t.plain_text).join(''); if (v) return v; break; }
+      case 'select':       { if (prop.select?.name) return prop.select.name; break; }
+      case 'status':       { if (prop.status?.name)  return prop.status.name;  break; }
+      case 'multi_select': { const v = prop.multi_select.map(s => s.name).join(', '); if (v) return v; break; }
+      case 'date':         { if (prop.date?.start)   return prop.date.start;   break; }
+      case 'number':       { if (prop.number !== null && prop.number !== undefined) return prop.number; break; }
+      case 'checkbox':     { return prop.checkbox; }
+      case 'formula':      {
+        const fv = prop.formula;
+        if (fv?.type === 'number' && fv.number !== null) return fv.number;
+        if (fv?.type === 'string' && fv.string)          return fv.string;
+        break;
+      }
+    }
+  }
+  return null;
+}
+
+// ── Uhrzeit ──────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent   = h + ':' + m;
+  document.getElementById('datestr').textContent =
+    DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+  document.getElementById('cal-date').textContent =
+    now.getDate() + '. ' + MONTHS[now.getMonth()];
+}
+updateClock();
+setInterval(updateClock, 10_000);
+
+// ── Wetter ───────────────────────────────────────────────────
+async function fetchWeather() {
+  try {
+    const res  = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${WEATHER_CITY}&appid=${WEATHER_KEY}&units=metric&lang=de`
+    );
+    const d    = await res.json();
+    if (d.cod !== 200) throw new Error('API error');
+
+    const temp  = Math.round(d.main.temp);
+    const feels = Math.round(d.main.feels_like);
+    const icon  = WEATHER_ICONS[d.weather[0].icon] || '🌤';
+    const desc  = WEATHER_DE[d.weather[0].description.toLowerCase()] || d.weather[0].description;
+
+    document.getElementById('weather-card').innerHTML = `
+      <div class="fade-in" style="display:flex;flex-direction:column;justify-content:space-between;height:100%;">
+        <div>
+          <div class="weather-icon">${icon}</div>
+          <div class="weather-temp">${temp}°</div>
+        </div>
+        <div>
+          <div class="weather-desc">${esc(desc)}</div>
+          <div class="weather-feel">Fühlt: ${feels}°</div>
+          <div class="weather-city">Laubach</div>
+        </div>
+      </div>`;
+  } catch {
+    document.getElementById('weather-card').innerHTML = `
+      <div style="display:flex;flex-direction:column;justify-content:center;height:100%;gap:5px;">
+        <div style="font-size:20px;">🌤</div>
+        <div style="font-size:11px;color:var(--text-tertiary);">Nicht<br>verfügbar</div>
+      </div>`;
+  }
+}
+fetchWeather();
+setInterval(fetchWeather, 10 * 60_000);
+
+// ── Notion Proxy ──────────────────────────────────────────────
+async function notionQuery(dbId, body = {}) {
+  const res = await fetch(`/api/notion?endpoint=databases/${dbId}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Notion HTTP ${res.status}`);
+  return res.json();
+}
+
+// ── Pipeline ─────────────────────────────────────────────────
+async function loadPipeline() {
+  try {
+    const data  = await notionQuery(DB.pipeline, {
+      sorts: [{ property: 'Datum', direction: 'ascending' }],
+    });
+    const pages = data.results || [];
+
+    document.getElementById('pipeline-badge').textContent =
+      pages.length ? pages.length + (pages.length === 1 ? ' Lead' : ' Leads') : '';
+
+    if (!pages.length) {
+      document.getElementById('pipeline-list').innerHTML =
+        '<div class="state-msg">Keine Einträge in der Pipeline</div>';
+      return;
+    }
+
+    const items = pages.map(page => ({
+      name:   getProp(page, 'Name', 'Titel', 'Kundenname')          || 'Unbenannt',
+      status: getProp(page, 'Status')                                || null,
+      action: getProp(page, 'Nächste Aktion', 'Next Action', 'Aktion') || null,
+      date:   getProp(page, 'Datum', 'Date', 'Termin')               || null,
+      amount: getProp(page, 'Betrag', 'Amount', 'Wert', 'Budget')    ?? null,
+    }));
+
+    document.getElementById('pipeline-list').innerHTML = items.map(item => `
+      <div class="pipeline-item fade-in">
+        <div class="pipeline-row">
+          <span class="pipeline-name">${esc(item.name)}</span>
+          ${item.date ? `<span class="pipeline-date">${fmtDate(item.date)}</span>` : ''}
+        </div>
+        ${item.status ? `<div class="pipeline-status">${esc(item.status)}</div>` : ''}
+        ${item.action ? `<div class="pipeline-action">${esc(item.action)}</div>` : ''}
+        ${item.amount !== null ? `<div class="pipeline-amount">${fmtNum(item.amount, '€')}</div>` : ''}
+      </div>`).join('');
+
+  } catch (err) {
+    console.error('Pipeline:', err);
+    document.getElementById('pipeline-list').innerHTML =
+      '<div class="state-msg">Nicht verfügbar</div>';
+  }
+}
+
+// ── Fokus heute ───────────────────────────────────────────────
+async function loadFokus() {
+  try {
+    const data = await notionQuery(DB.fokus, {
+      sorts:     [{ property: 'Datum', direction: 'descending' }],
+      page_size: 1,
+    });
+    const page = data.results?.[0];
+
+    if (!page) {
+      document.getElementById('fokus-text').textContent = 'Kein Fokus eingetragen.';
+      return;
+    }
+
+    // Verschiedene mögliche Feldnamen probieren
+    const text = getProp(page, 'Fokus', 'Fokus-Satz', 'Text', 'Satz', 'Name', 'Titel') || '—';
+    document.getElementById('fokus-text').innerHTML =
+      `<span class="fade-in">${esc(text)}</span>`;
+
+  } catch (err) {
+    console.error('Fokus:', err);
+    document.getElementById('fokus-text').textContent = 'Nicht verfügbar';
+  }
+}
+
+// ── Cashflow ──────────────────────────────────────────────────
+async function loadCashflow() {
+  try {
+    const data  = await notionQuery(DB.cashflow);
+    const pages = data.results || [];
+    const now   = new Date();
+
+    // Suche Eintrag für aktuellen Monat (flexibel)
+    const curMonthName = MONTHS[now.getMonth()].toLowerCase();
+    const curMonthNum  = String(now.getMonth() + 1).padStart(2, '0');
+    const curYear      = String(now.getFullYear());
+
+    let entry = null;
+    for (const page of pages) {
+      const monat   = String(getProp(page, 'Monat', 'Monat/Jahr', 'Month', 'Name') || '').toLowerCase();
+      const dateProp = String(getProp(page, 'Datum', 'Date') || '');
+
+      if (
+        monat.includes(curMonthName) ||
+        monat.includes(curMonthNum) ||
+        dateProp.startsWith(`${curYear}-${curMonthNum}`)
+      ) {
+        entry = page;
+        break;
+      }
+    }
+
+    // Fallback: neuester Eintrag
+    if (!entry && pages.length) entry = pages[0];
+
+    if (!entry) {
+      document.getElementById('cashflow-inner').innerHTML =
+        '<div class="state-msg" style="padding:0;margin-top:4px;">Keine Daten</div>';
+      return;
+    }
+
+    const einnahmen = getProp(entry, 'Einnahmen', 'Revenue', 'Income', 'Ist')  ?? 0;
+    const ziel      = getProp(entry, 'Ziel', 'Goal', 'Target', 'Budget')       ?? 0;
+    const offen     = getProp(entry, 'Offene Rechnungen', 'Open', 'Ausstehend') ?? null;
+
+    const pct = (ziel > 0) ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
+
+    document.getElementById('cashflow-inner').innerHTML = `
+      <div class="fade-in">
+        <div class="cashflow-row">
+          <span class="cashflow-value">${fmtNum(einnahmen)}</span>
+          <span class="cashflow-sep"> / </span>
+          <span class="cashflow-goal">${fmtNum(ziel)} €</span>
+        </div>
+        <div class="cashflow-bar-wrap">
+          <div class="cashflow-bar-fill" style="width:${pct}%;"></div>
+        </div>
+        <div class="cashflow-sub" style="margin-top:4px;">
+          ${pct} % des Ziels${offen !== null ? ' · ' + fmtNum(offen) + ' € offen' : ''}
+        </div>
+      </div>`;
+
+  } catch (err) {
+    console.error('Cashflow:', err);
+    document.getElementById('cashflow-inner').innerHTML =
+      '<div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>';
+  }
+}
+
+// ── Alle Notion-Daten laden ───────────────────────────────────
+function refreshNotion() {
+  loadPipeline();
+  loadFokus();
+  loadCashflow();
+}
+refreshNotion();
+setInterval(refreshNotion, 5 * 60_000);
+
+// ── Wake Lock (iPad-Display bleibt an) ───────────────────────
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch { /* ignorieren */ }
+}
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+</script>
+
+</body>
+</html>
