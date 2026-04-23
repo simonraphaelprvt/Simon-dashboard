@@ -768,8 +768,14 @@ document.addEventListener('visibilitychange', () => {
 
 // ── Morning Report ────────────────────────────────────────────
 
+// Google Cloud TTS API Key (nur für persönliches Dashboard)
+const GOOGLE_TTS_KEY = 'DEIN_GOOGLE_TTS_API_KEY';
+
 const SVG_SUN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/><line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/></svg>`;
+const SVG_SPIN = `<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
 const SVG_STOP = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`;
+
+let currentAudio = null;
 
 function collectDashboardData() {
   const pipelineItems = Array.from(document.querySelectorAll('.pipeline-item'))
@@ -864,59 +870,80 @@ function buildMorningText(d) {
   return parts.join(' ');
 }
 
-async function getGermanVoice() {
-  return new Promise(resolve => {
-    const pick = voices => {
-      const de = voices.filter(v => v.lang.startsWith('de'));
-      if (!de.length) { resolve(null); return; }
-      const best = de.find(v => /anna|petra|google|microsoft/i.test(v.name))
-                || de.find(v => v.localService)
-                || de[0];
-      resolve(best);
-    };
-    const v = speechSynthesis.getVoices();
-    if (v.length) { pick(v); return; }
-    speechSynthesis.addEventListener('voiceschanged', () => pick(speechSynthesis.getVoices()), { once: true });
-    setTimeout(() => resolve(null), 2500);
-  });
-}
-
 function setBtn(state) {
   const btn = document.getElementById('morning-btn');
   btn.classList.remove('speaking');
-  if (state === 'idle') {
-    btn.disabled = false;
-    btn.innerHTML = SVG_SUN + ' Morning Report';
-    btn.onclick = startMorningReport;
-  } else {
-    btn.classList.add('speaking');
-    btn.disabled = false;
-    btn.innerHTML = SVG_STOP + ' Stop';
-    btn.onclick = () => { speechSynthesis.cancel(); setBtn('idle'); };
+  switch (state) {
+    case 'idle':
+      btn.disabled = false;
+      btn.innerHTML = SVG_SUN + ' Morning Report';
+      btn.onclick = startMorningReport;
+      break;
+    case 'loading':
+      btn.disabled = true;
+      btn.innerHTML = SVG_SPIN + ' Lädt…';
+      break;
+    case 'speaking':
+      btn.classList.add('speaking');
+      btn.disabled = false;
+      btn.innerHTML = SVG_STOP + ' Stop';
+      btn.onclick = () => {
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          currentAudio = null;
+        }
+        setBtn('idle');
+      };
+      break;
   }
 }
 
 async function startMorningReport() {
-  if (!window.speechSynthesis) {
-    alert('Sprachausgabe wird von diesem Browser nicht unterstützt.');
-    return;
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
-  speechSynthesis.cancel();
+  setBtn('loading');
 
-  const text  = buildMorningText(collectDashboardData());
-  const voice = await getGermanVoice();
-  const utt   = new SpeechSynthesisUtterance(text);
-  utt.lang  = 'de-DE';
-  utt.rate  = 0.92;
-  utt.pitch = 1;
-  if (voice) utt.voice = voice;
+  const text = buildMorningText(collectDashboardData());
 
-  utt.onstart = () => setBtn('speaking');
-  utt.onend   = () => setBtn('idle');
-  utt.onerror = () => setBtn('idle');
+  try {
+    const res = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_KEY}`,
+      {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input:       { text },
+          voice:       { languageCode: 'de-DE', name: 'de-DE-Wavenet-F' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: 0 },
+        }),
+      }
+    );
 
-  setBtn('speaking');
-  speechSynthesis.speak(utt);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const { audioContent } = await res.json();
+    if (!audioContent) throw new Error('Keine Audio-Daten erhalten');
+
+    currentAudio = new Audio('data:audio/mpeg;base64,' + audioContent);
+    currentAudio.onended = () => { currentAudio = null; setBtn('idle'); };
+    currentAudio.onerror = () => { currentAudio = null; setBtn('idle'); };
+
+    setBtn('speaking');
+    await currentAudio.play();
+
+  } catch (err) {
+    console.error('TTS Fehler:', err);
+    currentAudio = null;
+    setBtn('idle');
+    alert('Sprachausgabe fehlgeschlagen: ' + err.message);
+  }
 }
 </script>
 
