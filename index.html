@@ -87,10 +87,11 @@
   }
 
   .card-weather {
-    padding: 16px 18px;
+    padding: 14px 18px 16px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-around;
+    gap: 2px;
   }
 
   .weather-icon  { font-size: 22px; line-height: 1; margin-bottom: 2px; }
@@ -526,11 +527,15 @@ function parseNotionTable(data) {
   });
 }
 
-// Zahl aus deutschem oder englischem Formatstring
+// Zahl aus deutschem Format: "1.000,50" → 1000.5, "1000" → 1000
 function parseNum(s) {
   if (typeof s === 'number') return s;
   if (!s) return 0;
-  return parseFloat(String(s).replace(/[^0-9,.-]/g, '').replace(',', '.')) || 0;
+  const str = String(s).trim();
+  // Deutsches Format: Punkt = Tausender, Komma = Dezimal
+  if (/\d\.\d{3}/.test(str)) return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+  // Englisches Format oder plain
+  return parseFloat(str.replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
 }
 
 // ── Uhrzeit ──────────────────────────────────────────────────
