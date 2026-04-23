@@ -22,30 +22,27 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // ── Debug-Endpoint: /api/notion?debug=pipeline|fokus|cashflow ──
-  // Zeigt den rohen Notion-Response für eine Datenbank
+  // ── Debug: /api/notion?debug=pipeline|fokus|cashflow ──
+  // Findet die echten Datenbank-IDs innerhalb der Seiten
   if (req.query.debug) {
     const token = process.env.NOTION_TOKEN;
     if (!token) return res.status(500).json({ error: 'NOTION_TOKEN nicht gesetzt' });
-    const dbMap = {
+    const pageMap = {
       pipeline: '34b5f290ef7181d68ab4e00967e47bde',
       fokus:    '34b5f290ef718101a4baf1eb95eadee6',
       cashflow: '34b5f290ef718187a3bfc8e17c2cb06e',
     };
-    const dbId = dbMap[req.query.debug];
-    if (!dbId) return res.status(400).json({ error: 'Unbekannte DB, nutze: pipeline|fokus|cashflow' });
+    const pageId = pageMap[req.query.debug];
+    if (!pageId) return res.status(400).json({ error: 'Nutze: pipeline|fokus|cashflow' });
     try {
-      const r = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
-        method: 'POST',
-        headers: {
-          Authorization:    `Bearer ${token}`,
-          'Notion-Version': '2022-06-28',
-          'Content-Type':   'application/json',
-        },
-        body: '{}',
+      const r = await fetch(`https://api.notion.com/v1/blocks/${pageId}/children?page_size=10`, {
+        headers: { Authorization: `Bearer ${token}`, 'Notion-Version': '2022-06-28' },
       });
       const data = await r.json();
-      return res.status(r.status).json({ httpStatus: r.status, notionResponse: data });
+      const dbs = (data.results || [])
+        .filter(b => b.type === 'child_database')
+        .map(b => ({ id: b.id, idClean: b.id.replace(/-/g,''), title: b.child_database?.title }));
+      return res.status(r.status).json({ httpStatus: r.status, databases_found: dbs, raw_blocks: data.results?.map(b => ({ id: b.id, type: b.type })) });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
