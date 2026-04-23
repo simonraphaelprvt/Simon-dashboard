@@ -460,10 +460,11 @@
 const WEATHER_KEY = '1f71b21255f6c1acd98a8f8406770053';
 const WEATHER_CITY = 'Laubach,DE';
 
-const DB = {
-  pipeline: '34b5f290ef7181d68ab4e00967e47bde',
-  fokus:    '34b5f290ef718101a4baf1eb95eadee6',
-  cashflow: '34b5f290ef718187a3bfc8e17c2cb06e',
+// Echte Table-Block-IDs (aus /api/notion?debug= ermittelt)
+const TABLE = {
+  pipeline: '9971f418-7f5f-4989-b815-c971bb65215a',
+  fokus:    'e7ca1761-15c1-4791-84af-1c3320cec475',
+  cashflow: 'ffae9691-2a24-4c15-87c1-41cda34db9fd',
 };
 
 const DAYS   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -503,35 +504,33 @@ function fmtNum(n, unit) {
   return unit ? formatted + '\u202F' + unit : formatted;
 }
 
-function fmtDate(s) {
-  if (!s) return '';
-  const d = new Date(s + 'T00:00:00');
-  return d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
+// ── Notion Blocks API ────────────────────────────────────────
+// Liest eine einfache Notion-Tabelle (type: "table") per Blocks API
+async function notionGetBlocks(blockId) {
+  const res = await fetch(`/api/notion?endpoint=blocks/${blockId}/children&page_size=50`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-// Notion-Property flexibel auslesen (versucht mehrere Typen)
-function getProp(page, ...names) {
-  for (const name of names) {
-    const prop = page.properties?.[name];
-    if (!prop) continue;
-    switch (prop.type) {
-      case 'title':        { const v = prop.title.map(t => t.plain_text).join(''); if (v) return v; break; }
-      case 'rich_text':    { const v = prop.rich_text.map(t => t.plain_text).join(''); if (v) return v; break; }
-      case 'select':       { if (prop.select?.name) return prop.select.name; break; }
-      case 'status':       { if (prop.status?.name)  return prop.status.name;  break; }
-      case 'multi_select': { const v = prop.multi_select.map(s => s.name).join(', '); if (v) return v; break; }
-      case 'date':         { if (prop.date?.start)   return prop.date.start;   break; }
-      case 'number':       { if (prop.number !== null && prop.number !== undefined) return prop.number; break; }
-      case 'checkbox':     { return prop.checkbox; }
-      case 'formula':      {
-        const fv = prop.formula;
-        if (fv?.type === 'number' && fv.number !== null) return fv.number;
-        if (fv?.type === 'string' && fv.string)          return fv.string;
-        break;
-      }
-    }
-  }
-  return null;
+// Parst Notion table_row Blöcke → Array von Objekten
+// Erste Zeile wird als Header-Zeile behandelt
+function parseNotionTable(data) {
+  const rows = (data.results || []).filter(b => b.type === 'table_row');
+  if (rows.length < 2) return [];
+  const cellText = cells => (cells || []).map(t => t.plain_text || t.text?.content || '').join('').trim();
+  const headers  = rows[0].table_row.cells.map(cellText);
+  return rows.slice(1).map(row => {
+    const obj = {};
+    row.table_row.cells.forEach((cell, i) => { if (headers[i]) obj[headers[i]] = cellText(cell); });
+    return obj;
+  });
+}
+
+// Zahl aus deutschem oder englischem Formatstring
+function parseNum(s) {
+  if (typeof s === 'number') return s;
+  if (!s) return 0;
+  return parseFloat(String(s).replace(/[^0-9,.-]/g, '').replace(',', '.')) || 0;
 }
 
 // ── Uhrzeit ──────────────────────────────────────────────────
@@ -585,52 +584,38 @@ async function fetchWeather() {
 fetchWeather();
 setInterval(fetchWeather, 10 * 60_000);
 
-// ── Notion Proxy ──────────────────────────────────────────────
-async function notionQuery(dbId, body = {}) {
-  const res = await fetch(`/api/notion?endpoint=databases/${dbId}/query`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Notion HTTP ${res.status}`);
-  return res.json();
-}
-
 // ── Pipeline ─────────────────────────────────────────────────
 async function loadPipeline() {
   try {
-    const data  = await notionQuery(DB.pipeline, {
-      sorts: [{ property: 'Datum', direction: 'ascending' }],
-    });
-    const pages = data.results || [];
+    const data  = await notionGetBlocks(TABLE.pipeline);
+    const rows  = parseNotionTable(data);
 
     document.getElementById('pipeline-badge').textContent =
-      pages.length ? pages.length + (pages.length === 1 ? ' Lead' : ' Leads') : '';
+      rows.length ? rows.length + (rows.length === 1 ? ' Lead' : ' Leads') : '';
 
-    if (!pages.length) {
+    if (!rows.length) {
       document.getElementById('pipeline-list').innerHTML =
         '<div class="state-msg">Keine Einträge in der Pipeline</div>';
       return;
     }
 
-    const items = pages.map(page => ({
-      name:   getProp(page, 'Name', 'Titel', 'Kundenname')          || 'Unbenannt',
-      status: getProp(page, 'Status')                                || null,
-      action: getProp(page, 'Nächste Aktion', 'Next Action', 'Aktion') || null,
-      date:   getProp(page, 'Datum', 'Date', 'Termin')               || null,
-      amount: getProp(page, 'Betrag', 'Amount', 'Wert', 'Budget')    ?? null,
-    }));
-
-    document.getElementById('pipeline-list').innerHTML = items.map(item => `
-      <div class="pipeline-item fade-in">
-        <div class="pipeline-row">
-          <span class="pipeline-name">${esc(item.name)}</span>
-          ${item.date ? `<span class="pipeline-date">${fmtDate(item.date)}</span>` : ''}
-        </div>
-        ${item.status ? `<div class="pipeline-status">${esc(item.status)}</div>` : ''}
-        ${item.action ? `<div class="pipeline-action">${esc(item.action)}</div>` : ''}
-        ${item.amount !== null ? `<div class="pipeline-amount">${fmtNum(item.amount, '€')}</div>` : ''}
-      </div>`).join('');
+    document.getElementById('pipeline-list').innerHTML = rows.map(row => {
+      const name   = row['Name']   || row['Titel']         || 'Unbenannt';
+      const status = row['Status'] || '';
+      const action = row['Nächste Aktion'] || row['Aktion'] || '';
+      const date   = row['Datum']  || row['Date']           || '';
+      const amount = row['Betrag'] || row['Amount']         || '';
+      return `
+        <div class="pipeline-item fade-in">
+          <div class="pipeline-row">
+            <span class="pipeline-name">${esc(name)}</span>
+            ${date ? `<span class="pipeline-date">${esc(date)}</span>` : ''}
+          </div>
+          ${status ? `<div class="pipeline-status">${esc(status)}</div>` : ''}
+          ${action ? `<div class="pipeline-action">${esc(action)}</div>` : ''}
+          ${amount ? `<div class="pipeline-amount">${esc(amount)}</div>` : ''}
+        </div>`;
+    }).join('');
 
   } catch (err) {
     console.error('Pipeline:', err);
@@ -642,19 +627,20 @@ async function loadPipeline() {
 // ── Fokus heute ───────────────────────────────────────────────
 async function loadFokus() {
   try {
-    const data = await notionQuery(DB.fokus, {
-      sorts:     [{ property: 'Datum', direction: 'descending' }],
-      page_size: 1,
-    });
-    const page = data.results?.[0];
+    const data = await notionGetBlocks(TABLE.fokus);
+    const rows = parseNotionTable(data);
 
-    if (!page) {
+    if (!rows.length) {
       document.getElementById('fokus-text').textContent = 'Kein Fokus eingetragen.';
       return;
     }
 
-    // Verschiedene mögliche Feldnamen probieren
-    const text = getProp(page, 'Fokus', 'Fokus-Satz', 'Text', 'Satz', 'Name', 'Titel') || '—';
+    // Neueste Zeile (letzte Zeile = aktuellster Eintrag bei chronologischer Reihenfolge)
+    const entry = rows[rows.length - 1];
+    // Ersten nicht-leeren Wert nehmen der nicht "Datum" heißt
+    const text = entry['Fokus'] || entry['Fokus-Satz'] || entry['Text'] || entry['Satz']
+      || Object.entries(entry).find(([k, v]) => v && !k.toLowerCase().includes('datum'))?.[1]
+      || '—';
     document.getElementById('fokus-text').innerHTML =
       `<span class="fade-in">${esc(text)}</span>`;
 
@@ -667,44 +653,28 @@ async function loadFokus() {
 // ── Cashflow ──────────────────────────────────────────────────
 async function loadCashflow() {
   try {
-    const data  = await notionQuery(DB.cashflow);
-    const pages = data.results || [];
-    const now   = new Date();
+    const now  = new Date();
+    const data = await notionGetBlocks(TABLE.cashflow);
+    const rows = parseNotionTable(data);
 
-    // Suche Eintrag für aktuellen Monat (flexibel)
-    const curMonthName = MONTHS[now.getMonth()].toLowerCase();
-    const curMonthNum  = String(now.getMonth() + 1).padStart(2, '0');
-    const curYear      = String(now.getFullYear());
-
-    let entry = null;
-    for (const page of pages) {
-      const monat   = String(getProp(page, 'Monat', 'Monat/Jahr', 'Month', 'Name') || '').toLowerCase();
-      const dateProp = String(getProp(page, 'Datum', 'Date') || '');
-
-      if (
-        monat.includes(curMonthName) ||
-        monat.includes(curMonthNum) ||
-        dateProp.startsWith(`${curYear}-${curMonthNum}`)
-      ) {
-        entry = page;
-        break;
-      }
-    }
-
-    // Fallback: neuester Eintrag
-    if (!entry && pages.length) entry = pages[0];
-
-    if (!entry) {
+    if (!rows.length) {
       document.getElementById('cashflow-inner').innerHTML =
         '<div class="state-msg" style="padding:0;margin-top:4px;">Keine Daten</div>';
       return;
     }
 
-    const einnahmen = getProp(entry, 'Einnahmen', 'Revenue', 'Income', 'Ist')  ?? 0;
-    const ziel      = getProp(entry, 'Ziel', 'Goal', 'Target', 'Budget')       ?? 0;
-    const offen     = getProp(entry, 'Offene Rechnungen', 'Open', 'Ausstehend') ?? null;
+    // Aktuellen Monat suchen, sonst letzte Zeile
+    const curMonthName = MONTHS[now.getMonth()].toLowerCase();
+    const curMonthNum  = String(now.getMonth() + 1).padStart(2, '0');
+    let entry = rows.find(r => {
+      const m = String(r['Monat'] || r['Month'] || r['Name'] || '').toLowerCase();
+      return m.includes(curMonthName) || m.includes(curMonthNum);
+    }) || rows[rows.length - 1];
 
-    const pct = (ziel > 0) ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
+    const einnahmen = parseNum(entry['Einnahmen'] || entry['Revenue'] || 0);
+    const ziel      = parseNum(entry['Ziel']      || entry['Goal']    || 0);
+    const offen     = entry['Offene Rechnungen']  || entry['Offen']   || null;
+    const pct       = ziel > 0 ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
 
     document.getElementById('cashflow-inner').innerHTML = `
       <div class="fade-in">
@@ -717,7 +687,7 @@ async function loadCashflow() {
           <div class="cashflow-bar-fill" style="width:${pct}%;"></div>
         </div>
         <div class="cashflow-sub" style="margin-top:4px;">
-          ${pct} % des Ziels${offen !== null ? ' · ' + fmtNum(offen) + ' € offen' : ''}
+          ${pct} % des Ziels${offen ? ' · ' + esc(offen) + ' € offen' : ''}
         </div>
       </div>`;
 
