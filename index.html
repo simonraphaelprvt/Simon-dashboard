@@ -322,6 +322,33 @@
     transition: width 1s cubic-bezier(0.16,1,0.3,1);
   }
 
+  /* ── Morning Report Button ── */
+  .morning-btn {
+    align-self: center;
+    flex-shrink: 0;
+    background: var(--accent-purple);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s, transform 0.12s;
+    white-space: nowrap;
+  }
+  .morning-btn:active   { transform: scale(0.96); }
+  .morning-btn:disabled { opacity: 0.5; cursor: default; }
+  .morning-btn.speaking { background: var(--accent-red); }
+  .morning-btn svg      { flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin 0.85s linear infinite; }
+
   /* ─────────────────────────────────────
      Skeleton / Loading
   ───────────────────────────────────── */
@@ -366,9 +393,21 @@
   <!-- ── ROW 1: Zeit + Wetter ── -->
   <div class="row-top">
 
-    <div class="card card-time">
-      <div class="time-display" id="clock">00:00</div>
-      <div class="time-date"    id="datestr">Laden…</div>
+    <div class="card card-time" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="time-display" id="clock">00:00</div>
+        <div class="time-date"    id="datestr">Laden…</div>
+      </div>
+      <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
+          <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
+          <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
+        </svg>
+        Morning Report
+      </button>
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -725,6 +764,133 @@ requestWakeLock();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
+
+// ── Morning Report ────────────────────────────────────────────
+
+const SVG_SUN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/><line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/></svg>`;
+const SVG_SPIN = `<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+const SVG_STOP = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`;
+
+function collectDashboardData() {
+  // Alle sichtbaren Dashboard-Inhalte aus dem DOM lesen
+  const weatherText = document.getElementById('weather-card')?.innerText?.trim() || '';
+  const pipelineItems = Array.from(document.querySelectorAll('.pipeline-item'))
+    .map(el => el.innerText.replace(/\n+/g, ' · ').trim())
+    .filter(Boolean);
+  return {
+    time:     document.getElementById('clock')?.textContent || '',
+    date:     document.getElementById('datestr')?.textContent || '',
+    weather:  weatherText,
+    fokus:    document.getElementById('fokus-text')?.innerText?.trim() || 'Kein Fokus',
+    pipeline: pipelineItems.length ? pipelineItems.join(' | ') : 'Keine Pipeline-Daten',
+    cashflow: document.getElementById('cashflow-inner')?.innerText?.replace(/\n+/g, ' ').trim() || 'Keine Daten',
+  };
+}
+
+async function getGermanVoice() {
+  return new Promise(resolve => {
+    const pick = voices => {
+      const de = voices.filter(v => v.lang.startsWith('de'));
+      if (!de.length) { resolve(null); return; }
+      // Beste Stimme: bevorzuge bekannte natürliche Stimmen
+      const best = de.find(v => /anna|petra|google|microsoft/i.test(v.name))
+                || de.find(v => v.localService)
+                || de[0];
+      resolve(best);
+    };
+    const voices = speechSynthesis.getVoices();
+    if (voices.length) { pick(voices); return; }
+    speechSynthesis.addEventListener('voiceschanged', () => pick(speechSynthesis.getVoices()), { once: true });
+    setTimeout(() => resolve(null), 2500); // Fallback-Timeout für iOS
+  });
+}
+
+function setBtn(state) {
+  const btn = document.getElementById('morning-btn');
+  btn.classList.remove('speaking');
+  switch (state) {
+    case 'idle':
+      btn.disabled = false;
+      btn.innerHTML = SVG_SUN + ' Morning Report';
+      btn.onclick = startMorningReport;
+      break;
+    case 'loading':
+      btn.disabled = true;
+      btn.innerHTML = SVG_SPIN + ' Generiert…';
+      break;
+    case 'speaking':
+      btn.classList.add('speaking');
+      btn.disabled = false;
+      btn.innerHTML = SVG_STOP + ' Stop';
+      btn.onclick = () => { speechSynthesis.cancel(); setBtn('idle'); };
+      break;
+  }
+}
+
+async function startMorningReport() {
+  if (!window.speechSynthesis) {
+    alert('Sprachausgabe wird von diesem Browser nicht unterstützt.');
+    return;
+  }
+
+  setBtn('loading');
+  speechSynthesis.cancel(); // laufende Ausgabe stoppen
+
+  try {
+    const d = collectDashboardData();
+
+    const system = `Du bist Simons persönlicher Morgenassistent. Simon ist selbstständiger Videograf und Freelancer.
+Erstelle einen kurzen, natürlichen Tagesbericht auf Deutsch – ausschließlich fließender Text, keine Listen, keine Formatierung, kein Markdown.
+Locker und freundlich wie ein guter Assistent. Angenehm zum Anhören.
+Reihenfolge: Begrüßung mit aktuellem Wochentag und Uhrzeit → Wetter → heutige Termine (aus Kalender falls vorhanden) → Fokus des Tages → Pipeline-Status kurz → Cashflow kurz → motivierender Abschluss.
+Maximal 180 Wörter. Beginne direkt mit "Guten Morgen, Simon."`;
+
+    const userMsg = `Aktuelle Dashboard-Daten:
+Uhrzeit: ${d.time} Uhr
+Datum: ${d.date}
+Wetter: ${d.weather}
+Fokus heute: ${d.fokus}
+Pipeline: ${d.pipeline}
+Cashflow: ${d.cashflow}`;
+
+    const res = await fetch('/api/anthropic', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        system,
+        messages:   [{ role: 'user', content: userMsg }],
+        max_tokens: 400,
+      }),
+    });
+
+    if (!res.ok) throw new Error(`API Status ${res.status}`);
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+
+    const text = result.content?.[0]?.text;
+    if (!text) throw new Error('Leere Antwort von Claude');
+
+    // Stimme holen und vorlesen
+    const voice = await getGermanVoice();
+    const utt   = new SpeechSynthesisUtterance(text);
+    utt.lang    = 'de-DE';
+    utt.rate    = 0.93;
+    utt.pitch   = 1;
+    if (voice) utt.voice = voice;
+
+    utt.onstart = () => setBtn('speaking');
+    utt.onend   = () => setBtn('idle');
+    utt.onerror = () => setBtn('idle');
+
+    setBtn('speaking');
+    speechSynthesis.speak(utt);
+
+  } catch (err) {
+    console.error('Morning Report Fehler:', err);
+    setBtn('idle');
+    alert('Morning Report fehlgeschlagen: ' + err.message);
+  }
+}
 </script>
 
 </body>
