@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Dashboard · Simon</title>
+<!-- Google Identity Services für Gmail OAuth -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -243,8 +245,72 @@
   ───────────────────────────────────── */
   .row-bottom {
     display: grid;
-    grid-template-columns: 1fr 210px;
+    grid-template-columns: 1fr 175px 130px 200px;
     gap: 12px;
+  }
+
+  /* ── Gmail Widget ── */
+  .card-gmail {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .gmail-count {
+    font-size: 24px;
+    font-weight: 200;
+    color: var(--text-primary);
+    letter-spacing: -0.8px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .gmail-sub { font-size: 11px; color: var(--text-tertiary); }
+  .gmail-login-btn {
+    font-size: 11px;
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--accent-blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  /* ── Zoho Widget ── */
+  .card-zoho {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+  }
+  .zoho-main {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .zoho-amount {
+    font-size: 18px;
+    font-weight: 200;
+    color: var(--accent-orange);
+    letter-spacing: -0.5px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .zoho-due {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .card-fokus {
@@ -487,6 +553,24 @@
         <div class="cashflow-row">
           <span class="skel" style="display:inline-block;width:110px;height:24px;"></span>
         </div>
+      </div>
+    </div>
+
+    <!-- Gmail Unread -->
+    <div class="card card-gmail">
+      <span class="section-label">Gmail</span>
+      <div id="gmail-inner">
+        <span class="skel" style="display:block;width:48px;height:22px;margin-top:4px;"></span>
+        <span class="skel" style="display:block;width:68px;height:11px;margin-top:5px;"></span>
+      </div>
+    </div>
+
+    <!-- Zoho Offene Rechnungen -->
+    <div class="card card-zoho">
+      <span class="section-label">Rechnungen</span>
+      <div id="zoho-inner">
+        <span class="skel" style="display:block;width:110px;height:18px;margin-top:3px;"></span>
+        <span class="skel" style="display:block;width:85px;height:11px;margin-top:5px;"></span>
       </div>
     </div>
 
@@ -765,6 +849,194 @@ requestWakeLock();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
 });
+
+// ── Gmail & Zoho Konstanten ───────────────────────────────────
+// Gmail: OAuth Client ID aus console.cloud.google.com
+// → APIs & Services → Credentials → OAuth 2.0 Client IDs → Web application
+// → Authorized JavaScript origins: https://simon-dashboard-omega.vercel.app
+const GMAIL_CLIENT_ID = 'DEINE_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+// Zoho: Refresh Token (einmalig generieren, läuft nicht ab)
+// → Zoho Developer Console → Self Client → Scope: ZohoInvoice.invoices.READ
+// → Code generieren → gegen Refresh Token eintauschen (siehe README)
+const ZOHO_REFRESH_TOKEN = 'DEIN_ZOHO_REFRESH_TOKEN';
+
+// ── Gmail Widget ──────────────────────────────────────────────
+const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+
+function gmailTokenLoad() {
+  try {
+    const d = JSON.parse(localStorage.getItem('gmail_token') || 'null');
+    if (d && Date.now() < d.expires) return d.token;
+  } catch {}
+  return null;
+}
+
+function gmailTokenSave(token, expiresIn) {
+  localStorage.setItem('gmail_token', JSON.stringify({
+    token,
+    expires: Date.now() + (expiresIn || 3600) * 1000 - 60_000,
+  }));
+}
+
+function gmailTokenClear() { localStorage.removeItem('gmail_token'); }
+
+function gmailRenderCount(n) {
+  const label = n === 0 ? 'Keine neuen Mails'
+              : n > 99  ? '99+ ungelesen'
+              : `${n} ungelesen`;
+  const display = n > 99 ? '99+' : String(n);
+  const color = n > 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
+  document.getElementById('gmail-inner').innerHTML = `
+    <div class="fade-in">
+      <div class="gmail-count" style="color:${color}">${display}</div>
+      <div class="gmail-sub">${n === 0 ? 'Posteingang leer' : 'neue Mails'}</div>
+    </div>`;
+}
+
+function gmailRenderLogin() {
+  document.getElementById('gmail-inner').innerHTML =
+    `<button class="gmail-login-btn" onclick="gmailLogin()">Anmelden</button>`;
+}
+
+function gmailRenderError() {
+  document.getElementById('gmail-inner').innerHTML =
+    `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>`;
+}
+
+async function gmailFetch(token) {
+  const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/labels/INBOX', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (r.status === 401) throw Object.assign(new Error('401'), { status: 401 });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const d = await r.json();
+  return d.messagesUnread || 0;
+}
+
+async function gmailLoad() {
+  // 1. Gespeicherter Token vorhanden?
+  const stored = gmailTokenLoad();
+  if (stored) {
+    try { gmailRenderCount(await gmailFetch(stored)); return; }
+    catch (e) { if (e.status === 401) gmailTokenClear(); }
+  }
+  // 2. Stilles Re-Auth versuchen (funktioniert wenn bereits autorisiert)
+  if (window.google?.accounts?.oauth2) {
+    const token = await new Promise(resolve => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GMAIL_CLIENT_ID,
+        scope: GMAIL_SCOPE,
+        callback: r => {
+          if (r.access_token) { gmailTokenSave(r.access_token, r.expires_in); resolve(r.access_token); }
+          else resolve(null);
+        },
+      });
+      client.requestAccessToken({ prompt: 'none' });
+      setTimeout(() => resolve(null), 4000);
+    });
+    if (token) {
+      try { gmailRenderCount(await gmailFetch(token)); return; }
+      catch { gmailTokenClear(); }
+    }
+  }
+  // 3. Login-Button anzeigen
+  gmailRenderLogin();
+}
+
+function gmailLogin() {
+  if (!window.google?.accounts?.oauth2) { gmailRenderError(); return; }
+  google.accounts.oauth2.initTokenClient({
+    client_id: GMAIL_CLIENT_ID,
+    scope: GMAIL_SCOPE,
+    callback: async r => {
+      if (!r.access_token) { gmailRenderError(); return; }
+      gmailTokenSave(r.access_token, r.expires_in);
+      try { gmailRenderCount(await gmailFetch(r.access_token)); }
+      catch { gmailRenderError(); }
+    },
+  }).requestAccessToken({ prompt: 'consent' });
+}
+
+gmailLoad();
+setInterval(gmailLoad, 5 * 60_000);
+
+// ── Zoho Widget ───────────────────────────────────────────────
+let _zohoToken = null;
+let _zohoExpiry = 0;
+
+async function zohoGetToken() {
+  if (_zohoToken && Date.now() < _zohoExpiry) return _zohoToken;
+  const r = await fetch('/api/zoho', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'refresh', refreshToken: ZOHO_REFRESH_TOKEN }),
+  });
+  if (!r.ok) throw new Error(`Token HTTP ${r.status}`);
+  const d = await r.json();
+  if (!d.access_token) throw new Error(d.error || 'Kein Zoho-Token');
+  _zohoToken  = d.access_token;
+  _zohoExpiry = Date.now() + (d.expires_in || 3600) * 1000 - 60_000;
+  return _zohoToken;
+}
+
+function fmtDateShort(s) {
+  if (!s) return '—';
+  const d = new Date(s + 'T00:00:00');
+  return d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
+}
+
+function zohoRender(data) {
+  const list = data.invoices || [];
+  if (!list.length) {
+    document.getElementById('zoho-inner').innerHTML = `
+      <div class="fade-in">
+        <div class="zoho-amount" style="color:var(--accent-green);font-size:13px;font-weight:500;">
+          Alles beglichen
+        </div>
+        <div class="zoho-due">Keine offenen Rechnungen</div>
+      </div>`;
+    return;
+  }
+  const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
+  const next  = [...list].sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0];
+  document.getElementById('zoho-inner').innerHTML = `
+    <div class="fade-in">
+      <div class="zoho-main">${list.length} offen</div>
+      <div class="zoho-amount">${fmtNum(total)} €</div>
+      <div class="zoho-due">Fällig ${fmtDateShort(next.due_date)} · ${esc(next.customer_name || '—')}</div>
+    </div>`;
+}
+
+function zohoRenderError() {
+  document.getElementById('zoho-inner').innerHTML =
+    `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>`;
+}
+
+async function zohoLoad() {
+  try {
+    const token = await zohoGetToken();
+    const r = await fetch('/api/zoho', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'invoices', accessToken: token }),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    zohoRender(await r.json());
+  } catch (err) {
+    console.error('Zoho:', err);
+    // Kein Refresh-Token gesetzt → neutral zeigen statt Fehler-Alert
+    if (ZOHO_REFRESH_TOKEN === 'DEIN_ZOHO_REFRESH_TOKEN') {
+      document.getElementById('zoho-inner').innerHTML =
+        `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht konfiguriert</div>`;
+    } else {
+      zohoRenderError();
+    }
+  }
+}
+
+zohoLoad();
+setInterval(zohoLoad, 10 * 60_000);
 
 // ── Morning Report ────────────────────────────────────────────
 
