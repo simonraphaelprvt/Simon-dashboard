@@ -11,7 +11,6 @@ module.exports = async function handler(req, res) {
   }
 
   // ── Test-Endpoint: /api/notion?ping=1 ──
-  // Zeigt ob Token gesetzt ist, ohne ihn zu leaken
   if (req.query.ping) {
     const t = process.env.NOTION_TOKEN || '';
     return res.status(200).json({
@@ -21,6 +20,35 @@ module.exports = async function handler(req, res) {
       nodeVersion: process.version,
       fetchAvail:  typeof fetch !== 'undefined',
     });
+  }
+
+  // ── Debug-Endpoint: /api/notion?debug=pipeline|fokus|cashflow ──
+  // Zeigt den rohen Notion-Response für eine Datenbank
+  if (req.query.debug) {
+    const token = process.env.NOTION_TOKEN;
+    if (!token) return res.status(500).json({ error: 'NOTION_TOKEN nicht gesetzt' });
+    const dbMap = {
+      pipeline: '34b5f290ef7181d68ab4e00967e47bde',
+      fokus:    '34b5f290ef718101a4baf1eb95eadee6',
+      cashflow: '34b5f290ef718187a3bfc8e17c2cb06e',
+    };
+    const dbId = dbMap[req.query.debug];
+    if (!dbId) return res.status(400).json({ error: 'Unbekannte DB, nutze: pipeline|fokus|cashflow' });
+    try {
+      const r = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
+        method: 'POST',
+        headers: {
+          Authorization:    `Bearer ${token}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type':   'application/json',
+        },
+        body: '{}',
+      });
+      const data = await r.json();
+      return res.status(r.status).json({ httpStatus: r.status, notionResponse: data });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   const token = process.env.NOTION_TOKEN;
