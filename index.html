@@ -2010,6 +2010,116 @@ function morgenRenderLoginHint() {
 
 // Aktualisiere Morgen-Termine alle 15 Min
 setInterval(() => { if (_googleToken) morgenLoad(); }, 15 * 60_000);
+
+// ═════════════════════════════════════════════════════════════
+// KALENDER-DEBUG — URL: ?debug
+// Zeigt alle gefundenen Kalender + heutige Events direkt auf dem iPad
+// ═════════════════════════════════════════════════════════════
+if (new URLSearchParams(window.location.search).has('debug')) {
+  async function runCalDebug() {
+    // Warte bis Token vorhanden (max 8 Sek)
+    for (let i = 0; i < 16; i++) {
+      if (_googleToken) break;
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed','inset:0','z-index:99999','background:#fff',
+      'overflow:auto','padding:20px 16px','font-family:-apple-system,monospace',
+      'font-size:13px','color:#1c1c1e','line-height:1.5',
+    ].join(';');
+
+    if (!_googleToken) {
+      overlay.innerHTML = '<h2>Kein Google-Token</h2><p>Zuerst Gmail anmelden, dann ?debug aufrufen.</p>';
+      document.body.appendChild(overlay);
+      return;
+    }
+
+    overlay.innerHTML = '<h2 style="margin-bottom:12px">⏳ Lade Kalender…</h2>';
+    document.body.appendChild(overlay);
+
+    try {
+      // 1. Alle Kalender auflisten
+      const listRes = await fetch(
+        'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+        { headers: { Authorization: 'Bearer ' + _googleToken } }
+      );
+      const calList = listRes.ok ? await listRes.json() : { items: [] };
+      const cals = calList.items || [];
+
+      // 2. Heute-Events aus jedem Kalender
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end   = new Date(); end.setHours(23, 59, 59, 999);
+
+      const calResults = await Promise.all(cals.map(async cal => {
+        const evs = await fetchEventsForDay(cal.id, start, end);
+        return { id: cal.id, name: cal.summary || cal.id, color: cal.backgroundColor || '#888', evs };
+      }));
+
+      // Auch explizit den Dashboard-Kalender testen
+      const dashEvs = await fetchEventsForDay(DASHBOARD_CAL_ID, start, end);
+
+      // 3. HTML bauen
+      const rows = calResults.map(c => {
+        const evHtml = c.evs.length
+          ? c.evs.map(e => {
+              const t = e.start?.dateTime
+                ? new Date(e.start.dateTime).toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' })
+                : 'Ganztags';
+              return `<div style="padding:2px 0 2px 16px;color:#3c3c43">⏱ ${t} — ${e.summary || '?'}</div>`;
+            }).join('')
+          : '<div style="padding:2px 0 2px 16px;color:#aeaeb2">keine Events heute</div>';
+        return `
+          <div style="margin-bottom:14px;border:1px solid #eee;border-radius:10px;padding:10px 12px;">
+            <div style="font-weight:600;margin-bottom:4px;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.color};margin-right:6px;vertical-align:middle;"></span>
+              ${c.name}
+            </div>
+            <div style="font-size:11px;color:#8e8e93;margin-bottom:6px;">${c.id}</div>
+            ${evHtml}
+          </div>`;
+      }).join('');
+
+      const dashSection = dashEvs.length
+        ? dashEvs.map(e => {
+            const t = e.start?.dateTime
+              ? new Date(e.start.dateTime).toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' })
+              : 'Ganztags';
+            return `<div>⏱ ${t} — ${e.summary || '?'}</div>`;
+          }).join('')
+        : '<div style="color:#aeaeb2">Keine Events gefunden</div>';
+
+      const totalEvs = calResults.reduce((s, c) => s + c.evs.length, 0);
+
+      overlay.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="font-size:18px;font-weight:700;">Kalender Debug</h2>
+          <button onclick="this.closest('div[style]').remove()" style="background:#f2f2f7;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;">Schließen</button>
+        </div>
+
+        <div style="background:#f9f9fb;border-radius:10px;padding:12px;margin-bottom:16px;">
+          <div style="font-weight:600;margin-bottom:6px;">📋 Dashboard-Kalender (simon-raphael.moser@web.de)</div>
+          ${dashSection}
+        </div>
+
+        <div style="font-weight:600;margin-bottom:10px;">
+          Alle ${cals.length} Kalender — ${totalEvs} Events heute total
+        </div>
+        ${rows || '<div style="color:#aeaeb2">Keine Kalender gefunden</div>'}
+
+        <div style="margin-top:16px;font-size:11px;color:#8e8e93;">
+          Token: ${_googleToken ? _googleToken.slice(0,20) + '…' : 'fehlt'}
+        </div>`;
+
+    } catch (err) {
+      overlay.innerHTML = `<h2>Fehler</h2><pre>${err.message}</pre>
+        <button onclick="this.closest('div[style]').remove()">Schließen</button>`;
+    }
+  }
+  // Kurz nach Load starten (Token braucht einen Moment)
+  window.addEventListener('load', () => setTimeout(runCalDebug, 2000));
+}
 </script>
 <script src="morningReport.js"></script>
 </body>
