@@ -1881,19 +1881,43 @@ setInterval(() => {
 // ═════════════════════════════════════════════════════════════
 // CALENDAR — TERMINE MORGEN
 // ═════════════════════════════════════════════════════════════
+// Hilfsfunktion: Events aus einem einzelnen Kalender holen
+async function fetchEventsForDay(calId, start, end) {
+  try {
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?`
+      + `timeMin=${encodeURIComponent(start.toISOString())}`
+      + `&timeMax=${encodeURIComponent(end.toISOString())}`
+      + `&singleEvents=true&orderBy=startTime&maxResults=30`;
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + _googleToken } });
+    if (!r.ok) return [];
+    const d = await r.json();
+    return d.items || [];
+  } catch { return []; }
+}
+
 async function todayLoad() {
   if (!_googleToken) return;
   try {
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const end   = new Date(); end.setHours(23, 59, 59, 999);
-    const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?`
-      + `timeMin=${encodeURIComponent(start.toISOString())}`
-      + `&timeMax=${encodeURIComponent(end.toISOString())}`
-      + `&singleEvents=true&orderBy=startTime&maxResults=20`;
-    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + _googleToken } });
-    if (!r.ok) return;
-    const d = await r.json();
-    window._mrEvents = (d.items || []).map(ev => ({
+
+    // Alle Kalender des Users abrufen, dann parallel Events holen
+    const listRes = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+      { headers: { Authorization: 'Bearer ' + _googleToken } }
+    );
+    const calList = listRes.ok ? await listRes.json() : { items: [{ id: 'primary' }] };
+    const calIds  = (calList.items || [{ id: 'primary' }]).map(c => c.id);
+
+    const allEvents = (await Promise.all(calIds.map(id => fetchEventsForDay(id, start, end)))).flat();
+
+    // Sortieren + deduplizieren (nach eventId)
+    const seen = new Set();
+    const sorted = allEvents
+      .filter(ev => { const k = ev.id; if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a, b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date));
+
+    window._mrEvents = sorted.map(ev => ({
       time:  ev.start?.dateTime
         ? new Date(ev.start.dateTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         : 'Ganztags',

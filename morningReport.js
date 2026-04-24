@@ -62,16 +62,17 @@
       : `Du hast ${events.length} ${events.length === 1 ? 'Termin' : 'Termine'} heute. `
         + events.slice(0, 3).map(e => `${e.time} Uhr: ${e.title}`).join('. ') + '.';
 
-    // Slide 3 — Pipeline
-    const hot  = leads.filter(l => (l.status || '').toUpperCase() === 'HOT');
-    const warm = leads.filter(l => (l.status || '').toUpperCase() === 'WARM');
+    // Slide 3 — Pipeline (jeden Lead einzeln nennen)
     let n3;
     if (!leads.length) {
       n3 = 'Deine Pipeline ist aktuell leer.';
     } else {
-      const parts = ['Deine Pipeline.'];
-      if (hot.length)  parts.push(`Heiß: ${hot.map(l => l.name).join(', ')}.`);
-      if (warm.length) parts.push(`Warm: ${warm.slice(0,3).map(l => l.name).join(', ')}.`);
+      const parts = [`Du hast ${leads.length} aktive ${leads.length === 1 ? 'Lead' : 'Leads'}.`];
+      leads.slice(0, 4).forEach(l => {
+        const status = l.status ? `, Status ${l.status}` : '';
+        const detail = l.detail ? `: ${l.detail}` : '';
+        parts.push(`${l.name}${status}${detail}.`);
+      });
       n3 = parts.join(' ');
     }
 
@@ -210,10 +211,19 @@
     requestAnimationFrame(() => overlay.classList.add('visible'));
 
     let aborted = false;
+
+    // Spotify einmal am Start sanft auf 8% ducken — läuft dann leise im Hintergrund
+    if (window._spotifyPlayer) {
+      try { window._spotifyPlayer.setVolume(0.08); } catch {}
+    }
+
     const cleanup = () => {
       if (aborted) return;
       aborted = true;
-      if (window.spotifyDuck) { try { window.spotifyDuck(false); } catch {} }
+      // Spotify zurück auf Normallautstärke
+      if (window._spotifyPlayer) {
+        try { window._spotifyPlayer.setVolume(window.SPOTIFY_VOLUME_NORMAL || 0.25); } catch {}
+      }
       overlay.classList.add('closing');
       const rm = () => overlay.remove();
       overlay.addEventListener('transitionend', rm, { once: true });
@@ -264,13 +274,8 @@
       slide.classList.add('active');
       if (typeof animate === 'function') animate();
 
-      // Spotify ducken
-      if (window.spotifyDuck) { try { window.spotifyDuck(true); } catch {} }
-
-      // Vorab-geladenes Audio abspielen
+      // Vorab-geladenes Audio abspielen (Spotify läuft leise im Hintergrund)
       await playAndWait(audios[index]);
-
-      if (window.spotifyDuck) { try { window.spotifyDuck(false); } catch {} }
     }
 
     // ── 4 Slides nacheinander ──
