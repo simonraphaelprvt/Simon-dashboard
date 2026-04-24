@@ -8,6 +8,8 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
+<!-- Morning Report Slideshow -->
+<link rel="stylesheet" href="morningReport.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -988,6 +990,10 @@ async function fetchWeather() {
 fetchWeather();
 setInterval(fetchWeather, 10 * 60_000);
 
+// Globale Dash-Daten für Morning Report
+window._mrLeads  = [];
+window._mrEvents = [];
+
 // ── Pipeline ─────────────────────────────────────────────────
 async function loadPipeline() {
   try {
@@ -1002,6 +1008,13 @@ async function loadPipeline() {
         '<div class="state-msg">Keine Einträge in der Pipeline</div>';
       return;
     }
+
+    // Global für Morning Report speichern
+    window._mrLeads = rows.map(row => ({
+      name:   row['Name']   || row['Titel']   || 'Unbenannt',
+      status: row['Status'] || 'KALT',
+      detail: row['Nächste Aktion'] || row['Aktion'] || '',
+    }));
 
     document.getElementById('pipeline-list').innerHTML = rows.map(row => {
       const name   = row['Name']   || row['Titel']         || 'Unbenannt';
@@ -1334,6 +1347,8 @@ setInterval(zohoLoad, 10 * 60_000);
 
 // Google Cloud TTS API Key (nur für persönliches Dashboard)
 const GOOGLE_TTS_KEY = 'AIzaSyB0q3cr74a8xoG9PZkz4Qjs8KjewbSMNKE';
+// Globaler Zugriff für morningReport.js
+window.GOOGLE_TTS_KEY = GOOGLE_TTS_KEY;
 
 const SVG_SUN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/><line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/></svg>`;
 const SVG_SPIN = `<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
@@ -1463,7 +1478,24 @@ function setBtn(state) {
   }
 }
 
-async function startMorningReport() {
+function startMorningReport() {
+  // Daten aus dem aktuellen Dashboard-Zustand sammeln
+  const now     = new Date();
+  const data = {
+    time:    document.getElementById('clock')?.textContent?.trim() || '',
+    weekday: DAYS[now.getDay()],
+    date:    now.getDate() + '. ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear(),
+    events:  window._mrEvents || [],
+    leads:   window._mrLeads  || [],
+    focus:   document.getElementById('fokus-text')?.innerText?.replace(/\n.*/s,'').trim() || '',
+  };
+  // Neues Fullscreen-Slideshow-Overlay starten (morningReport.js)
+  if (typeof window.startMorningReportOverlay === 'function') {
+    window.startMorningReportOverlay(data);
+  }
+}
+
+async function _legacyTtsReport() {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
@@ -1849,8 +1881,30 @@ setInterval(() => {
 // ═════════════════════════════════════════════════════════════
 // CALENDAR — TERMINE MORGEN
 // ═════════════════════════════════════════════════════════════
+async function todayLoad() {
+  if (!_googleToken) return;
+  try {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const end   = new Date(); end.setHours(23, 59, 59, 999);
+    const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?`
+      + `timeMin=${encodeURIComponent(start.toISOString())}`
+      + `&timeMax=${encodeURIComponent(end.toISOString())}`
+      + `&singleEvents=true&orderBy=startTime&maxResults=20`;
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + _googleToken } });
+    if (!r.ok) return;
+    const d = await r.json();
+    window._mrEvents = (d.items || []).map(ev => ({
+      time:  ev.start?.dateTime
+        ? new Date(ev.start.dateTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+        : 'Ganztags',
+      title: ev.summary || '(ohne Titel)',
+    }));
+  } catch { /* ignorieren */ }
+}
+
 async function morgenLoad() {
   if (!_googleToken) { morgenRenderLoginHint(); return; }
+  todayLoad(); // Heute-Termine für Morning Report parallel laden
   try {
     const start = new Date();
     start.setDate(start.getDate() + 1);
@@ -1903,6 +1957,6 @@ function morgenRenderLoginHint() {
 // Aktualisiere Morgen-Termine alle 15 Min
 setInterval(() => { if (_googleToken) morgenLoad(); }, 15 * 60_000);
 </script>
-
+<script src="morningReport.js"></script>
 </body>
 </html>

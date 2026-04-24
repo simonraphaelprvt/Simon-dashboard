@@ -1,0 +1,261 @@
+/* ══════════════════════════════════════════════════════════════
+   Morning Report — Fullscreen 4-Slide Präsentation
+   ══════════════════════════════════════════════════════════════ */
+
+.mr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
+  color: #1c1c1e;
+  opacity: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mr-overlay.visible { opacity: 1; }
+.mr-overlay.closing { opacity: 0; }
+
+/* Sanfter Hinweis */
+.mr-hint {
+  position: absolute;
+  bottom: 2.5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #c7c7cc;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.mr-overlay.visible .mr-hint { opacity: 1; transition-delay: 2.5s; }
+
+/* Slide-Container */
+.mr-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5vw;
+  opacity: 0;
+  transform: scale(0.985);
+  transition:
+    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+.mr-slide.active { opacity: 1; transform: scale(1); }
+.mr-slide.leaving { opacity: 0; transform: scale(1.01); }
+
+/* Emojis als visuelle Anker */
+.mr-emoji {
+  font-size: clamp(2.8rem, 7vw, 4.25rem);
+  line-height: 1;
+  margin-bottom: 1.75rem;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.08));
+  opacity: 0;
+  transform: scale(0.6) rotate(-8deg);
+  transition:
+    opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mr-emoji.lg {
+  font-size: clamp(3.5rem, 9vw, 5.5rem);
+}
+.mr-slide.active .mr-emoji {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Eyebrow-Label (klein, grau, über dem Content) */
+.mr-eyebrow {
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
+  font-weight: 600;
+  color: #9c9ca6;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.mr-slide.active .mr-eyebrow { opacity: 1; transform: translateY(0); }
+
+/* ─────────────── SLIDE 1 — Zeit ─────────────── */
+.mr-time {
+  font-size: clamp(5rem, 15vw, 14rem);
+  font-weight: 200;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  color: #1c1c1e;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.2s,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+.mr-slide.active .mr-time { opacity: 1; transform: translateY(0); }
+
+.mr-date {
+  font-size: clamp(1.1rem, 2.5vw, 1.9rem);
+  font-weight: 300;
+  color: #8e8e93;
+  margin-top: 1.1rem;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+}
+.mr-slide.active .mr-date { opacity: 1; transform: translateY(0); }
+
+/* ─────────────── SLIDE 2 — Termine ─────────────── */
+.mr-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: min(620px, 80%);
+}
+.mr-event-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4rem;
+  padding: 1rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 14px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+  font-size: clamp(1rem, 2.1vw, 1.45rem);
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+.mr-event-item.in { opacity: 1; transform: translateY(0); }
+
+.mr-event-time {
+  font-weight: 500;
+  color: #6B4EFF;
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5ch;
+  letter-spacing: -0.01em;
+}
+.mr-event-title {
+  color: #1c1c1e;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+/* ─────────────── SLIDE 3 — Pipeline ─────────────── */
+.mr-pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: min(780px, 82%);
+}
+.mr-pipeline-card {
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 16px;
+  padding: 1.4rem 1.55rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+.mr-pipeline-card.in { opacity: 1; transform: scale(1); }
+
+.mr-lead-name {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 600;
+  color: #1c1c1e;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.mr-lead-detail {
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  color: #8e8e93;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+.mr-badge {
+  align-self: flex-start;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: clamp(0.65rem, 1vw, 0.78rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.mr-badge-hot  { background: #FF4D6D; }
+.mr-badge-warm { background: #FF9F43; }
+.mr-badge-kalt { background: #aaaaaa; }
+
+/* ─────────────── SLIDE 4 — Fokus ─────────────── */
+.mr-focus {
+  font-size: clamp(2rem, 6vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  text-align: center;
+  max-width: 82%;
+  color: #1c1c1e;
+}
+.mr-focus-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-right: 0.28em;
+  will-change: transform, opacity;
+}
+.mr-focus-word.in { opacity: 1; transform: translateY(0); }
+.mr-focus-accent { color: #6B4EFF; }
+
+.mr-focus-sub {
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: #8e8e93;
+  font-weight: 400;
+  margin-top: 1.8rem;
+  letter-spacing: -0.008em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mr-focus-sub.in { opacity: 1; transform: translateY(0); }
+
+/* Mobile-Fallback — Pipeline-Grid einreihig */
+@media (max-width: 640px) {
+  .mr-pipeline-grid { grid-template-columns: 1fr; }
+}
