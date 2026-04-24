@@ -1488,9 +1488,20 @@ function setBtn(state) {
   }
 }
 
-function startMorningReport() {
-  // Daten aus dem aktuellen Dashboard-Zustand sammeln
-  const now     = new Date();
+async function startMorningReport() {
+  // iOS Audio-Unlock sofort in der User-Geste
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
+    setTimeout(() => ctx.close(), 500);
+  } catch {}
+
+  // Frische Heute-Termine laden (blockiert kurz, aber Loader im Overlay fängt das ab)
+  if (_googleToken) await todayLoad();
+
+  const now = new Date();
   const data = {
     time:    document.getElementById('clock')?.textContent?.trim() || '',
     weekday: DAYS[now.getDay()],
@@ -1502,7 +1513,6 @@ function startMorningReport() {
     gmail:   window._mrGmail   ?? null,
     zoho:    window._mrZoho    || null,
   };
-  // Neues Fullscreen-Slideshow-Overlay starten (morningReport.js)
   if (typeof window.startMorningReportOverlay === 'function') {
     window.startMorningReportOverlay(data);
   }

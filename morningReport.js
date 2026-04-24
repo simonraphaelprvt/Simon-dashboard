@@ -58,13 +58,13 @@
     const zoho   = data.zoho;
     const gmail  = data.gmail;
 
-    // Slide 0 — Wetter
-    const n0 = wx
+    // Slide 0 — Zeit & Datum
+    const n0 = `Es ist ${data.time || '—'} Uhr. ${data.weekday || ''}, ${data.date || ''}.`;
+
+    // Slide 1 — Wetter
+    const n1 = wx
       ? `Draußen in Laubach sind es ${wx.temp} Grad, ${wx.desc.toLowerCase()}. Gefühlt wie ${wx.feels} Grad.`
       : 'Wetterdaten sind gerade nicht verfügbar.';
-
-    // Slide 1 — Zeit & Datum
-    const n1 = `Es ist ${data.time || '—'} Uhr. ${data.weekday || ''}, ${data.date || ''}.`;
 
     // Slide 2 — Termine
     const n2 = events.length === 0
@@ -338,7 +338,8 @@
     return () => {};
   }
 
-  const renders = [renderSlide0, renderSlide1, renderSlide2, renderSlide3, renderSlide4, renderSlide5, renderSlide6];
+  // Reihenfolge: Zeit → Wetter → Termine → Pipeline → Fokus → Gmail → Rechnungen
+  const renders = [renderSlide1, renderSlide0, renderSlide2, renderSlide3, renderSlide4, renderSlide5, renderSlide6];
 
     async function showSlide(index) {
       if (aborted) return;
