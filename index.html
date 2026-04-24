@@ -1210,6 +1210,15 @@ async function gmailFetch(token) {
 // Globales Google-Access-Token (Gmail + Calendar)
 let _googleToken = null;
 
+// Prüft ob ein Token wirklich Calendar-Scope hat
+async function hasCalendarScope(token) {
+  const r = await fetch(
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1',
+    { headers: { Authorization: 'Bearer ' + token } }
+  );
+  return r.ok;
+}
+
 async function gmailLoad() {
   // 1. Gespeicherter Token vorhanden?
   const stored = gmailTokenLoad();
@@ -1217,8 +1226,16 @@ async function gmailLoad() {
     _googleToken = stored;
     try {
       gmailRenderCount(await gmailFetch(stored));
-      morgenLoad();
-      return;
+      // Prüfe ob Calendar-Scope vorhanden — wenn nicht, Token wegwerfen + silent re-auth
+      const calOk = await hasCalendarScope(stored);
+      if (!calOk) {
+        console.warn('[Dashboard] Token hat keinen Calendar-Scope → stilles Re-Auth');
+        gmailTokenClear(); _googleToken = null;
+        // weiter zu silent re-auth unten
+      } else {
+        morgenLoad();
+        return;
+      }
     } catch (e) { if (e.status === 401) { gmailTokenClear(); _googleToken = null; } }
   }
   // 2. Stilles Re-Auth versuchen (funktioniert wenn bereits autorisiert)
@@ -1239,8 +1256,11 @@ async function gmailLoad() {
       _googleToken = token;
       try {
         gmailRenderCount(await gmailFetch(token));
-        morgenLoad();
-        return;
+        // Erneut Calendar-Scope prüfen
+        const calOk = await hasCalendarScope(token);
+        if (calOk) { morgenLoad(); return; }
+        // Silent auth gab uns kein Calendar-Scope → manueller Login nötig
+        gmailTokenClear(); _googleToken = null;
       } catch { gmailTokenClear(); _googleToken = null; }
     }
   }
@@ -2045,8 +2065,29 @@ if (new URLSearchParams(window.location.search).has('debug')) {
         'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
         { headers: { Authorization: 'Bearer ' + _googleToken } }
       );
-      const calList = listRes.ok ? await listRes.json() : { items: [] };
+      const listStatus = listRes.status;
+      const listBody = await listRes.text();
+      let calList = { items: [] };
+      try { calList = JSON.parse(listBody); } catch {}
       const cals = calList.items || [];
+
+      // Scope-Fehler anzeigen
+      if (!listRes.ok) {
+        const reAuthBtn = `<button onclick="gmailTokenClear();gmailLogin();" style="margin-top:12px;background:#0A84FF;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:15px;cursor:pointer;font-weight:600;">Neu anmelden (mit Kalender-Zugriff)</button>`;
+        overlay.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2 style="font-size:18px;font-weight:700;">Kalender Debug</h2>
+            <button onclick="this.closest('div[style]').remove()" style="background:#f2f2f7;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;">Schließen</button>
+          </div>
+          <div style="background:#fff3f3;border:1px solid #ffcdd2;border-radius:10px;padding:14px;margin-bottom:12px;">
+            <div style="font-weight:700;color:#d32f2f;margin-bottom:6px;">⚠️ calendarList API Fehler ${listStatus}</div>
+            <pre style="font-size:11px;color:#555;white-space:pre-wrap;word-break:break-all;">${listBody.slice(0,400)}</pre>
+          </div>
+          <p style="color:#3c3c43;margin-bottom:4px;">Das Token hat keinen Kalender-Scope. Du musst dich neu einloggen:</p>
+          ${reAuthBtn}
+          <div style="margin-top:14px;font-size:11px;color:#8e8e93;">Token: ${_googleToken.slice(0,20)}…</div>`;
+        return;
+      }
 
       // 2. Heute-Events aus jedem Kalender
       const start = new Date(); start.setHours(0, 0, 0, 0);
