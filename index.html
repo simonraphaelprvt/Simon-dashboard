@@ -1181,7 +1181,8 @@ function gmailRenderError() {
 }
 
 async function gmailFetch(token) {
-  const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/labels/INBOX', {
+  // CATEGORY_PERSONAL = nur Primary-Tab (ohne Werbung, Updates, Social)
+  const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/labels/CATEGORY_PERSONAL', {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (r.status === 401) throw Object.assign(new Error('401'), { status: 401 });
