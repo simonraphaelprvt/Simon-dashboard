@@ -48,12 +48,22 @@
     } catch {}
   }
 
+  const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
   // ── Narrations bauen ─────────────────────────────────────────
   function buildNarrations(data) {
     const events = Array.isArray(data.events) ? data.events : [];
     const leads  = Array.isArray(data.leads)  ? data.leads  : [];
+    const wx     = data.weather;
+    const zoho   = data.zoho;
+    const gmail  = data.gmail;
 
-    // Slide 1 — Zeit
+    // Slide 0 — Wetter
+    const n0 = wx
+      ? `Draußen in Laubach sind es ${wx.temp} Grad, ${wx.desc.toLowerCase()}. Gefühlt wie ${wx.feels} Grad.`
+      : 'Wetterdaten sind gerade nicht verfügbar.';
+
+    // Slide 1 — Zeit & Datum
     const n1 = `Es ist ${data.time || '—'} Uhr. ${data.weekday || ''}, ${data.date || ''}.`;
 
     // Slide 2 — Termine
@@ -62,7 +72,7 @@
       : `Du hast ${events.length} ${events.length === 1 ? 'Termin' : 'Termine'} heute. `
         + events.slice(0, 3).map(e => `${e.time} Uhr: ${e.title}`).join('. ') + '.';
 
-    // Slide 3 — Pipeline (jeden Lead einzeln nennen)
+    // Slide 3 — Pipeline
     let n3;
     if (!leads.length) {
       n3 = 'Deine Pipeline ist aktuell leer.';
@@ -80,10 +90,48 @@
     const focusText = (data.focus || '').trim() || 'Kein Fokus gesetzt';
     const n4 = `Dein Fokus für heute: ${focusText}. Mach es. Viel Erfolg.`;
 
-    return [n1, n2, n3, n4];
+    // Slide 5 — Gmail
+    const n5 = (gmail === null || gmail === undefined)
+      ? 'Gmail-Daten nicht verfügbar.'
+      : gmail === 0
+        ? 'Dein Posteingang ist leer. Keine neuen Mails.'
+        : `Du hast ${gmail} neue ${gmail === 1 ? 'Mail' : 'Mails'} im Posteingang.`;
+
+    // Slide 6 — Rechnungen
+    let n6;
+    if (!zoho) {
+      n6 = 'Rechnungsdaten nicht verfügbar.';
+    } else if (zoho.count === 0) {
+      n6 = 'Alle Rechnungen sind beglichen. Keine offenen Posten.';
+    } else {
+      const amt = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(zoho.total);
+      let txt = `Du hast ${zoho.count} offene ${zoho.count === 1 ? 'Rechnung' : 'Rechnungen'} über insgesamt ${amt} Euro.`;
+      if (zoho.nextDue) {
+        const d = new Date(zoho.nextDue + 'T00:00:00');
+        txt += ` Nächste fällig am ${d.getDate()}. ${MONATE[d.getMonth()]}.`;
+      }
+      n6 = txt;
+    }
+
+    return [n0, n1, n2, n3, n4, n5, n6];
   }
 
   // ── Render-Funktionen pro Slide ───────────────────────────────
+  function renderSlide0(slide, data) {
+    const wx = data.weather;
+    const icon = wx ? wx.icon : '🌤';
+    const temp = wx ? `${wx.temp}°` : '—';
+    const desc = wx ? wx.desc : 'Keine Daten';
+    const feels = wx ? `Gefühlt ${wx.feels}°` : '';
+    slide.innerHTML = `
+      <div class="mr-emoji lg">${icon}</div>
+      <div class="mr-time" style="font-size:clamp(4rem,12vw,10rem);">${esc(temp)}</div>
+      <div class="mr-eyebrow" style="margin-top:1rem;margin-bottom:0;">${esc(desc)}</div>
+      <div class="mr-date" style="margin-top:0.5rem;">${esc(feels)}</div>
+    `;
+    return () => {};
+  }
+
   function renderSlide1(slide, data) {
     const [hh, mm] = (data.time || '00:00').split(':').map(n => parseInt(n, 10) || 0);
     slide.innerHTML = `
@@ -248,7 +296,49 @@
     overlay.appendChild(hint);
 
     // ── Slide-Helfer ──
-    const renders = [renderSlide1, renderSlide2, renderSlide3, renderSlide4];
+    function renderSlide5(slide, data) {
+    const n = data.gmail;
+    const empty = n === 0;
+    const unknown = n === null || n === undefined;
+    const countStr = unknown ? '—' : String(n > 99 ? '99+' : n);
+    const color = empty ? '#8e8e93' : '#6B4EFF';
+    const sub = unknown ? 'Nicht verfügbar' : empty ? 'Posteingang leer' : `neue ${n === 1 ? 'Mail' : 'Mails'}`;
+    slide.innerHTML = `
+      <div class="mr-emoji">📧</div>
+      <div class="mr-time" style="font-size:clamp(4rem,13vw,11rem);color:${color};">${esc(countStr)}</div>
+      <div class="mr-date">${esc(sub)}</div>
+    `;
+    return () => {};
+  }
+
+  function renderSlide6(slide, data) {
+    const zoho = data.zoho;
+    const none = !zoho || zoho.count === 0;
+    const emoji = none ? '✅' : '💶';
+    let main, sub;
+    if (!zoho) {
+      main = '—'; sub = 'Nicht verfügbar';
+    } else if (none) {
+      main = 'Alles beglichen'; sub = 'Keine offenen Rechnungen';
+    } else {
+      const amt = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(zoho.total);
+      main = `${amt} €`;
+      sub = `${zoho.count} offene ${zoho.count === 1 ? 'Rechnung' : 'Rechnungen'}`;
+      if (zoho.nextDue) {
+        const d = new Date(zoho.nextDue + 'T00:00:00');
+        sub += ` · fällig ${d.getDate()}.${d.getMonth()+1}.`;
+      }
+    }
+    const color = none ? '#30D158' : '#FF9F0A';
+    slide.innerHTML = `
+      <div class="mr-emoji lg">${emoji}</div>
+      <div class="mr-focus" style="font-size:clamp(2rem,6vw,4rem);color:${color};">${esc(main)}</div>
+      <div class="mr-date" style="margin-top:1rem;">${esc(sub)}</div>
+    `;
+    return () => {};
+  }
+
+  const renders = [renderSlide0, renderSlide1, renderSlide2, renderSlide3, renderSlide4, renderSlide5, renderSlide6];
 
     async function showSlide(index) {
       if (aborted) return;
@@ -278,8 +368,8 @@
       await playAndWait(audios[index]);
     }
 
-    // ── 4 Slides nacheinander ──
-    for (let i = 0; i < 4; i++) {
+    // ── 7 Slides nacheinander ──
+    for (let i = 0; i < 7; i++) {
       await showSlide(i);
       if (aborted) return;
       // Kurze Pause zwischen Slides

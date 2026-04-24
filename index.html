@@ -966,6 +966,7 @@ async function fetchWeather() {
     const feels = Math.round(d.main.feels_like);
     const icon  = WEATHER_ICONS[d.weather[0].icon] || '🌤';
     const desc  = WEATHER_DE[d.weather[0].description.toLowerCase()] || d.weather[0].description;
+    window._mrWeather = { temp, feels, icon, desc };
 
     document.getElementById('weather-card').innerHTML = `
       <div class="fade-in" style="display:flex;flex-direction:column;justify-content:space-between;height:100%;">
@@ -1171,6 +1172,7 @@ function gmailTokenSave(token, expiresIn) {
 function gmailTokenClear() { localStorage.removeItem('gmail_token'); }
 
 function gmailRenderCount(n) {
+  window._mrGmail = n; // für Morning Report
   const label = n === 0 ? 'Keine neuen Mails'
               : n > 99  ? '99+ ungelesen'
               : `${n} ungelesen`;
@@ -1293,6 +1295,14 @@ function fmtDateShort(s) {
 
 function zohoRender(data) {
   const list = data.invoices || [];
+  // Global für Morning Report
+  if (list.length) {
+    const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
+    const next  = [...list].sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0];
+    window._mrZoho = { count: list.length, total, nextDue: next?.due_date || null, nextName: next?.customer_name || '' };
+  } else {
+    window._mrZoho = { count: 0, total: 0 };
+  }
   if (!list.length) {
     document.getElementById('zoho-inner').innerHTML = `
       <div class="fade-in">
@@ -1485,9 +1495,12 @@ function startMorningReport() {
     time:    document.getElementById('clock')?.textContent?.trim() || '',
     weekday: DAYS[now.getDay()],
     date:    now.getDate() + '. ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear(),
-    events:  window._mrEvents || [],
-    leads:   window._mrLeads  || [],
+    events:  window._mrEvents  || [],
+    leads:   window._mrLeads   || [],
     focus:   document.getElementById('fokus-text')?.innerText?.replace(/\n.*/s,'').trim() || '',
+    weather: window._mrWeather || null,
+    gmail:   window._mrGmail   ?? null,
+    zoho:    window._mrZoho    || null,
   };
   // Neues Fullscreen-Slideshow-Overlay starten (morningReport.js)
   if (typeof window.startMorningReportOverlay === 'function') {
@@ -1895,19 +1908,26 @@ async function fetchEventsForDay(calId, start, end) {
   } catch { return []; }
 }
 
+// Kalender-ID aus dem Dashboard-Iframe (simon-raphael.moser@web.de)
+const DASHBOARD_CAL_ID = 'simon-raphael.moser@web.de';
+
 async function todayLoad() {
   if (!_googleToken) return;
   try {
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const end   = new Date(); end.setHours(23, 59, 59, 999);
 
-    // Alle Kalender des Users abrufen, dann parallel Events holen
+    // Dashboard-Kalender immer explizit + alle weiteren aus der Liste
     const listRes = await fetch(
       'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
       { headers: { Authorization: 'Bearer ' + _googleToken } }
     );
-    const calList = listRes.ok ? await listRes.json() : { items: [{ id: 'primary' }] };
-    const calIds  = (calList.items || [{ id: 'primary' }]).map(c => c.id);
+    const calList = listRes.ok ? await listRes.json() : { items: [] };
+    const calIds  = [...new Set([
+      DASHBOARD_CAL_ID,
+      'primary',
+      ...(calList.items || []).map(c => c.id),
+    ])];
 
     const allEvents = (await Promise.all(calIds.map(id => fetchEventsForDay(id, start, end)))).flat();
 
