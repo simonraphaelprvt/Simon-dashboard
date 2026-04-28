@@ -6,8 +6,6 @@
 <title>Dashboard · Simon</title>
 <!-- Google Identity Services für Gmail + Calendar OAuth -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<!-- Spotify Web Playback SDK -->
-<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <!-- Morning Report Slideshow -->
 <link rel="stylesheet" href="morningReport.css">
 <style>
@@ -61,11 +59,11 @@
   }
 
   /* ─────────────────────────────────────
-     ROW 1: Zeit + Spotify + Wetter
+     ROW 1: Zeit + Wetter
   ───────────────────────────────────── */
   .row-top {
     display: grid;
-    grid-template-columns: 1fr 260px 148px;
+    grid-template-columns: 1fr 148px;
     gap: 12px;
   }
 
@@ -160,93 +158,6 @@
     border: none;
     display: block;
   }
-
-  /* ── Spotify Mini-Player ── */
-  .card-spotify {
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    overflow: hidden;
-  }
-  .spotify-art {
-    width: 56px; height: 56px;
-    border-radius: 8px;
-    background: var(--card-inner) center/cover no-repeat;
-    flex-shrink: 0;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-  }
-  .spotify-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
-  .spotify-track {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    letter-spacing: -0.2px;
-    line-height: 1.2;
-  }
-  .spotify-artist {
-    font-size: 11px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
-  }
-  .spotify-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
-  }
-  .spotify-btn {
-    background: none;
-    border: none;
-    padding: 3px;
-    cursor: pointer;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-  }
-  .spotify-btn:hover { color: var(--text-primary); background: var(--card-inner); }
-  .spotify-btn:active { transform: scale(0.92); }
-  .spotify-btn-play {
-    color: var(--text-primary);
-    background: var(--card-inner);
-    width: 24px; height: 24px;
-    border-radius: 50%;
-  }
-  .spotify-empty {
-    padding: 8px 12px;
-    font-size: 11px;
-    color: var(--text-tertiary);
-    width: 100%;
-    text-align: center;
-  }
-  .spotify-cta {
-    background: #1DB954;
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    padding: 6px 14px;
-    font-size: 11.5px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    letter-spacing: 0.1px;
-  }
-  .spotify-cta:active { transform: scale(0.96); }
 
   /* Pipeline */
   .card-pipeline {
@@ -725,12 +636,6 @@
         </svg>
         Morning Report
       </button>
-    </div>
-
-    <div class="card card-spotify" id="spotify-card">
-      <div class="spotify-empty" id="spotify-empty">
-        <button class="spotify-cta" onclick="spotifyConnect()">Spotify verbinden</button>
-      </div>
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -1575,280 +1480,15 @@ async function _legacyTtsReport() {
     currentAudio.onerror = () => { currentAudio = null; setBtn('idle'); };
 
     setBtn('speaking');
-    spotifyDuck(true);
-    currentAudio.addEventListener('ended', () => spotifyDuck(false));
-    currentAudio.addEventListener('pause', () => spotifyDuck(false));
     await currentAudio.play();
 
   } catch (err) {
     console.error('TTS Fehler:', err);
     currentAudio = null;
-    spotifyDuck(false);
     setBtn('idle');
     alert('Sprachausgabe fehlgeschlagen: ' + err.message);
   }
 }
-
-// ═════════════════════════════════════════════════════════════
-// SPOTIFY INTEGRATION (PKCE OAuth + Web Playback SDK)
-// ═════════════════════════════════════════════════════════════
-// Setup:
-// 1. https://developer.spotify.com/dashboard → Create App
-// 2. Redirect URI = exakt diese Dashboard-URL (z.B. https://simon-dashboard-omega.vercel.app/)
-// 3. Client ID + Playlist-URI hier eintragen
-// 4. Spotify Premium-Konto erforderlich für Web Playback SDK
-// ─────────────────────────────────────────────────────────────
-const SPOTIFY_CLIENT_ID    = 'e8a56cb4bfa242e1a8f9b2ba8b7cab68';
-const SPOTIFY_PLAYLIST_URI = 'spotify:playlist:69vYU5GaL6K157BAlMvSCf';
-const SPOTIFY_VOLUME_NORMAL = 0.25;  // 25 %
-const SPOTIFY_VOLUME_DUCK   = 0.10;  // 10 % während TTS
-const SPOTIFY_SCOPE = 'streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state';
-const SPOTIFY_REDIRECT_URI = 'https://simon-dashboard-omega.vercel.app/';
-
-let _spotifyPlayer    = null;
-let _spotifyDeviceId  = null;
-let _spotifyToken     = null;
-let _spotifyDucking   = false;
-let _spotifyAutoStarted = false;
-
-// ── PKCE Helpers ──
-function spRand(len = 64) {
-  const arr = new Uint8Array(len);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(b => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b % 62]).join('');
-}
-async function spChallenge(verifier) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
-  return btoa(String.fromCharCode(...new Uint8Array(buf)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-// ── Token-Storage ──
-function spTokenLoad() {
-  try {
-    const d = JSON.parse(localStorage.getItem('spotify_token') || 'null');
-    if (d && Date.now() < d.expires) return d;
-    return d; // ggf. expired → refresh
-  } catch { return null; }
-}
-function spTokenSave(token, refresh, expiresIn) {
-  localStorage.setItem('spotify_token', JSON.stringify({
-    token, refresh,
-    expires: Date.now() + (expiresIn || 3600) * 1000 - 60_000,
-  }));
-}
-function spTokenClear() { localStorage.removeItem('spotify_token'); }
-
-// ── OAuth Flow ──
-async function spotifyConnect() {
-  if (SPOTIFY_CLIENT_ID === 'DEINE_SPOTIFY_CLIENT_ID') {
-    alert('Bitte SPOTIFY_CLIENT_ID in index.html eintragen.');
-    return;
-  }
-  const verifier  = spRand(80);
-  const challenge = await spChallenge(verifier);
-  sessionStorage.setItem('spotify_verifier', verifier);
-  const params = new URLSearchParams({
-    client_id:             SPOTIFY_CLIENT_ID,
-    response_type:         'code',
-    redirect_uri:          SPOTIFY_REDIRECT_URI,
-    code_challenge_method: 'S256',
-    code_challenge:        challenge,
-    scope:                 SPOTIFY_SCOPE,
-  });
-  window.location.href = `https://accounts.spotify.com/authorize?${params}`;
-}
-
-async function spotifyHandleRedirect() {
-  const params = new URLSearchParams(window.location.search);
-  const code   = params.get('code');
-  if (!code) return null;
-  const verifier = sessionStorage.getItem('spotify_verifier');
-  if (!verifier) return null;
-  try {
-    const r = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id:     SPOTIFY_CLIENT_ID,
-        grant_type:    'authorization_code',
-        code,
-        redirect_uri:  SPOTIFY_REDIRECT_URI,
-        code_verifier: verifier,
-      }),
-    });
-    const d = await r.json();
-    if (d.access_token) {
-      spTokenSave(d.access_token, d.refresh_token, d.expires_in);
-      sessionStorage.removeItem('spotify_verifier');
-      // URL säubern
-      window.history.replaceState(null, '', window.location.pathname);
-      return d.access_token;
-    }
-  } catch (e) { console.error('Spotify token exchange:', e); }
-  return null;
-}
-
-async function spotifyRefresh(refreshToken) {
-  try {
-    const r = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id:     SPOTIFY_CLIENT_ID,
-        grant_type:    'refresh_token',
-        refresh_token: refreshToken,
-      }),
-    });
-    const d = await r.json();
-    if (d.access_token) {
-      spTokenSave(d.access_token, d.refresh_token || refreshToken, d.expires_in);
-      return d.access_token;
-    }
-  } catch (e) { console.error('Spotify refresh:', e); }
-  return null;
-}
-
-async function spotifyEnsureToken() {
-  const stored = spTokenLoad();
-  if (!stored) return null;
-  if (Date.now() < stored.expires) return stored.token;
-  if (stored.refresh) return await spotifyRefresh(stored.refresh);
-  return null;
-}
-
-// ── Web Playback SDK ──
-window.onSpotifyWebPlaybackSDKReady = async () => {
-  // Erst Redirect verarbeiten
-  await spotifyHandleRedirect();
-  const token = await spotifyEnsureToken();
-  if (!token) { spotifyRenderEmpty(); return; }
-  _spotifyToken = token;
-  spotifyInitPlayer();
-};
-
-function spotifyInitPlayer() {
-  _spotifyPlayer = new Spotify.Player({
-    name: 'Simon Dashboard',
-    getOAuthToken: cb => spotifyEnsureToken().then(t => { _spotifyToken = t; cb(t); }),
-    volume: SPOTIFY_VOLUME_NORMAL,
-  });
-
-  _spotifyPlayer.addListener('ready', ({ device_id }) => {
-    _spotifyDeviceId = device_id;
-    spotifyRenderState({ paused: true, track_window: { current_track: null } });
-    // Bei erstem User-Click Auto-Start
-    document.addEventListener('pointerdown', spotifyAutoStart, { once: true });
-  });
-
-  _spotifyPlayer.addListener('not_ready', () => {
-    _spotifyDeviceId = null;
-  });
-
-  _spotifyPlayer.addListener('player_state_changed', state => {
-    if (state) spotifyRenderState(state);
-  });
-
-  _spotifyPlayer.addListener('authentication_error', async () => {
-    spTokenClear();
-    spotifyRenderEmpty();
-  });
-
-  _spotifyPlayer.addListener('initialization_error', e => console.error('Spotify init:', e));
-  _spotifyPlayer.addListener('account_error', () => {
-    spotifyRenderError('Spotify Premium erforderlich');
-  });
-
-  _spotifyPlayer.connect();
-}
-
-async function spotifyAutoStart() {
-  if (_spotifyAutoStarted) return;
-  _spotifyAutoStarted = true;
-  if (!_spotifyDeviceId || !_spotifyToken) return;
-  // Transfer + Play
-  try {
-    await fetch('https://api.spotify.com/v1/me/player', {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + _spotifyToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_ids: [_spotifyDeviceId], play: false }),
-    });
-    await new Promise(r => setTimeout(r, 400));
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${_spotifyDeviceId}`, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + _spotifyToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ context_uri: SPOTIFY_PLAYLIST_URI }),
-    });
-    if (_spotifyPlayer) _spotifyPlayer.setVolume(SPOTIFY_VOLUME_NORMAL);
-  } catch (e) { console.error('Spotify autostart:', e); }
-}
-
-// ── UI ──
-function spotifyRenderEmpty() {
-  document.getElementById('spotify-card').innerHTML = `
-    <div class="spotify-empty">
-      <button class="spotify-cta" onclick="spotifyConnect()">Spotify verbinden</button>
-    </div>`;
-}
-
-function spotifyRenderError(msg) {
-  document.getElementById('spotify-card').innerHTML = `
-    <div class="spotify-empty" style="color:var(--text-tertiary);">${esc(msg)}</div>`;
-}
-
-function spotifyRenderState(state) {
-  const track = state.track_window?.current_track;
-  const card  = document.getElementById('spotify-card');
-  const art   = track?.album?.images?.[0]?.url || '';
-  const name  = track?.name    || 'Bereit';
-  const artist = track?.artists?.map(a => a.name).join(', ') || 'Tippe zum Starten';
-  const playing = !state.paused && track;
-  const playIcon = playing
-    ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>`
-    : `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>`;
-
-  card.innerHTML = `
-    <div class="spotify-art" style="${art ? `background-image:url('${art}')` : ''}"></div>
-    <div class="spotify-info">
-      <div class="spotify-track">${esc(name)}</div>
-      <div class="spotify-artist">${esc(artist)}</div>
-      <div class="spotify-controls">
-        <button class="spotify-btn" onclick="spotifyPrev()" aria-label="Vorheriger">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-        </button>
-        <button class="spotify-btn spotify-btn-play" onclick="spotifyToggle()" aria-label="Play">${playIcon}</button>
-        <button class="spotify-btn" onclick="spotifyNext()" aria-label="Nächster">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
-        </button>
-      </div>
-    </div>`;
-}
-
-async function spotifyToggle() {
-  if (!_spotifyPlayer) return;
-  const state = await _spotifyPlayer.getCurrentState();
-  if (!state || !state.track_window?.current_track) {
-    // Noch nichts geladen → Playlist starten
-    spotifyAutoStart();
-    return;
-  }
-  _spotifyPlayer.togglePlay();
-}
-function spotifyPrev() { _spotifyPlayer?.previousTrack(); }
-function spotifyNext() { _spotifyPlayer?.nextTrack(); }
-
-function spotifyDuck(on) {
-  if (!_spotifyPlayer) return;
-  _spotifyDucking = on;
-  _spotifyPlayer.setVolume(on ? SPOTIFY_VOLUME_DUCK : SPOTIFY_VOLUME_NORMAL).catch(() => {});
-}
-
-// Falls SDK nicht lädt (z.B. Premium fehlt) — UI bleibt leer
-setTimeout(() => {
-  if (!_spotifyPlayer && !_spotifyToken && !spTokenLoad()) {
-    // Noch nicht verbunden → Empty bleibt sichtbar
-  }
-}, 5000);
 
 // ═════════════════════════════════════════════════════════════
 // TOMORROW'S GOAL (Abend-Prompt + Morgens-Banner)
