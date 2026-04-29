@@ -612,11 +612,331 @@
     from { opacity: 0; transform: translateY(5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     VIEW TOGGLE BUTTON
+  ═══════════════════════════════════════════════════════════════ */
+  #view-toggle {
+    position: fixed;
+    top: 20px; right: 20px;
+    z-index: 10000;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 22px;
+    padding: 7px 16px 7px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #1c1c1e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: -apple-system, 'SF Pro Text', sans-serif;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    transition: transform 0.15s, background 0.25s, color 0.25s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #view-toggle:active { transform: scale(0.95); }
+  #view-toggle.priv-mode {
+    background: rgba(252,248,240,0.92);
+    color: #3A2E24;
+    border-color: rgba(180,140,100,0.25);
+    box-shadow: 0 2px 12px rgba(150,100,50,0.12);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     PRIVATE SCREEN — VARS + CONTAINER
+  ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --pb:  #FAF6EF;
+    --pc:  #FFFDF8;
+    --pb2: rgba(180,145,100,0.15);
+    --ps:  0 2px 18px rgba(150,100,50,0.07), 0 1px 4px rgba(150,100,50,0.04);
+    --pt:  #3A2E24;
+    --pt2: #8C7B6B;
+    --pt3: #C4B09A;
+    --pa:  #C4713A;
+    --pg:  #5B8A52;
+    --pg2: #AEDD9C;
+    --pg3: #2D5A27;
+    --phn: #E0D8CD;
+  }
+
+  #screen-private {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: var(--pb);
+    overflow-y: auto;
+    padding: 20px;
+    font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
+    color: var(--pt);
+    -webkit-font-smoothing: antialiased;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #screen-private.active { opacity: 1; pointer-events: auto; }
+
+  .priv-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    grid-template-rows: auto 1fr;
+    gap: 14px;
+    min-height: calc(100dvh - 40px);
+  }
+  .priv-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0 2px;
+  }
+  .priv-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pt);
+    letter-spacing: -0.03em;
+  }
+  .priv-date-label { font-size: 13px; color: var(--pt2); font-weight: 400; }
+
+  .priv-col-left  { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .priv-col-right { display: flex; flex-direction: column; gap: 14px; }
+
+  .priv-card {
+    background: var(--pc);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--pb2);
+    box-shadow: var(--ps);
+    padding: 17px 19px;
+  }
+  .priv-card-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--pt2);
+    margin-bottom: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── Habit Check List ── */
+  .habit-check-list { display: flex; flex-direction: column; gap: 1px; }
+  .habit-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 8px;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .habit-row:active { background: rgba(180,145,100,0.08); }
+  .habit-check {
+    width: 22px; height: 22px;
+    border-radius: 7px;
+    border: 1.5px solid rgba(180,145,100,0.35);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .habit-check.done { background: var(--pg); border-color: var(--pg); }
+  .habit-check.done::after {
+    content: '';
+    display: block;
+    width: 11px; height: 7px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .habit-info { flex: 1; min-width: 0; }
+  .habit-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pt);
+    letter-spacing: -0.01em;
+  }
+  .habit-name.placeholder { color: var(--pt3); font-style: italic; }
+  .habit-goal-label { font-size: 10.5px; color: var(--pt3); margin-top: 1px; }
+  .habit-streak-col { text-align: right; flex-shrink: 0; }
+  .habit-streak-val { font-size: 13px; font-weight: 600; color: var(--pa); }
+  .habit-streak-rec { font-size: 10px; color: var(--pt3); margin-top: 1px; }
+
+  /* 30-Day mini heatmap */
+  .habit-hmap-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--pb2);
+  }
+  .habit-hmap-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pt3);
+    margin-bottom: 9px;
+  }
+  .habit-hmap-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .habit-hmap-lbl {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--pt3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    width: 30px;
+    flex-shrink: 0;
+  }
+  .habit-hmap-dots { display: flex; gap: 2.5px; }
+  .habit-hmap-dot {
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Italian Heatmap ── */
+  .ita-log-btn {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--pa);
+    cursor: pointer;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid rgba(196,113,58,0.3);
+    background: transparent;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ita-log-btn:active { background: rgba(196,113,58,0.1); }
+  .ita-grid { display: flex; gap: 3px; margin-bottom: 8px; }
+  .ita-col  { display: flex; flex-direction: column; gap: 3px; }
+  .ita-cell {
+    width: 11px; height: 11px;
+    border-radius: 2.5px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    flex-shrink: 0;
+  }
+  .ita-cell:active { transform: scale(1.35); }
+  .ita-cell.ita-today { outline: 2px solid var(--pa); outline-offset: 1.5px; }
+  .ita-month-labels { display: flex; gap: 3px; margin-bottom: 4px; }
+  .ita-month-span { font-size: 8.5px; color: var(--pt3); white-space: nowrap; overflow: hidden; }
+  .ita-legend {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 9.5px;
+    color: var(--pt3);
+    flex-wrap: wrap;
+  }
+  .ita-leg-dot {
+    width: 9px; height: 9px;
+    border-radius: 2px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* ── Life Weeks Grid ── */
+  .life-bd-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 0 4px;
+  }
+  .life-bd-form label { font-size: 12px; color: var(--pt2); }
+  .life-bd-input {
+    border: 1px solid var(--pb2);
+    border-radius: 9px;
+    padding: 8px 10px;
+    font-size: 14px;
+    background: rgba(180,145,100,0.07);
+    color: var(--pt);
+    font-family: inherit;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  .life-bd-save {
+    background: var(--pa);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .life-age-lbl {
+    font-size: 10px;
+    color: var(--pt3);
+    text-align: center;
+    margin-bottom: 9px;
+    letter-spacing: 0.04em;
+  }
+  .life-grid {
+    display: grid;
+    grid-template-columns: repeat(52, 1fr);
+    gap: 1.5px;
+    margin-bottom: 12px;
+  }
+  .life-cell {
+    aspect-ratio: 1;
+    border-radius: 1px;
+  }
+  .life-cell.lived   { background: #3A2E24; opacity: 0.72; }
+  .life-cell.current { background: var(--pa) !important; opacity: 1 !important; border-radius: 2px; }
+  .life-cell:not(.lived):not(.current) { background: rgba(180,145,100,0.18); }
+  .life-stats {
+    font-size: 12px;
+    color: var(--pt2);
+    line-height: 1.65;
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--pb2);
+  }
+  .life-stats strong { color: var(--pt); font-weight: 600; }
+  .life-year-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5px;
+    color: var(--pt3);
+    margin-bottom: 5px;
+    letter-spacing: 0.02em;
+  }
+
 </style>
 </head>
 <body>
 
-<div class="screen">
+
+<!-- ── View Toggle ── -->
+<button id="view-toggle" onclick="toggleView()">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+  </svg>
+  <span id="view-toggle-label">Privat</span>
+</button>
+
+<div class="screen" id="screen-business">
 
   <!-- ── ROW 1: Zeit + Wetter ── -->
   <div class="row-top">
@@ -759,6 +1079,75 @@
   </div>
 
 </div><!-- /.screen -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRIVATE SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div id="screen-private">
+  <div class="priv-layout">
+
+    <!-- Header -->
+    <header class="priv-header">
+      <h1 class="priv-title">Privat</h1>
+      <span class="priv-date-label" id="priv-date-label"></span>
+    </header>
+
+    <!-- Left Column -->
+    <div class="priv-col-left">
+
+      <!-- ── Habit Tracker ── -->
+      <div class="priv-card">
+        <div class="priv-card-label">Habits heute</div>
+        <div class="habit-check-list" id="habit-checks"></div>
+        <div class="habit-hmap-section">
+          <div class="habit-hmap-title">30 Tage</div>
+          <div id="habit-heatmaps"></div>
+        </div>
+      </div>
+
+      <!-- ── Italienisch Heatmap ── -->
+      <div class="priv-card">
+        <div class="priv-card-label">
+          Italienisch — 6 Monate
+          <button class="ita-log-btn" onclick="itaLogDay(dateKey(new Date()))">+ Heute</button>
+        </div>
+        <div id="ita-heatmap"></div>
+        <div class="ita-legend">
+          <span class="ita-leg-dot" style="background:var(--phn)"></span>0 Min&nbsp;
+          <span class="ita-leg-dot" style="background:#AEDD9C"></span>&lt;10&nbsp;
+          <span class="ita-leg-dot" style="background:#5B8A52"></span>10–30&nbsp;
+          <span class="ita-leg-dot" style="background:#2D5A27"></span>30+
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- Right Column -->
+    <div class="priv-col-right">
+
+      <!-- ── Life Weeks ── -->
+      <div class="priv-card" style="flex:1">
+        <div class="priv-card-label">Wochen deines Lebens</div>
+
+        <div class="life-bd-form" id="life-bd-form">
+          <label>Geburtsdatum:</label>
+          <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
+          <button class="life-bd-save" onclick="lifeSaveBirthdate()">Speichern</button>
+        </div>
+
+        <div class="life-year-labels" id="life-year-labels" style="display:none">
+          <span>Geburt</span><span>20</span><span>40</span><span>60</span><span>85</span>
+        </div>
+        <div class="life-age-lbl" id="life-age-lbl" style="display:none"></div>
+        <div class="life-grid" id="life-grid" style="display:none"></div>
+        <div class="life-stats" id="life-stats" style="display:none"></div>
+      </div>
+
+    </div><!-- /right -->
+
+  </div>
+</div><!-- /#screen-private -->
+
 
 <script>
 'use strict';
@@ -1803,5 +2192,281 @@ if (new URLSearchParams(window.location.search).has('debug')) {
 }
 </script>
 <script src="morningReport.js"></script>
+
+<script>
+'use strict';
+// ═════════════════════════════════════════════════════════════
+// PRIVATE VIEW
+// ═════════════════════════════════════════════════════════════
+
+let _currentView = 'business';
+
+function toggleView() {
+  _currentView = _currentView === 'business' ? 'private' : 'business';
+  const priv = document.getElementById('screen-private');
+  const btn  = document.getElementById('view-toggle');
+  const lbl  = document.getElementById('view-toggle-label');
+  if (_currentView === 'private') {
+    priv.classList.add('active');
+    btn.classList.add('priv-mode');
+    lbl.textContent = 'Business';
+    renderPrivate();
+  } else {
+    priv.classList.remove('active');
+    btn.classList.remove('priv-mode');
+    lbl.textContent = 'Privat';
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function privDateKey(d) {
+  return d.getFullYear() + '-'
+    + String(d.getMonth()+1).padStart(2,'0') + '-'
+    + String(d.getDate()).padStart(2,'0');
+}
+
+// ── Habits ───────────────────────────────────────────────────
+const HABITS_CFG = [
+  { id:'gym',    name:'Gym',               goal:'2× / Woche' },
+  { id:'ita',    name:'Italienisch',        goal:'täglich'    },
+  { id:'nodoom', name:'Kein Doomscrolling', goal:'täglich'    },
+  { id:'custom', name:null,                 goal:'täglich'    },
+];
+
+function habitsLoad() {
+  try { return JSON.parse(localStorage.getItem('priv_habits')||'{}'); } catch { return {}; }
+}
+function habitsSave(d) { localStorage.setItem('priv_habits', JSON.stringify(d)); }
+
+function habitToggle(hid, ds) {
+  const d = habitsLoad();
+  if (!d[hid]) d[hid] = {};
+  d[hid][ds] = !d[hid][ds];
+  habitsSave(d);
+  renderHabits();
+}
+
+function habitStreak(hid, all) {
+  const days = all[hid] || {};
+  let streak = 0, d = new Date();
+  if (!days[privDateKey(d)]) d.setDate(d.getDate()-1);
+  while (days[privDateKey(d)]) { streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+
+function habitRecord(hid, all) {
+  const days = all[hid] || {};
+  const keys = Object.keys(days).filter(k=>days[k]).sort();
+  if (!keys.length) return 0;
+  let max=1, cur=1;
+  for (let i=1;i<keys.length;i++) {
+    const diff = Math.round((new Date(keys[i])-new Date(keys[i-1]))/86400000);
+    if (diff===1) { cur++; if(cur>max) max=cur; } else { cur=1; }
+  }
+  return max;
+}
+
+function habitEditCustom() {
+  const cur = localStorage.getItem('priv_habit_custom_name') || '';
+  const name = prompt('Name für diese Habit:', cur);
+  if (name===null) return;
+  localStorage.setItem('priv_habit_custom_name', name.trim());
+  renderHabits();
+}
+
+// ── Life Weeks ───────────────────────────────────────────────
+function lifeSaveBirthdate() {
+  const val = document.getElementById('life-bd-input').value;
+  if (!val) return;
+  localStorage.setItem('priv_birthdate', val);
+  renderLifeWeeks();
+}
+
+// ── Italian Minutes ──────────────────────────────────────────
+function itaLoad() {
+  try { return JSON.parse(localStorage.getItem('priv_ita_min')||'{}'); } catch { return {}; }
+}
+function itaMinsToColor(m) {
+  if (!m) return 'var(--phn)';
+  if (m<10) return '#AEDD9C';
+  if (m<=30) return '#5B8A52';
+  return '#2D5A27';
+}
+function itaLogDay(ds) {
+  const data = itaLoad();
+  const cur  = data[ds] || 0;
+  const raw  = prompt('Lernminuten für ' + ds + ' (aktuell: ' + cur + '):', cur||'');
+  if (raw===null) return;
+  const mins = Math.max(0, parseInt(raw)||0);
+  data[ds] = mins;
+  localStorage.setItem('priv_ita_min', JSON.stringify(data));
+  renderItaHeatmap();
+}
+
+// ── Master Render ────────────────────────────────────────────
+function renderPrivate() {
+  const now = new Date();
+  const lbl = document.getElementById('priv-date-label');
+  if (lbl) lbl.textContent = DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()];
+  renderHabits();
+  renderLifeWeeks();
+  renderItaHeatmap();
+}
+
+function renderHabits() {
+  const all     = habitsLoad();
+  const today   = privDateKey(new Date());
+  const checksEl = document.getElementById('habit-checks');
+  const hmapEl   = document.getElementById('habit-heatmaps');
+  if (!checksEl || !hmapEl) return;
+
+  // Today rows
+  checksEl.innerHTML = HABITS_CFG.map(h => {
+    const done    = (all[h.id]||{})[today] || false;
+    const streak  = habitStreak(h.id, all);
+    const record  = habitRecord(h.id, all);
+    const isCustom = h.id==='custom';
+    const customName = localStorage.getItem('priv_habit_custom_name') || null;
+    const displayName = isCustom ? customName : h.name;
+    const isPlaceholder = isCustom && !displayName;
+
+    const editSvg = isCustom
+      ? `<svg onclick="event.stopPropagation();habitEditCustom()" style="flex-shrink:0;cursor:pointer;color:var(--pt3);opacity:0.6" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>`
+      : '';
+
+    return '<div class="habit-row" onclick="habitToggle(\''+h.id+'\',\''+today+'\')"><div class="habit-check'+(done?' done':'')+'"></div>'
+      + '<div class="habit-info"><div class="habit-name'+(isPlaceholder?' placeholder':'')+'">'+( isPlaceholder ? 'Habit hinzufügen…' : (displayName||'') )+'</div>'
+      + '<div class="habit-goal-label">'+h.goal+'</div></div>'
+      + '<div class="habit-streak-col"><div class="habit-streak-val">'+(streak>0?streak+' 🔥':'—')+'</div>'
+      + '<div class="habit-streak-rec">Rekord: '+record+'</div></div>'
+      + editSvg + '</div>';
+  }).join('');
+
+  // 30-day heatmap rows
+  const SHORT = { gym:'Gym', ita:'Ita', nodoom:'Doom', custom:'----' };
+  hmapEl.innerHTML = HABITS_CFG.map(h => {
+    const days = all[h.id] || {};
+    let dots = '';
+    for (let i=29; i>=0; i--) {
+      const d = new Date(); d.setDate(d.getDate()-i);
+      const k = privDateKey(d);
+      const done = days[k];
+      const isToday = i===0;
+      dots += '<div class="habit-hmap-dot" style="background:'+(done?'var(--pg)':'var(--phn)')+';'+(isToday?'outline:1.5px solid var(--pa);outline-offset:1px;':'')+'"></div>';
+    }
+    const customName = h.id==='custom' ? (localStorage.getItem('priv_habit_custom_name')||'----').substring(0,4) : SHORT[h.id];
+    return '<div class="habit-hmap-row"><span class="habit-hmap-lbl">'+customName+'</span><div class="habit-hmap-dots">'+dots+'</div></div>';
+  }).join('');
+}
+
+function renderLifeWeeks() {
+  const bdStr  = localStorage.getItem('priv_birthdate');
+  const form   = document.getElementById('life-bd-form');
+  const gridEl = document.getElementById('life-grid');
+  const statsEl= document.getElementById('life-stats');
+  const ageLbl = document.getElementById('life-age-lbl');
+  const yrLbls = document.getElementById('life-year-labels');
+
+  const show = (el, v) => { if(el) el.style.display = v; };
+
+  if (!bdStr) {
+    show(form,'flex'); show(gridEl,'none'); show(statsEl,'none'); show(ageLbl,'none'); show(yrLbls,'none');
+    return;
+  }
+  show(form,'none');
+
+  const birth = new Date(bdStr);
+  const now   = new Date();
+  const TOTAL = 85 * 52; // 4420
+  const weeksLived = Math.floor((now - birth) / (7*24*60*60*1000));
+  const weeksLeft  = Math.max(0, TOTAL - weeksLived);
+  const currentWk  = Math.min(weeksLived, TOTAL-1);
+  const age = Math.floor((now - birth) / (365.25*24*60*60*1000));
+
+  show(ageLbl,'block');
+  show(yrLbls,'flex');
+  ageLbl.textContent = age + ' Jahre · ' + weeksLived.toLocaleString('de-DE') + ' Wochen';
+
+  // Build grid (4420 cells)
+  show(gridEl,'grid');
+  let html = '';
+  for (let i=0; i<TOTAL; i++) {
+    const isLived   = i < weeksLived;
+    const isCurrent = i === currentWk;
+    html += '<div class="life-cell'+(isCurrent?' current':isLived?' lived':'')+'"></div>';
+  }
+  gridEl.innerHTML = html;
+
+  show(statsEl,'block');
+  statsEl.innerHTML = 'Du hast <strong>'+weeksLived.toLocaleString('de-DE')+'</strong> Wochen gelebt<br><strong>'+weeksLeft.toLocaleString('de-DE')+'</strong> Wochen bleiben noch';
+}
+
+function renderItaHeatmap() {
+  const container = document.getElementById('ita-heatmap');
+  if (!container) return;
+  const data  = itaLoad();
+  const today = new Date();
+  const todayStr = privDateKey(today);
+  const WEEKS = 26;
+
+  // Start: Monday 26 weeks ago
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - WEEKS*7);
+  const dow = startDate.getDay();
+  startDate.setDate(startDate.getDate() - (dow===0?6:dow-1));
+
+  const cur = new Date(startDate);
+  const columns = [];
+  const monthBreaks = [];
+  let prevMonth = -1;
+
+  for (let w=0; w<=WEEKS; w++) {
+    const cells = [];
+    const colMonth = cur.getMonth();
+    if (colMonth !== prevMonth) { monthBreaks.push({ w, label: MONTHS[colMonth].substring(0,3) }); prevMonth=colMonth; }
+    for (let day=0; day<7; day++) {
+      const k = privDateKey(cur);
+      const isFuture = cur > today;
+      const isToday  = k===todayStr;
+      const mins = data[k]||0;
+      cells.push({ k, isFuture, isToday, color: isFuture?'transparent':itaMinsToColor(mins), mins });
+      cur.setDate(cur.getDate()+1);
+    }
+    columns.push(cells);
+  }
+
+  // Month label row
+  let monthRow = '<div class="ita-month-labels">';
+  let lastLblW = -6;
+  columns.forEach((_, w) => {
+    const mb = monthBreaks.find(m=>m.w===w);
+    if (mb && w-lastLblW>=3) {
+      monthRow += '<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>';
+      lastLblW=w;
+    } else {
+      monthRow += '<div style="width:14px;min-width:14px;"></div>';
+    }
+  });
+  monthRow += '</div>';
+
+  // Grid
+  let gridHtml = '<div class="ita-grid">';
+  columns.forEach(cells => {
+    gridHtml += '<div class="ita-col">';
+    cells.forEach(c => {
+      if (c.isFuture) {
+        gridHtml += '<div class="ita-cell" style="background:transparent;cursor:default;"></div>';
+      } else {
+        gridHtml += '<div class="ita-cell'+(c.isToday?' ita-today':'')+'" style="background:'+c.color+'" title="'+c.k+': '+c.mins+' Min" onclick="itaLogDay(\''+c.k+'\')"></div>';
+      }
+    });
+    gridHtml += '</div>';
+  });
+  gridHtml += '</div>';
+
+  container.innerHTML = monthRow + gridHtml;
+}
+</script>
+
 </body>
 </html>
