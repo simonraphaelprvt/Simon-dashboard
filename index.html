@@ -617,30 +617,31 @@
   /* ═══════════════════════════════════════════════════════════════
      VIEW SWITCH — floating iOS-style toggle, top-right
   ═══════════════════════════════════════════════════════════════ */
-  .view-switch-card {
-    position: fixed;
-    top: 20px; right: 180px;
-    z-index: 10000;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(16px) saturate(1.6);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
-    border: 0.5px solid rgba(0,0,0,0.10);
-    border-radius: 16px;
-    padding: 9px 13px 9px 14px;
+  .time-actions {
     display: flex;
     align-items: center;
-    gap: 9px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.06);
+    gap: 10px;
+  }
+  .view-switch-card {
+    background: #F4F4F6;
+    border: 0.5px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    padding: 7px 11px 7px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+    transition: background 0.35s, border-color 0.35s;
+    position: relative;
+    z-index: 5;
   }
+  .view-switch-card:active { transform: scale(0.97); }
   .view-switch-card.priv-mode {
-    background: rgba(250,245,232,0.92);
-    border-color: rgba(180,140,80,0.22);
-    box-shadow: 0 2px 16px rgba(130,80,20,0.10), 0 1px 3px rgba(130,80,20,0.06);
+    background: #F8F1E0;
+    border-color: rgba(180,140,80,0.20);
   }
   .view-switch-label {
     font-size: 11.5px;
@@ -721,10 +722,11 @@
   .priv-header {
     grid-column: 1 / -1;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 12px;
     padding: 4px 0 2px;
   }
+  .priv-header-spacer { flex: 1; }
   .priv-title {
     font-size: 22px;
     font-weight: 700;
@@ -954,13 +956,6 @@
 <body>
 
 
-<!-- ── View Switch (floating, top-right) ── -->
-<div class="view-switch-card" id="view-switch-card" onclick="toggleView()">
-  <span class="view-switch-label" id="view-switch-label">Business</span>
-  <div class="view-switch-pill" id="view-switch-pill">
-    <div class="view-switch-thumb"></div>
-  </div>
-</div>
 
 <div class="screen" id="screen-business">
 
@@ -972,16 +967,24 @@
         <div class="time-display" id="clock">00:00</div>
         <div class="time-date"    id="datestr">Laden…</div>
       </div>
-      <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
-          <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
-          <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
-        </svg>
-        Morning Report
-      </button>
+      <div class="time-actions">
+        <div class="view-switch-card" id="view-switch-card" onclick="toggleView()">
+          <span class="view-switch-label" id="view-switch-label">Business</span>
+          <div class="view-switch-pill" id="view-switch-pill">
+            <div class="view-switch-thumb"></div>
+          </div>
+        </div>
+        <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
+            <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
+            <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
+            <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
+            <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
+          </svg>
+          Morning Report
+        </button>
+      </div>
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -1116,6 +1119,13 @@
     <header class="priv-header">
       <h1 class="priv-title">Privat</h1>
       <span class="priv-date-label" id="priv-date-label"></span>
+      <div class="priv-header-spacer"></div>
+      <div class="view-switch-card priv-mode" id="view-switch-card-priv" onclick="toggleView()">
+        <span class="view-switch-label" id="view-switch-label-priv">Privat</span>
+        <div class="view-switch-pill">
+          <div class="view-switch-thumb"></div>
+        </div>
+      </div>
     </header>
 
     <!-- ── Left Column ── -->
@@ -2299,13 +2309,11 @@ function switchView(target) {
   _currentView = target;
   const priv  = document.getElementById('screen-private');
   const card  = document.getElementById('view-switch-card');
-  const pill  = document.getElementById('view-switch-pill');
   const label = document.getElementById('view-switch-label');
   const isPriv = _currentView === 'private';
   if (isPriv) { priv.classList.add('active'); renderPrivate(); }
   else { priv.classList.remove('active'); }
   if (card)  card.classList.toggle('priv-mode', isPriv);
-  if (pill)  pill.classList.toggle('priv-mode', isPriv);  // thumb moves via card class
   if (label) label.textContent = isPriv ? 'Privat' : 'Business';
 }
 function toggleView() { switchView(_currentView === 'business' ? 'private' : 'business'); }
