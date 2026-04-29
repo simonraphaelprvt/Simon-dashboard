@@ -613,40 +613,6 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     VIEW TOGGLE BUTTON
-  ═══════════════════════════════════════════════════════════════ */
-  #view-toggle {
-    position: fixed;
-    top: 20px; right: 20px;
-    z-index: 10000;
-    background: rgba(255,255,255,0.82);
-    backdrop-filter: blur(14px) saturate(1.4);
-    -webkit-backdrop-filter: blur(14px) saturate(1.4);
-    border: 0.5px solid rgba(0,0,0,0.12);
-    border-radius: 22px;
-    padding: 7px 16px 7px 13px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: #1c1c1e;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: -apple-system, 'SF Pro Text', sans-serif;
-    letter-spacing: 0.01em;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-    transition: transform 0.15s, background 0.25s, color 0.25s;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  #view-toggle:active { transform: scale(0.95); }
-  #view-toggle.priv-mode {
-    background: rgba(252,248,240,0.92);
-    color: #3A2E24;
-    border-color: rgba(180,140,100,0.25);
-    box-shadow: 0 2px 12px rgba(150,100,50,0.12);
-  }
 
   /* ═══════════════════════════════════════════════════════════════
      PRIVATE SCREEN — VARS + CONTAINER
@@ -927,6 +893,14 @@
 <body>
 
 
+<!-- ── View Switch (floating, top-right) ── -->
+<div class="view-switch-card" id="view-switch-card" onclick="toggleView()">
+  <span class="view-switch-label" id="view-switch-label">Business</span>
+  <div class="view-switch-pill" id="view-switch-pill">
+    <div class="view-switch-thumb"></div>
+  </div>
+</div>
+
 <div class="screen" id="screen-business">
 
   <!-- ── ROW 1: Zeit + Wetter ── -->
@@ -937,22 +911,16 @@
         <div class="time-display" id="clock">00:00</div>
         <div class="time-date"    id="datestr">Laden…</div>
       </div>
-      <div class="card-time-right">
-        <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
-            <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
-            <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
-            <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
-            <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
-          </svg>
-          Morning Report
-        </button>
-        <div class="view-seg">
-          <button class="view-seg-btn seg-active" data-seg="business" onclick="switchView('business')">Business</button>
-          <button class="view-seg-btn" data-seg="private" onclick="switchView('private')">Privat</button>
-        </div>
-      </div>
+      <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
+          <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
+          <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
+        </svg>
+        Morning Report
+      </button>
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -1087,10 +1055,6 @@
     <header class="priv-header">
       <h1 class="priv-title">Privat</h1>
       <span class="priv-date-label" id="priv-date-label"></span>
-      <div class="view-seg">
-        <button class="view-seg-btn" data-seg="business" onclick="switchView('business')">Business</button>
-        <button class="view-seg-btn seg-active" data-seg="private" onclick="switchView('private')">Privat</button>
-      </div>
     </header>
 
     <!-- ── Left Column ── -->
@@ -2216,12 +2180,16 @@ let _currentView = 'business';
 function switchView(target) {
   if (target === _currentView) return;
   _currentView = target;
-  const priv = document.getElementById('screen-private');
-  if (_currentView === 'private') { priv.classList.add('active'); renderPrivate(); }
+  const priv  = document.getElementById('screen-private');
+  const card  = document.getElementById('view-switch-card');
+  const pill  = document.getElementById('view-switch-pill');
+  const label = document.getElementById('view-switch-label');
+  const isPriv = _currentView === 'private';
+  if (isPriv) { priv.classList.add('active'); renderPrivate(); }
   else { priv.classList.remove('active'); }
-  document.querySelectorAll('[data-seg]').forEach(btn => {
-    btn.classList.toggle('seg-active', btn.dataset.seg === _currentView);
-  });
+  if (card)  card.classList.toggle('priv-mode', isPriv);
+  if (pill)  pill.classList.toggle('priv-mode', isPriv);  // thumb moves via card class
+  if (label) label.textContent = isPriv ? 'Privat' : 'Business';
 }
 function toggleView() { switchView(_currentView === 'business' ? 'private' : 'business'); }
 
