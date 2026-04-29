@@ -927,15 +927,6 @@
 <body>
 
 
-<!-- ── View Toggle ── -->
-<button id="view-toggle" onclick="toggleView()">
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-  </svg>
-  <span id="view-toggle-label">Privat</span>
-</button>
-
 <div class="screen" id="screen-business">
 
   <!-- ── ROW 1: Zeit + Wetter ── -->
@@ -946,16 +937,22 @@
         <div class="time-display" id="clock">00:00</div>
         <div class="time-date"    id="datestr">Laden…</div>
       </div>
-      <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
-          <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
-          <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
-        </svg>
-        Morning Report
-      </button>
+      <div class="card-time-right">
+        <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
+            <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
+            <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
+            <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
+            <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
+          </svg>
+          Morning Report
+        </button>
+        <div class="view-seg">
+          <button class="view-seg-btn seg-active" data-seg="business" onclick="switchView('business')">Business</button>
+          <button class="view-seg-btn" data-seg="private" onclick="switchView('private')">Privat</button>
+        </div>
+      </div>
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -1086,64 +1083,79 @@
 <div id="screen-private">
   <div class="priv-layout">
 
-    <!-- Header -->
+    <!-- ── Header ── -->
     <header class="priv-header">
       <h1 class="priv-title">Privat</h1>
       <span class="priv-date-label" id="priv-date-label"></span>
+      <div class="view-seg">
+        <button class="view-seg-btn" data-seg="business" onclick="switchView('business')">Business</button>
+        <button class="view-seg-btn seg-active" data-seg="private" onclick="switchView('private')">Privat</button>
+      </div>
     </header>
 
-    <!-- Left Column -->
+    <!-- ── Left Column ── -->
     <div class="priv-col-left">
 
-      <!-- ── Habit Tracker ── -->
+      <!-- Habit Tracker -->
       <div class="priv-card">
-        <div class="priv-card-label">Habits heute</div>
-        <div class="habit-check-list" id="habit-checks"></div>
+        <div class="priv-card-label">Heute</div>
+        <div class="habit-tiles" id="habit-tiles"></div>
         <div class="habit-hmap-section">
           <div class="habit-hmap-title">30 Tage</div>
           <div id="habit-heatmaps"></div>
         </div>
       </div>
 
-      <!-- ── Italienisch Heatmap ── -->
+      <!-- Italienisch Heatmap -->
       <div class="priv-card">
         <div class="priv-card-label">
-          Italienisch — 6 Monate
-          <button class="ita-log-btn" onclick="itaLogDay(dateKey(new Date()))">+ Heute</button>
+          Italiano — 6 Monate
+          <button class="ita-log-btn" onclick="itaLogDay(privDateKey(new Date()))">+ Heute</button>
         </div>
         <div id="ita-heatmap"></div>
         <div class="ita-legend">
-          <span class="ita-leg-dot" style="background:var(--phn)"></span>0 Min&nbsp;
-          <span class="ita-leg-dot" style="background:#AEDD9C"></span>&lt;10&nbsp;
-          <span class="ita-leg-dot" style="background:#5B8A52"></span>10–30&nbsp;
-          <span class="ita-leg-dot" style="background:#2D5A27"></span>30+
+          <span class="ita-leg-dot" style="background:var(--phn)"></span>0 Min
+          <span class="ita-leg-dot" style="background:#8DC49A"></span>&lt;10
+          <span class="ita-leg-dot" style="background:#4A7C59"></span>10–30
+          <span class="ita-leg-dot" style="background:#2D5A3A"></span>30+
         </div>
       </div>
 
-    </div><!-- /left -->
+    </div><!-- /col-left -->
 
-    <!-- Right Column -->
+    <!-- ── Right Column ── -->
     <div class="priv-col-right">
 
-      <!-- ── Life Weeks ── -->
+      <!-- Life Weeks -->
       <div class="priv-card" style="flex:1">
         <div class="priv-card-label">Wochen deines Lebens</div>
 
+        <!-- First-time birthdate form -->
         <div class="life-bd-form" id="life-bd-form">
           <label>Geburtsdatum:</label>
           <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
-          <button class="life-bd-save" onclick="lifeSaveBirthdate()">Speichern</button>
+          <button class="life-bd-save" onclick="lifeSaveBirthdate()">Los geht's</button>
         </div>
 
-        <div class="life-year-labels" id="life-year-labels" style="display:none">
-          <span>Geburt</span><span>20</span><span>40</span><span>60</span><span>85</span>
+        <!-- Grid (shown when birthdate set) -->
+        <div id="life-content" style="display:none">
+          <div class="life-hero" id="life-hero">
+            <div class="life-hero-week" id="life-hero-week">—</div>
+            <div class="life-hero-label">Woche deines Lebens</div>
+            <div class="life-hero-total" id="life-hero-total"></div>
+          </div>
+          <div class="life-progress-bar">
+            <div class="life-progress-fill" id="life-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="life-age-row">
+            <span>Geburt</span><span>21</span><span>42</span><span>63</span><span>85</span>
+          </div>
+          <div class="life-grid" id="life-grid"></div>
+          <div class="life-stats" id="life-stats"></div>
         </div>
-        <div class="life-age-lbl" id="life-age-lbl" style="display:none"></div>
-        <div class="life-grid" id="life-grid" style="display:none"></div>
-        <div class="life-stats" id="life-stats" style="display:none"></div>
       </div>
 
-    </div><!-- /right -->
+    </div><!-- /col-right -->
 
   </div>
 </div><!-- /#screen-private -->
@@ -2201,41 +2213,32 @@ if (new URLSearchParams(window.location.search).has('debug')) {
 
 let _currentView = 'business';
 
-function toggleView() {
-  _currentView = _currentView === 'business' ? 'private' : 'business';
+function switchView(target) {
+  if (target === _currentView) return;
+  _currentView = target;
   const priv = document.getElementById('screen-private');
-  const btn  = document.getElementById('view-toggle');
-  const lbl  = document.getElementById('view-toggle-label');
-  if (_currentView === 'private') {
-    priv.classList.add('active');
-    btn.classList.add('priv-mode');
-    lbl.textContent = 'Business';
-    renderPrivate();
-  } else {
-    priv.classList.remove('active');
-    btn.classList.remove('priv-mode');
-    lbl.textContent = 'Privat';
-  }
+  if (_currentView === 'private') { priv.classList.add('active'); renderPrivate(); }
+  else { priv.classList.remove('active'); }
+  document.querySelectorAll('[data-seg]').forEach(btn => {
+    btn.classList.toggle('seg-active', btn.dataset.seg === _currentView);
+  });
 }
+function toggleView() { switchView(_currentView === 'business' ? 'private' : 'business'); }
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── Helpers ──
 function privDateKey(d) {
-  return d.getFullYear() + '-'
-    + String(d.getMonth()+1).padStart(2,'0') + '-'
-    + String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
-// ── Habits ───────────────────────────────────────────────────
+// ── Habits ──
 const HABITS_CFG = [
-  { id:'gym',    name:'Gym',               goal:'2× / Woche' },
-  { id:'ita',    name:'Italienisch',        goal:'täglich'    },
-  { id:'nodoom', name:'Kein Doomscrolling', goal:'täglich'    },
-  { id:'custom', name:null,                 goal:'täglich'    },
+  { id:'gym',    name:'Gym',               goal:'2× / Woche', short:'Gym'  },
+  { id:'ita',    name:'Italiano',           goal:'täglich',    short:'Ita'  },
+  { id:'nodoom', name:'Kein Doomscrolling', goal:'täglich',    short:'Doom' },
+  { id:'custom', name:null,                 goal:'täglich',    short:'----' },
 ];
 
-function habitsLoad() {
-  try { return JSON.parse(localStorage.getItem('priv_habits')||'{}'); } catch { return {}; }
-}
+function habitsLoad() { try { return JSON.parse(localStorage.getItem('priv_habits')||'{}'); } catch { return {}; } }
 function habitsSave(d) { localStorage.setItem('priv_habits', JSON.stringify(d)); }
 
 function habitToggle(hid, ds) {
@@ -2247,34 +2250,33 @@ function habitToggle(hid, ds) {
 }
 
 function habitStreak(hid, all) {
-  const days = all[hid] || {};
-  let streak = 0, d = new Date();
+  const days = all[hid]||{};
+  let streak=0, d=new Date();
   if (!days[privDateKey(d)]) d.setDate(d.getDate()-1);
   while (days[privDateKey(d)]) { streak++; d.setDate(d.getDate()-1); }
   return streak;
 }
 
 function habitRecord(hid, all) {
-  const days = all[hid] || {};
+  const days = all[hid]||{};
   const keys = Object.keys(days).filter(k=>days[k]).sort();
   if (!keys.length) return 0;
   let max=1, cur=1;
   for (let i=1;i<keys.length;i++) {
-    const diff = Math.round((new Date(keys[i])-new Date(keys[i-1]))/86400000);
-    if (diff===1) { cur++; if(cur>max) max=cur; } else { cur=1; }
+    const diff=Math.round((new Date(keys[i])-new Date(keys[i-1]))/86400000);
+    if (diff===1){cur++;if(cur>max)max=cur;}else{cur=1;}
   }
   return max;
 }
 
 function habitEditCustom() {
-  const cur = localStorage.getItem('priv_habit_custom_name') || '';
-  const name = prompt('Name für diese Habit:', cur);
+  const name = prompt('Name für diese Habit:', localStorage.getItem('priv_habit_custom_name')||'');
   if (name===null) return;
   localStorage.setItem('priv_habit_custom_name', name.trim());
   renderHabits();
 }
 
-// ── Life Weeks ───────────────────────────────────────────────
+// ── Life Weeks ──
 function lifeSaveBirthdate() {
   const val = document.getElementById('life-bd-input').value;
   if (!val) return;
@@ -2282,189 +2284,145 @@ function lifeSaveBirthdate() {
   renderLifeWeeks();
 }
 
-// ── Italian Minutes ──────────────────────────────────────────
-function itaLoad() {
-  try { return JSON.parse(localStorage.getItem('priv_ita_min')||'{}'); } catch { return {}; }
-}
+// ── Italian Minutes ──
+function itaLoad() { try { return JSON.parse(localStorage.getItem('priv_ita_min')||'{}'); } catch { return {}; } }
 function itaMinsToColor(m) {
   if (!m) return 'var(--phn)';
-  if (m<10) return '#AEDD9C';
-  if (m<=30) return '#5B8A52';
-  return '#2D5A27';
+  if (m<10) return '#8DC49A';
+  if (m<=30) return '#4A7C59';
+  return '#2D5A3A';
 }
 function itaLogDay(ds) {
-  const data = itaLoad();
-  const cur  = data[ds] || 0;
-  const raw  = prompt('Lernminuten für ' + ds + ' (aktuell: ' + cur + '):', cur||'');
+  const data=itaLoad(), cur=data[ds]||0;
+  const raw=prompt('Lernminuten ('+ds+', aktuell '+cur+' Min):', cur||'');
   if (raw===null) return;
-  const mins = Math.max(0, parseInt(raw)||0);
-  data[ds] = mins;
-  localStorage.setItem('priv_ita_min', JSON.stringify(data));
+  data[ds]=Math.max(0,parseInt(raw)||0);
+  localStorage.setItem('priv_ita_min',JSON.stringify(data));
   renderItaHeatmap();
 }
 
-// ── Master Render ────────────────────────────────────────────
+// ── Master render ──
 function renderPrivate() {
-  const now = new Date();
-  const lbl = document.getElementById('priv-date-label');
-  if (lbl) lbl.textContent = DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()];
-  renderHabits();
-  renderLifeWeeks();
-  renderItaHeatmap();
+  const now=new Date();
+  const lbl=document.getElementById('priv-date-label');
+  if (lbl) lbl.textContent=DAYS[now.getDay()]+', '+now.getDate()+'. '+MONTHS[now.getMonth()];
+  renderHabits(); renderLifeWeeks(); renderItaHeatmap();
 }
 
 function renderHabits() {
-  const all     = habitsLoad();
-  const today   = privDateKey(new Date());
-  const checksEl = document.getElementById('habit-checks');
-  const hmapEl   = document.getElementById('habit-heatmaps');
-  if (!checksEl || !hmapEl) return;
+  const all=habitsLoad(), today=privDateKey(new Date());
+  const tilesEl=document.getElementById('habit-tiles');
+  const hmapEl=document.getElementById('habit-heatmaps');
+  if (!tilesEl||!hmapEl) return;
 
-  // Today rows
-  checksEl.innerHTML = HABITS_CFG.map(h => {
-    const done    = (all[h.id]||{})[today] || false;
-    const streak  = habitStreak(h.id, all);
-    const record  = habitRecord(h.id, all);
-    const isCustom = h.id==='custom';
-    const customName = localStorage.getItem('priv_habit_custom_name') || null;
-    const displayName = isCustom ? customName : h.name;
-    const isPlaceholder = isCustom && !displayName;
-
-    const editSvg = isCustom
-      ? `<svg onclick="event.stopPropagation();habitEditCustom()" style="flex-shrink:0;cursor:pointer;color:var(--pt3);opacity:0.6" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>`
-      : '';
-
-    return '<div class="habit-row" onclick="habitToggle(\''+h.id+'\',\''+today+'\')"><div class="habit-check'+(done?' done':'')+'"></div>'
-      + '<div class="habit-info"><div class="habit-name'+(isPlaceholder?' placeholder':'')+'">'+( isPlaceholder ? 'Habit hinzufügen…' : (displayName||'') )+'</div>'
-      + '<div class="habit-goal-label">'+h.goal+'</div></div>'
-      + '<div class="habit-streak-col"><div class="habit-streak-val">'+(streak>0?streak+' 🔥':'—')+'</div>'
-      + '<div class="habit-streak-rec">Rekord: '+record+'</div></div>'
-      + editSvg + '</div>';
+  tilesEl.innerHTML=HABITS_CFG.map(h=>{
+    const done=(all[h.id]||{})[today]||false;
+    const streak=habitStreak(h.id,all), record=habitRecord(h.id,all);
+    const isCustom=h.id==='custom';
+    const customName=localStorage.getItem('priv_habit_custom_name')||null;
+    const displayName=isCustom?customName:h.name;
+    const isPlaceholder=isCustom&&!displayName;
+    const editAttr=isCustom?' ondblclick="event.stopPropagation();habitEditCustom()"':'';
+    return '<div class="habit-tile'+(done?' done':'')+'" onclick="habitToggle(''+h.id+'',''+today+'')"+editAttr+">'
+      +'<div class="habit-tile-circle"><div class="habit-tile-check"></div></div>'
+      +'<div class="habit-tile-name'+(isPlaceholder?' placeholder':'')+'">'+( isPlaceholder?'Habit<br>hinzufügen':esc(displayName||'') )+'</div>'
+      +'<div class="habit-tile-goal">'+h.goal+'</div>'
+      +'<div class="habit-tile-streak">'+(streak>0?streak+' 🔥':(record>0?'Rek: '+record:'—'))+'</div>'
+      +'</div>';
   }).join('');
 
-  // 30-day heatmap rows
-  const SHORT = { gym:'Gym', ita:'Ita', nodoom:'Doom', custom:'----' };
-  hmapEl.innerHTML = HABITS_CFG.map(h => {
-    const days = all[h.id] || {};
-    let dots = '';
-    for (let i=29; i>=0; i--) {
-      const d = new Date(); d.setDate(d.getDate()-i);
-      const k = privDateKey(d);
-      const done = days[k];
-      const isToday = i===0;
-      dots += '<div class="habit-hmap-dot" style="background:'+(done?'var(--pg)':'var(--phn)')+';'+(isToday?'outline:1.5px solid var(--pa);outline-offset:1px;':'')+'"></div>';
+  hmapEl.innerHTML=HABITS_CFG.map(h=>{
+    const days=all[h.id]||{};
+    const lbl=h.id==='custom'?(localStorage.getItem('priv_habit_custom_name')||'----').substring(0,4):h.short;
+    let dots='';
+    for (let i=29;i>=0;i--){
+      const d=new Date(); d.setDate(d.getDate()-i);
+      const k=privDateKey(d), isToday=i===0;
+      dots+='<div class="habit-hmap-dot" style="background:'+(days[k]?'var(--pg)':'var(--phn)')+';'+(isToday?'outline:1.5px solid var(--pa);outline-offset:1px':'')+'"></div>';
     }
-    const customName = h.id==='custom' ? (localStorage.getItem('priv_habit_custom_name')||'----').substring(0,4) : SHORT[h.id];
-    return '<div class="habit-hmap-row"><span class="habit-hmap-lbl">'+customName+'</span><div class="habit-hmap-dots">'+dots+'</div></div>';
+    return '<div class="habit-hmap-row"><span class="habit-hmap-lbl">'+esc(lbl)+'</span><div class="habit-hmap-dots">'+dots+'</div></div>';
   }).join('');
 }
 
 function renderLifeWeeks() {
-  const bdStr  = localStorage.getItem('priv_birthdate');
-  const form   = document.getElementById('life-bd-form');
-  const gridEl = document.getElementById('life-grid');
-  const statsEl= document.getElementById('life-stats');
-  const ageLbl = document.getElementById('life-age-lbl');
-  const yrLbls = document.getElementById('life-year-labels');
+  const bdStr=localStorage.getItem('priv_birthdate');
+  const bdForm=document.getElementById('life-bd-form');
+  const content=document.getElementById('life-content');
+  if (!bdForm||!content) return;
+  if (!bdStr){ bdForm.style.display='flex'; content.style.display='none'; return; }
+  bdForm.style.display='none'; content.style.display='block';
 
-  const show = (el, v) => { if(el) el.style.display = v; };
+  const birth=new Date(bdStr), now=new Date();
+  const TOTAL=85*52;
+  const weeksLived=Math.floor((now-birth)/(7*24*60*60*1000));
+  const weeksLeft=Math.max(0,TOTAL-weeksLived);
+  const currentWk=Math.min(weeksLived,TOTAL-1);
+  const pct=Math.min(100,weeksLived/TOTAL*100).toFixed(1);
+  const age=Math.floor((now-birth)/(365.25*24*60*60*1000));
 
-  if (!bdStr) {
-    show(form,'flex'); show(gridEl,'none'); show(statsEl,'none'); show(ageLbl,'none'); show(yrLbls,'none');
-    return;
+  const heroWk=document.getElementById('life-hero-week');
+  const heroTt=document.getElementById('life-hero-total');
+  const progFill=document.getElementById('life-progress-fill');
+  if (heroWk) heroWk.textContent=weeksLived.toLocaleString('de-DE');
+  if (heroTt) heroTt.innerHTML='<strong>'+weeksLeft.toLocaleString('de-DE')+'</strong> von 4.420 verbleiben · '+age+' Jahre';
+  if (progFill) setTimeout(()=>{ progFill.style.width=pct+'%'; }, 80);
+
+  const gridEl=document.getElementById('life-grid');
+  if (gridEl){
+    let html='';
+    for (let i=0;i<TOTAL;i++){
+      html+='<div class="life-cell'+(i===currentWk?' current':i<weeksLived?' lived':'')+'"></div>';
+    }
+    gridEl.innerHTML=html;
   }
-  show(form,'none');
-
-  const birth = new Date(bdStr);
-  const now   = new Date();
-  const TOTAL = 85 * 52; // 4420
-  const weeksLived = Math.floor((now - birth) / (7*24*60*60*1000));
-  const weeksLeft  = Math.max(0, TOTAL - weeksLived);
-  const currentWk  = Math.min(weeksLived, TOTAL-1);
-  const age = Math.floor((now - birth) / (365.25*24*60*60*1000));
-
-  show(ageLbl,'block');
-  show(yrLbls,'flex');
-  ageLbl.textContent = age + ' Jahre · ' + weeksLived.toLocaleString('de-DE') + ' Wochen';
-
-  // Build grid (4420 cells)
-  show(gridEl,'grid');
-  let html = '';
-  for (let i=0; i<TOTAL; i++) {
-    const isLived   = i < weeksLived;
-    const isCurrent = i === currentWk;
-    html += '<div class="life-cell'+(isCurrent?' current':isLived?' lived':'')+'"></div>';
-  }
-  gridEl.innerHTML = html;
-
-  show(statsEl,'block');
-  statsEl.innerHTML = 'Du hast <strong>'+weeksLived.toLocaleString('de-DE')+'</strong> Wochen gelebt<br><strong>'+weeksLeft.toLocaleString('de-DE')+'</strong> Wochen bleiben noch';
+  const statsEl=document.getElementById('life-stats');
+  if (statsEl) statsEl.textContent=pct+'% des Lebens erlebt';
 }
 
 function renderItaHeatmap() {
-  const container = document.getElementById('ita-heatmap');
+  const container=document.getElementById('ita-heatmap');
   if (!container) return;
-  const data  = itaLoad();
-  const today = new Date();
-  const todayStr = privDateKey(today);
-  const WEEKS = 26;
+  const data=itaLoad(), today=new Date(), todayStr=privDateKey(today), WEEKS=26;
 
-  // Start: Monday 26 weeks ago
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - WEEKS*7);
-  const dow = startDate.getDay();
-  startDate.setDate(startDate.getDate() - (dow===0?6:dow-1));
+  const startDate=new Date(today);
+  startDate.setDate(today.getDate()-WEEKS*7);
+  const dow=startDate.getDay();
+  startDate.setDate(startDate.getDate()-(dow===0?6:dow-1));
 
-  const cur = new Date(startDate);
-  const columns = [];
-  const monthBreaks = [];
-  let prevMonth = -1;
-
-  for (let w=0; w<=WEEKS; w++) {
-    const cells = [];
-    const colMonth = cur.getMonth();
-    if (colMonth !== prevMonth) { monthBreaks.push({ w, label: MONTHS[colMonth].substring(0,3) }); prevMonth=colMonth; }
-    for (let day=0; day<7; day++) {
-      const k = privDateKey(cur);
-      const isFuture = cur > today;
-      const isToday  = k===todayStr;
-      const mins = data[k]||0;
-      cells.push({ k, isFuture, isToday, color: isFuture?'transparent':itaMinsToColor(mins), mins });
+  const cur=new Date(startDate), columns=[], monthBreaks=[];
+  let prevMonth=-1;
+  for (let w=0;w<=WEEKS;w++){
+    const cells=[], colMonth=cur.getMonth();
+    if (colMonth!==prevMonth){ monthBreaks.push({w,label:MONTHS[colMonth].substring(0,3)}); prevMonth=colMonth; }
+    for (let day=0;day<7;day++){
+      const k=privDateKey(cur), isFuture=cur>today, isToday=k===todayStr;
+      cells.push({k,isFuture,isToday,color:isFuture?'transparent':itaMinsToColor(data[k]||0),mins:data[k]||0});
       cur.setDate(cur.getDate()+1);
     }
     columns.push(cells);
   }
 
-  // Month label row
-  let monthRow = '<div class="ita-month-labels">';
-  let lastLblW = -6;
-  columns.forEach((_, w) => {
-    const mb = monthBreaks.find(m=>m.w===w);
-    if (mb && w-lastLblW>=3) {
-      monthRow += '<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>';
-      lastLblW=w;
-    } else {
-      monthRow += '<div style="width:14px;min-width:14px;"></div>';
-    }
+  let monthRow='<div class="ita-month-labels">';
+  let lastLblW=-6;
+  columns.forEach((_,w)=>{
+    const mb=monthBreaks.find(m=>m.w===w);
+    if (mb&&w-lastLblW>=3){ monthRow+='<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>'; lastLblW=w; }
+    else { monthRow+='<div style="width:14px;min-width:14px;"></div>'; }
   });
-  monthRow += '</div>';
+  monthRow+='</div>';
 
-  // Grid
-  let gridHtml = '<div class="ita-grid">';
-  columns.forEach(cells => {
-    gridHtml += '<div class="ita-col">';
-    cells.forEach(c => {
-      if (c.isFuture) {
-        gridHtml += '<div class="ita-cell" style="background:transparent;cursor:default;"></div>';
-      } else {
-        gridHtml += '<div class="ita-cell'+(c.isToday?' ita-today':'')+'" style="background:'+c.color+'" title="'+c.k+': '+c.mins+' Min" onclick="itaLogDay(\''+c.k+'\')"></div>';
-      }
+  let gridHtml='<div class="ita-grid">';
+  columns.forEach(cells=>{
+    gridHtml+='<div class="ita-col">';
+    cells.forEach(c=>{
+      if (c.isFuture) gridHtml+='<div class="ita-cell" style="background:transparent;cursor:default;pointer-events:none;"></div>';
+      else gridHtml+='<div class="ita-cell'+(c.isToday?' ita-today':'')+'" style="background:'+c.color+'" title="'+c.k+': '+c.mins+' Min" onclick="itaLogDay(''+c.k+'')"></div>';
     });
-    gridHtml += '</div>';
+    gridHtml+='</div>';
   });
-  gridHtml += '</div>';
+  gridHtml+='</div>';
 
-  container.innerHTML = monthRow + gridHtml;
+  container.innerHTML=monthRow+gridHtml;
 }
 </script>
 
