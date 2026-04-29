@@ -1424,28 +1424,85 @@ const ZOHO_REFRESH_TOKEN = '1000.71b4ca83c2c23fa64caa5fe50890f037.1ecbd067247ad2
 // Scope umfasst Gmail + Calendar — ein OAuth-Flow für beide
 const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly';
 
+// ── Google Auth — Persistent Token mit proaktivem Refresh ─────
+// Access Tokens leben 1h. Wir erneuern sie 5 Min vor Ablauf still
+// im Hintergrund, solange die Google-Session aktiv ist (= immer auf iPad).
+
+let _googleToken  = null;
+let _refreshTimer = null;
+
 function gmailTokenLoad() {
   try {
     const d = JSON.parse(localStorage.getItem('gmail_token') || 'null');
-    if (d && Date.now() < d.expires) return d.token;
+    if (d && Date.now() < d.expires) return { token: d.token, expires: d.expires };
   } catch {}
   return null;
 }
 
 function gmailTokenSave(token, expiresIn) {
-  localStorage.setItem('gmail_token', JSON.stringify({
-    token,
-    expires: Date.now() + (expiresIn || 3600) * 1000 - 60_000,
-  }));
+  const expiresAt = Date.now() + (expiresIn || 3600) * 1000;
+  localStorage.setItem('gmail_token', JSON.stringify({ token, expires: expiresAt }));
+  _googleScheduleRefresh(expiresAt);
 }
 
-function gmailTokenClear() { localStorage.removeItem('gmail_token'); }
+function gmailTokenClear() {
+  localStorage.removeItem('gmail_token');
+  if (_refreshTimer) { clearTimeout(_refreshTimer); _refreshTimer = null; }
+}
+
+// Planen: 5 Minuten vor Ablauf still neuen Token holen
+function _googleScheduleRefresh(expiresAt) {
+  if (_refreshTimer) clearTimeout(_refreshTimer);
+  const delay = expiresAt - Date.now() - 5 * 60_000; // 5 min vor Ablauf
+  _refreshTimer = setTimeout(_googleSilentRefresh, Math.max(delay, 10_000));
+  console.log('[Auth] Token refresh in', Math.round(Math.max(delay,10000)/60000), 'Min geplant');
+}
+
+// Stilles Re-Auth — kein Dialog, kein Reload
+async function _googleSilentRefresh() {
+  if (!window.google?.accounts?.oauth2) return;
+  console.log('[Auth] Stilles Token-Refresh läuft…');
+  const token = await new Promise(resolve => {
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GMAIL_CLIENT_ID,
+        scope: GMAIL_SCOPE,
+        callback: r => resolve(r?.access_token || null),
+        error_callback: () => resolve(null),
+      });
+      client.requestAccessToken({ prompt: 'none' });
+    } catch { resolve(null); }
+    setTimeout(() => resolve(null), 10_000); // 10s Timeout (iOS braucht mehr Zeit)
+  });
+
+  if (token) {
+    gmailTokenSave(token, 3600);
+    _googleToken = token;
+    console.log('[Auth] Token still erneuert ✓');
+    // UI im Hintergrund aktualisieren
+    try { gmailRenderCount(await gmailFetch(token)); } catch {}
+    morgenLoad();
+  } else {
+    // Stilles Refresh fehlgeschlagen → dezenter Hinweis ohne UI zu brechen
+    console.warn('[Auth] Stilles Refresh fehlgeschlagen');
+    _gmailShowRefreshHint();
+  }
+}
+
+function _gmailShowRefreshHint() {
+  const el = document.getElementById('gmail-inner');
+  if (!el || el.querySelector('.gmail-refresh-btn')) return; // schon gezeigt
+  // Kleinen Tap-to-refresh Link unter dem Count anzeigen
+  const hint = document.createElement('div');
+  hint.className = 'gmail-refresh-btn';
+  hint.textContent = 'Tippen zum Verlängern';
+  hint.style.cssText = 'font-size:9.5px;color:var(--accent-blue);margin-top:4px;cursor:pointer;';
+  hint.onclick = () => gmailLogin();
+  el.appendChild(hint);
+}
 
 function gmailRenderCount(n) {
-  window._mrGmail = n; // für Morning Report
-  const label = n === 0 ? 'Keine neuen Mails'
-              : n > 99  ? '99+ ungelesen'
-              : `${n} ungelesen`;
+  window._mrGmail = n;
   const display = n > 99 ? '99+' : String(n);
   const color = n > 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
   document.getElementById('gmail-inner').innerHTML = `
@@ -1466,7 +1523,6 @@ function gmailRenderError() {
 }
 
 async function gmailFetch(token) {
-  // Ungelesene Threads im Primary-Tab (category:primary = nur Hauptposteingang)
   const r = await fetch(
     'https://gmail.googleapis.com/gmail/v1/users/me/threads?q=is:unread+in:inbox+category:primary&maxResults=50',
     { headers: { Authorization: `Bearer ${token}` } }
@@ -1477,10 +1533,7 @@ async function gmailFetch(token) {
   return (d.threads || []).length;
 }
 
-// Globales Google-Access-Token (Gmail + Calendar)
-let _googleToken = null;
-
-// Prüft ob ein Token wirklich Calendar-Scope hat
+// Prüft Calendar-Scope (nur einmal nach Fresh-Login aufgerufen)
 async function hasCalendarScope(token) {
   const r = await fetch(
     'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1',
@@ -1490,51 +1543,51 @@ async function hasCalendarScope(token) {
 }
 
 async function gmailLoad() {
-  // 1. Gespeicherter Token vorhanden?
+  // 1. Gespeicherter, noch gültiger Token?
   const stored = gmailTokenLoad();
   if (stored) {
-    _googleToken = stored;
+    _googleToken = stored.token;
+    _googleScheduleRefresh(stored.expires); // Refresh-Timer (neu) starten
     try {
-      gmailRenderCount(await gmailFetch(stored));
-      // Prüfe ob Calendar-Scope vorhanden — wenn nicht, Token wegwerfen + silent re-auth
-      const calOk = await hasCalendarScope(stored);
-      if (!calOk) {
-        console.warn('[Dashboard] Token hat keinen Calendar-Scope → stilles Re-Auth');
-        gmailTokenClear(); _googleToken = null;
-        // weiter zu silent re-auth unten
-      } else {
-        morgenLoad();
-        return;
-      }
-    } catch (e) { if (e.status === 401) { gmailTokenClear(); _googleToken = null; } }
+      gmailRenderCount(await gmailFetch(stored.token));
+      morgenLoad();
+      return;
+    } catch (e) {
+      if (e.status === 401) { gmailTokenClear(); _googleToken = null; }
+      else return; // Netzwerk-Fehler, nicht ausloggen
+    }
   }
-  // 2. Stilles Re-Auth versuchen (funktioniert wenn bereits autorisiert)
-  if (window.google?.accounts?.oauth2) {
-    const token = await new Promise(resolve => {
+
+  // 2. Kein/abgelaufener Token → stilles Re-Auth
+  const token = await new Promise(resolve => {
+    if (!window.google?.accounts?.oauth2) { resolve(null); return; }
+    try {
       const client = google.accounts.oauth2.initTokenClient({
         client_id: GMAIL_CLIENT_ID,
         scope: GMAIL_SCOPE,
-        callback: r => {
-          if (r.access_token) { gmailTokenSave(r.access_token, r.expires_in); resolve(r.access_token); }
-          else resolve(null);
-        },
+        callback: r => resolve(r?.access_token || null),
+        error_callback: () => resolve(null),
       });
       client.requestAccessToken({ prompt: 'none' });
-      setTimeout(() => resolve(null), 4000);
-    });
-    if (token) {
-      _googleToken = token;
-      try {
-        gmailRenderCount(await gmailFetch(token));
-        // Erneut Calendar-Scope prüfen
-        const calOk = await hasCalendarScope(token);
-        if (calOk) { morgenLoad(); return; }
-        // Silent auth gab uns kein Calendar-Scope → manueller Login nötig
-        gmailTokenClear(); _googleToken = null;
-      } catch { gmailTokenClear(); _googleToken = null; }
+    } catch { resolve(null); }
+    setTimeout(() => resolve(null), 10_000);
+  });
+
+  if (token) {
+    // Bei frischem Silent-Auth einmalig Calendar-Scope prüfen
+    const calOk = await hasCalendarScope(token);
+    if (!calOk) {
+      // Scope fehlt → manueller Login mit consent nötig
+      gmailRenderLogin(); morgenRenderLoginHint(); return;
     }
+    gmailTokenSave(token, 3600);
+    _googleToken = token;
+    try { gmailRenderCount(await gmailFetch(token)); } catch { gmailRenderError(); }
+    morgenLoad();
+    return;
   }
-  // 3. Login-Button anzeigen
+
+  // 3. Alles fehlgeschlagen → Login-Button
   gmailRenderLogin();
   morgenRenderLoginHint();
 }
@@ -1556,7 +1609,10 @@ function gmailLogin() {
 }
 
 gmailLoad();
-setInterval(gmailLoad, 5 * 60_000);
+// Fallback-Polling alle 10 Min als Sicherheitsnetz (z.B. nach Gerät-Sleep)
+setInterval(() => {
+  if (!_googleToken || !gmailTokenLoad()) gmailLoad();
+}, 10 * 60_000);
 
 // ── Zoho Widget ───────────────────────────────────────────────
 let _zohoToken = null;
