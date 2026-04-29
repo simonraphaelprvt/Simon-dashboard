@@ -680,27 +680,38 @@
      PRIVATE SCREEN — VARS + CONTAINER
   ═══════════════════════════════════════════════════════════════ */
   :root {
-    --pb:  #FAF6EF;
-    --pc:  #FFFDF8;
-    --pb2: rgba(180,145,100,0.15);
-    --ps:  0 2px 18px rgba(150,100,50,0.07), 0 1px 4px rgba(150,100,50,0.04);
-    --pt:  #3A2E24;
-    --pt2: #8C7B6B;
-    --pt3: #C4B09A;
+    --pb:  #FAF4EC;
+    --pc:  #FFFDF7;
+    --pc2: #FFF8E8;
+    --pb2: rgba(180,140,90,0.13);
+    --pb3: rgba(180,140,90,0.22);
+    --ps:  0 1px 3px rgba(150,100,50,0.05), 0 4px 18px rgba(150,100,50,0.05);
+    --ps2: 0 4px 24px rgba(150,100,50,0.10), 0 1px 2px rgba(150,100,50,0.05);
+    --pt:  #2C2118;
+    --pt2: #7A6651;
+    --pt3: #B5A38A;
     --pa:  #C4713A;
+    --pa2: #E89B5C;
     --pg:  #5B8A52;
-    --pg2: #AEDD9C;
+    --pg2: #88B783;
     --pg3: #2D5A27;
-    --phn: #E0D8CD;
+    --phn: #ECE3D4;
   }
 
   #screen-private {
     position: fixed;
     inset: 0;
     z-index: 9000;
-    background: var(--pb);
+    background:
+      radial-gradient(at 8% 6%,   rgba(251,210,170,0.55) 0%, transparent 35%),
+      radial-gradient(at 92% 14%, rgba(232,221,194,0.55) 0%, transparent 32%),
+      radial-gradient(at 78% 88%, rgba(212,232,200,0.50) 0%, transparent 36%),
+      radial-gradient(at 5% 76%,  rgba(238,206,180,0.45) 0%, transparent 30%),
+      radial-gradient(at 50% 50%, rgba(255,250,235,0.30) 0%, transparent 60%),
+      var(--pb);
+    background-attachment: fixed;
     overflow-y: auto;
-    padding: 20px;
+    padding: 16px;
     font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
     color: var(--pt);
     -webkit-font-smoothing: antialiased;
@@ -711,39 +722,69 @@
     -webkit-user-select: none;
   }
   #screen-private.active { opacity: 1; pointer-events: auto; }
+  /* Subtle paper-noise overlay */
+  #screen-private::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.55;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    z-index: 1;
+  }
+  #screen-private > * { position: relative; z-index: 2; }
 
   .priv-layout {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    grid-template-rows: auto 1fr;
-    gap: 14px;
-    min-height: calc(100dvh - 40px);
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: auto;
+    gap: 12px;
+    min-height: calc(100dvh - 32px);
   }
   .priv-header {
     grid-column: 1 / -1;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 4px 0 2px;
+    gap: 14px;
+    padding: 4px 4px 6px;
   }
   .priv-header-spacer { flex: 1; }
   .priv-title {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
     color: var(--pt);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--pt) 0%, #5B3E22 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .priv-date-label { font-size: 13px; color: var(--pt2); font-weight: 400; }
+  .priv-greeting {
+    font-size: 14px;
+    color: var(--pt2);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .priv-date-label {
+    font-size: 12px;
+    color: var(--pt3);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.55);
+    border: 0.5px solid var(--pb2);
+    border-radius: 99px;
+  }
 
-  .priv-col-left  { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
-  .priv-col-right { display: flex; flex-direction: column; gap: 14px; }
-
+  /* Bento card base */
   .priv-card {
     background: var(--pc);
-    border-radius: var(--radius);
+    border-radius: 22px;
     border: 0.5px solid var(--pb2);
     box-shadow: var(--ps);
-    padding: 17px 19px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
   }
   .priv-card-label {
     font-size: 10.5px;
@@ -751,109 +792,163 @@
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--pt2);
-    margin-bottom: 13px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
-  /* ── Habit Check List ── */
-  .habit-check-list { display: flex; flex-direction: column; gap: 1px; }
-  .habit-row {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 9px 8px;
-    border-radius: 11px;
+  /* ── Habit Mini Cards (Bento) ── */
+  .habit-mini {
+    grid-column: span 3;
+    background: var(--pc);
+    border: 0.5px solid var(--pb2);
+    border-radius: 22px;
+    box-shadow: var(--ps);
+    padding: 14px 15px 13px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, background 0.35s, border-color 0.35s;
+    position: relative;
+    overflow: hidden;
     -webkit-tap-highlight-color: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 175px;
   }
-  .habit-row:active { background: rgba(180,145,100,0.08); }
-  .habit-check {
-    width: 22px; height: 22px;
-    border-radius: 7px;
-    border: 1.5px solid rgba(180,145,100,0.35);
-    flex-shrink: 0;
+  .habit-mini::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(at top right, rgba(255,255,255,0.55), transparent 60%);
+    pointer-events: none;
+  }
+  .habit-mini:active { transform: scale(0.97); }
+  .habit-mini.done {
+    background: linear-gradient(135deg, #ECF5DF 0%, #D9EBC7 100%);
+    border-color: rgba(91,138,82,0.30);
+    box-shadow: 0 2px 10px rgba(91,138,82,0.16), 0 6px 22px rgba(91,138,82,0.10);
+  }
+  .habit-mini-emoji {
+    font-size: 30px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+    align-self: flex-start;
+  }
+  .habit-mini-name {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--pt);
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+  }
+  .habit-mini-name.placeholder { color: var(--pt3); font-weight: 600; font-style: italic; }
+  .habit-mini-goal {
+    font-size: 10.5px;
+    color: var(--pt2);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .habit-mini-bar {
+    display: flex;
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .habit-mini-bar-dot {
+    flex: 1;
+    height: 5px;
+    border-radius: 2px;
+    background: var(--phn);
+  }
+  .habit-mini-bar-dot.on { background: var(--pg2); }
+  .habit-mini.done .habit-mini-bar-dot.on { background: var(--pg); }
+  .habit-mini-bar-dot.today { outline: 1.5px solid var(--pa); outline-offset: 1px; }
+  .habit-mini-foot {
+    margin-top: auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background 0.2s, border-color 0.2s;
+    justify-content: space-between;
+    padding-top: 6px;
   }
-  .habit-check.done { background: var(--pg); border-color: var(--pg); }
-  .habit-check.done::after {
+  .habit-mini-streak {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pa);
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .habit-mini-streak.zero {
+    color: var(--pt3);
+    font-weight: 500;
+    font-size: 11.5px;
+  }
+  .habit-mini-checkmark {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pb3);
+    background: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+    flex-shrink: 0;
+  }
+  .habit-mini.done .habit-mini-checkmark {
+    background: var(--pg);
+    border-color: var(--pg);
+    transform: scale(1.05);
+    box-shadow: 0 1px 4px rgba(91,138,82,0.30);
+  }
+  .habit-mini.done .habit-mini-checkmark::after {
     content: '';
-    display: block;
-    width: 11px; height: 7px;
+    width: 9px; height: 5px;
     border-left: 2px solid #fff;
     border-bottom: 2px solid #fff;
     transform: rotate(-45deg) translateY(-1px);
   }
-  .habit-info { flex: 1; min-width: 0; }
-  .habit-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--pt);
-    letter-spacing: -0.01em;
-  }
-  .habit-name.placeholder { color: var(--pt3); font-style: italic; }
-  .habit-goal-label { font-size: 10.5px; color: var(--pt3); margin-top: 1px; }
-  .habit-streak-col { text-align: right; flex-shrink: 0; }
-  .habit-streak-val { font-size: 13px; font-weight: 600; color: var(--pa); }
-  .habit-streak-rec { font-size: 10px; color: var(--pt3); margin-top: 1px; }
 
-  /* 30-Day mini heatmap */
-  .habit-hmap-section {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--pb2);
+  /* ── Bento Position Cards ── */
+  .priv-ita-card  { grid-column: 1 / 9; }
+  .priv-life-card {
+    grid-column: 9 / 13;
+    grid-row: 2 / span 2;
+    background: linear-gradient(180deg, var(--pc) 0%, var(--pc2) 100%);
+    box-shadow: var(--ps2);
   }
-  .habit-hmap-title {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--pt3);
-    margin-bottom: 9px;
+  .priv-life-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -40px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(196,113,58,0.10) 0%, transparent 70%);
+    pointer-events: none;
   }
-  .habit-hmap-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 5px;
-  }
-  .habit-hmap-lbl {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--pt3);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    width: 30px;
-    flex-shrink: 0;
-  }
-  .habit-hmap-dots { display: flex; gap: 2.5px; }
-  .habit-hmap-dot {
-    width: 7px; height: 7px;
-    border-radius: 2px;
-    flex-shrink: 0;
+  .priv-ita-card::after {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(91,138,82,0.10) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   /* ── Italian Heatmap ── */
   .ita-log-btn {
-    font-size: 9.5px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     color: var(--pa);
     cursor: pointer;
-    padding: 3px 9px;
-    border-radius: 6px;
-    border: 1px solid rgba(196,113,58,0.3);
-    background: transparent;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid rgba(196,113,58,0.30);
+    background: rgba(255,255,255,0.55);
     font-family: inherit;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     transition: background 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
-  .ita-log-btn:active { background: rgba(196,113,58,0.1); }
+  .ita-log-btn:active { background: rgba(196,113,58,0.12); }
   .ita-grid { display: flex; gap: 3px; margin-bottom: 8px; }
   .ita-col  { display: flex; flex-direction: column; gap: 3px; }
   .ita-cell {
@@ -882,73 +977,113 @@
     vertical-align: middle;
   }
 
-  /* ── Life Weeks Grid ── */
+  /* ── Life Weeks Card ── */
+  .life-hero-week {
+    font-size: 56px;
+    font-weight: 200;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: var(--pt);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .life-hero-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--pt2);
+    margin-top: 5px;
+  }
+  .life-hero-total {
+    font-size: 12px;
+    color: var(--pt2);
+    margin-top: 8px;
+    line-height: 1.55;
+  }
+  .life-hero-total strong { color: var(--pt); font-weight: 700; }
+  .life-progress-bar {
+    height: 6px;
+    background: rgba(180,140,90,0.14);
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 14px 0 8px;
+  }
+  .life-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pa), var(--pa2));
+    border-radius: 99px;
+    transition: width 0.9s cubic-bezier(0.22,1,0.36,1);
+  }
+  .life-age-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--pt3);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .life-grid {
+    display: grid;
+    grid-template-columns: repeat(52, 1fr);
+    gap: 1.2px;
+    margin-bottom: 10px;
+  }
+  .life-cell {
+    aspect-ratio: 1;
+    border-radius: 1.5px;
+    background: rgba(180,140,90,0.18);
+    transition: background 0.2s;
+  }
+  .life-cell.lived   { background: var(--pt); opacity: 0.62; }
+  .life-cell.current {
+    background: var(--pa) !important;
+    opacity: 1 !important;
+    box-shadow: 0 0 0 1.5px var(--pa2), 0 0 8px rgba(196,113,58,0.40);
+  }
+  .life-stats {
+    font-size: 11px;
+    color: var(--pt2);
+    text-align: center;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--pb2);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
   .life-bd-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 8px 0 4px;
+    padding: 6px 0;
   }
-  .life-bd-form label { font-size: 12px; color: var(--pt2); }
+  .life-bd-form label { font-size: 12px; color: var(--pt2); font-weight: 500; }
   .life-bd-input {
-    border: 1px solid var(--pb2);
-    border-radius: 9px;
-    padding: 8px 10px;
+    border: 1px solid var(--pb3);
+    border-radius: 11px;
+    padding: 10px 12px;
     font-size: 14px;
-    background: rgba(180,145,100,0.07);
+    background: rgba(255,255,255,0.5);
     color: var(--pt);
     font-family: inherit;
     width: 100%;
     -webkit-appearance: none;
   }
   .life-bd-save {
-    background: var(--pa);
+    background: linear-gradient(135deg, var(--pa), var(--pa2));
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 10px 16px;
+    border-radius: 11px;
+    padding: 11px 16px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-  }
-  .life-age-lbl {
-    font-size: 10px;
-    color: var(--pt3);
-    text-align: center;
-    margin-bottom: 9px;
-    letter-spacing: 0.04em;
-  }
-  .life-grid {
-    display: grid;
-    grid-template-columns: repeat(52, 1fr);
-    gap: 1.5px;
-    margin-bottom: 12px;
-  }
-  .life-cell {
-    aspect-ratio: 1;
-    border-radius: 1px;
-  }
-  .life-cell.lived   { background: #3A2E24; opacity: 0.72; }
-  .life-cell.current { background: var(--pa) !important; opacity: 1 !important; border-radius: 2px; }
-  .life-cell:not(.lived):not(.current) { background: rgba(180,145,100,0.18); }
-  .life-stats {
-    font-size: 12px;
-    color: var(--pt2);
-    line-height: 1.65;
-    text-align: center;
-    padding-top: 10px;
-    border-top: 1px solid var(--pb2);
-  }
-  .life-stats strong { color: var(--pt); font-weight: 600; }
-  .life-year-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 8.5px;
-    color: var(--pt3);
-    margin-bottom: 5px;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 8px rgba(196,113,58,0.25);
   }
 
 </style>
@@ -1118,79 +1253,61 @@
     <!-- ── Header ── -->
     <header class="priv-header">
       <h1 class="priv-title">Privat</h1>
-      <span class="priv-date-label" id="priv-date-label"></span>
+      <span class="priv-greeting" id="priv-greeting"></span>
       <div class="priv-header-spacer"></div>
-      <div class="view-switch-card priv-mode" id="view-switch-card-priv" onclick="toggleView()">
-        <span class="view-switch-label" id="view-switch-label-priv">Privat</span>
+      <span class="priv-date-label" id="priv-date-label"></span>
+      <div class="view-switch-card priv-mode" onclick="toggleView()">
+        <span class="view-switch-label">Privat</span>
         <div class="view-switch-pill">
           <div class="view-switch-thumb"></div>
         </div>
       </div>
     </header>
 
-    <!-- ── Left Column ── -->
-    <div class="priv-col-left">
+    <!-- ── Habit Mini Cards (4 individual bento tiles) ── -->
+    <div id="habit-tiles" style="display:contents"></div>
 
-      <!-- Habit Tracker -->
-      <div class="priv-card">
-        <div class="priv-card-label">Heute</div>
-        <div class="habit-tiles" id="habit-tiles"></div>
-        <div class="habit-hmap-section">
-          <div class="habit-hmap-title">30 Tage</div>
-          <div id="habit-heatmaps"></div>
-        </div>
+    <!-- ── Italiano Heatmap ── -->
+    <div class="priv-card priv-ita-card">
+      <div class="priv-card-label">
+        <span>🇮🇹 &nbsp;Italiano — 6 Monate</span>
+        <button class="ita-log-btn" onclick="itaLogDay(privDateKey(new Date()))">+ Heute</button>
+      </div>
+      <div id="ita-heatmap"></div>
+      <div class="ita-legend">
+        <span class="ita-leg-dot" style="background:var(--phn)"></span>0 Min
+        <span class="ita-leg-dot" style="background:#8DC49A"></span>&lt;10
+        <span class="ita-leg-dot" style="background:#4A7C59"></span>10–30
+        <span class="ita-leg-dot" style="background:#2D5A3A"></span>30+
+      </div>
+    </div>
+
+    <!-- ── Life Weeks ── -->
+    <div class="priv-card priv-life-card">
+      <div class="priv-card-label"><span>🌱 &nbsp;Wochen deines Lebens</span></div>
+
+      <div class="life-bd-form" id="life-bd-form">
+        <label>Geburtsdatum:</label>
+        <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
+        <button class="life-bd-save" onclick="lifeSaveBirthdate()">Los geht's</button>
       </div>
 
-      <!-- Italienisch Heatmap -->
-      <div class="priv-card">
-        <div class="priv-card-label">
-          Italiano — 6 Monate
-          <button class="ita-log-btn" onclick="itaLogDay(privDateKey(new Date()))">+ Heute</button>
+      <div id="life-content" style="display:none">
+        <div class="life-hero">
+          <div class="life-hero-week" id="life-hero-week">—</div>
+          <div class="life-hero-label">Woche deines Lebens</div>
+          <div class="life-hero-total" id="life-hero-total"></div>
         </div>
-        <div id="ita-heatmap"></div>
-        <div class="ita-legend">
-          <span class="ita-leg-dot" style="background:var(--phn)"></span>0 Min
-          <span class="ita-leg-dot" style="background:#8DC49A"></span>&lt;10
-          <span class="ita-leg-dot" style="background:#4A7C59"></span>10–30
-          <span class="ita-leg-dot" style="background:#2D5A3A"></span>30+
+        <div class="life-progress-bar">
+          <div class="life-progress-fill" id="life-progress-fill" style="width:0%"></div>
         </div>
+        <div class="life-age-row">
+          <span>0</span><span>21</span><span>42</span><span>63</span><span>85</span>
+        </div>
+        <div class="life-grid" id="life-grid"></div>
+        <div class="life-stats" id="life-stats"></div>
       </div>
-
-    </div><!-- /col-left -->
-
-    <!-- ── Right Column ── -->
-    <div class="priv-col-right">
-
-      <!-- Life Weeks -->
-      <div class="priv-card" style="flex:1">
-        <div class="priv-card-label">Wochen deines Lebens</div>
-
-        <!-- First-time birthdate form -->
-        <div class="life-bd-form" id="life-bd-form">
-          <label>Geburtsdatum:</label>
-          <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
-          <button class="life-bd-save" onclick="lifeSaveBirthdate()">Los geht's</button>
-        </div>
-
-        <!-- Grid (shown when birthdate set) -->
-        <div id="life-content" style="display:none">
-          <div class="life-hero" id="life-hero">
-            <div class="life-hero-week" id="life-hero-week">—</div>
-            <div class="life-hero-label">Woche deines Lebens</div>
-            <div class="life-hero-total" id="life-hero-total"></div>
-          </div>
-          <div class="life-progress-bar">
-            <div class="life-progress-fill" id="life-progress-fill" style="width:0%"></div>
-          </div>
-          <div class="life-age-row">
-            <span>Geburt</span><span>21</span><span>42</span><span>63</span><span>85</span>
-          </div>
-          <div class="life-grid" id="life-grid"></div>
-          <div class="life-stats" id="life-stats"></div>
-        </div>
-      </div>
-
-    </div><!-- /col-right -->
+    </div>
 
   </div>
 </div><!-- /#screen-private -->
@@ -2325,11 +2442,21 @@ function privDateKey(d) {
 
 // ── Habits ──
 const HABITS_CFG = [
-  { id:'gym',    name:'Gym',               goal:'2× / Woche', short:'Gym'  },
-  { id:'ita',    name:'Italiano',           goal:'täglich',    short:'Ita'  },
-  { id:'nodoom', name:'Kein Doomscrolling', goal:'täglich',    short:'Doom' },
-  { id:'custom', name:null,                 goal:'täglich',    short:'----' },
+  { id:'gym',    name:'Gym',               goal:'2× / Woche', short:'Gym',  emoji:'💪' },
+  { id:'ita',    name:'Italiano',          goal:'täglich',    short:'Ita',  emoji:'🇮🇹' },
+  { id:'nodoom', name:'Kein Doomscrolling',goal:'täglich',    short:'Doom', emoji:'🌿' },
+  { id:'custom', name:null,                goal:'täglich',    short:'----', emoji:'✨' },
 ];
+
+function privGreeting() {
+  const h=new Date().getHours();
+  if (h<5)  return 'Gute Nacht';
+  if (h<11) return 'Guten Morgen';
+  if (h<14) return 'Hallo';
+  if (h<18) return 'Schönen Nachmittag';
+  if (h<22) return 'Guten Abend';
+  return 'Späte Stunde';
+}
 
 function habitsLoad() { try { return JSON.parse(localStorage.getItem('priv_habits')||'{}'); } catch { return {}; } }
 function habitsSave(d) { localStorage.setItem('priv_habits', JSON.stringify(d)); }
@@ -2398,42 +2525,52 @@ function itaLogDay(ds) {
 function renderPrivate() {
   const now=new Date();
   const lbl=document.getElementById('priv-date-label');
+  const grt=document.getElementById('priv-greeting');
   if (lbl) lbl.textContent=DAYS[now.getDay()]+', '+now.getDate()+'. '+MONTHS[now.getMonth()];
+  if (grt) grt.textContent='— '+privGreeting()+', Simon';
   renderHabits(); renderLifeWeeks(); renderItaHeatmap();
 }
 
 function renderHabits() {
   const all=habitsLoad(), today=privDateKey(new Date());
   const tilesEl=document.getElementById('habit-tiles');
-  const hmapEl=document.getElementById('habit-heatmaps');
-  if (!tilesEl||!hmapEl) return;
+  if (!tilesEl) return;
 
   tilesEl.innerHTML=HABITS_CFG.map(h=>{
-    const done=(all[h.id]||{})[today]||false;
+    const days=all[h.id]||{};
+    const done=days[today]||false;
     const streak=habitStreak(h.id,all), record=habitRecord(h.id,all);
     const isCustom=h.id==='custom';
     const customName=localStorage.getItem('priv_habit_custom_name')||null;
     const displayName=isCustom?customName:h.name;
     const isPlaceholder=isCustom&&!displayName;
     const editAttr=isCustom?' ondblclick="event.stopPropagation();habitEditCustom()"':'';
-    return '<div class="habit-tile'+(done?' done':'')+'" onclick="habitToggle(\''+h.id+'\',\''+today+'\')"'+editAttr+'>'
-      +'<div class="habit-tile-circle"><div class="habit-tile-check"></div></div>'
-      +'<div class="habit-tile-name'+(isPlaceholder?' placeholder':'')+'">'+( isPlaceholder?'Habit<br>hinzufügen':esc(displayName||'') )+'</div>'
-      +'<div class="habit-tile-goal">'+h.goal+'</div>'
-      +'<div class="habit-tile-streak">'+(streak>0?streak+' 🔥':(record>0?'Rek: '+record:'—'))+'</div>'
-      +'</div>';
-  }).join('');
 
-  hmapEl.innerHTML=HABITS_CFG.map(h=>{
-    const days=all[h.id]||{};
-    const lbl=h.id==='custom'?(localStorage.getItem('priv_habit_custom_name')||'----').substring(0,4):h.short;
-    let dots='';
-    for (let i=29;i>=0;i--){
+    // 14-day mini bar
+    let bar='';
+    for (let i=13;i>=0;i--){
       const d=new Date(); d.setDate(d.getDate()-i);
-      const k=privDateKey(d), isToday=i===0;
-      dots+='<div class="habit-hmap-dot" style="background:'+(days[k]?'var(--pg)':'var(--phn)')+';'+(isToday?'outline:1.5px solid var(--pa);outline-offset:1px':'')+'"></div>';
+      const k=privDateKey(d), isToday=i===0, on=days[k];
+      bar+='<span class="habit-mini-bar-dot'+(on?' on':'')+(isToday?' today':'')+'"></span>';
     }
-    return '<div class="habit-hmap-row"><span class="habit-hmap-lbl">'+esc(lbl)+'</span><div class="habit-hmap-dots">'+dots+'</div></div>';
+
+    const streakHtml = streak>0
+      ? '<span class="habit-mini-streak">'+streak+' 🔥</span>'
+      : (record>0
+          ? '<span class="habit-mini-streak zero">Rekord '+record+'</span>'
+          : '<span class="habit-mini-streak zero">—</span>');
+
+    const nameHtml = isPlaceholder
+      ? '<div class="habit-mini-name placeholder">Habit hinzufügen</div>'
+      : '<div class="habit-mini-name">'+esc(displayName||'')+'</div>';
+
+    return '<div class="habit-mini'+(done?' done':'')+'" onclick="habitToggle(\''+h.id+'\',\''+today+'\')"'+editAttr+'>'
+      +'<div class="habit-mini-emoji">'+h.emoji+'</div>'
+      +nameHtml
+      +'<div class="habit-mini-goal">'+h.goal+'</div>'
+      +'<div class="habit-mini-bar">'+bar+'</div>'
+      +'<div class="habit-mini-foot">'+streakHtml+'<div class="habit-mini-checkmark"></div></div>'
+      +'</div>';
   }).join('');
 }
 
