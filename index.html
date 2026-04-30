@@ -12,21 +12,21 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg:             #FFF2D9;
-    --card:           #FFFDF0;
-    --card-inner:     #FFF5E0;
-    --text-primary:   #3A2616;
-    --text-secondary: #B97A35;
-    --text-tertiary:  #D4A96A;
-    --border:         rgba(185,122,53,0.14);
-    --shadow:         0 2px 16px rgba(58,38,22,0.07), 0 1px 3px rgba(58,38,22,0.04);
+    --bg:             #F2F2F7;
+    --card:           #FFFFFF;
+    --card-inner:     #F2F2F7;
+    --text-primary:   #1C1C1E;
+    --text-secondary: #8E8E93;
+    --text-tertiary:  #C7C7CC;
+    --border:         rgba(0,0,0,0.06);
+    --shadow:         0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
     --radius:         18px;
     --radius-sm:      13px;
-    --accent-purple:  #F7B35A;
-    --accent-green:   #4A7C59;
-    --accent-orange:  #F7B35A;
-    --accent-blue:    #B97A35;
-    --accent-red:     #C0392B;
+    --accent-purple:  #5E5CE6;
+    --accent-green:   #30D158;
+    --accent-orange:  #FF9F0A;
+    --accent-blue:    #0A84FF;
+    --accent-red:     #FF453A;
   }
 
   html, body {
@@ -44,7 +44,7 @@
     height: 100dvh;
     padding: 20px;
     display: grid;
-    grid-template-rows: 96px 1fr 90px;
+    grid-template-rows: 136px 1fr 90px;
     gap: 12px;
     overflow: hidden;
     position: relative;
@@ -94,9 +94,10 @@
 
   .card-weather {
     padding: 14px 18px 16px;
+    padding-top: 52px; /* push content below fixed toggle (top:20 + ~40px height) */
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: flex-start;
     gap: 2px;
   }
 
@@ -582,7 +583,7 @@
   ───────────────────────────────────── */
   .skel {
     display: block;
-    background: linear-gradient(90deg, #F5E4BE 25%, #EBCF99 50%, #F5E4BE 75%);
+    background: linear-gradient(90deg, #ebebf0 25%, #e2e2e8 50%, #ebebf0 75%);
     background-size: 300% 100%;
     animation: shimmer 1.8s ease-in-out infinite;
     border-radius: 5px;
@@ -626,8 +627,8 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    background: rgba(255,253,240,0.92);
-    border: 0.5px solid var(--border);
+    background: rgba(255,255,255,0.92);
+    border: 0.5px solid rgba(0,0,0,0.08);
     border-radius: 14px;
     padding: 7px 11px 7px 12px;
     display: inline-flex;
@@ -652,17 +653,18 @@
   .view-switch-label {
     font-size: 11.5px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #1C1C1E;
     font-family: -apple-system, 'SF Pro Text', sans-serif;
     letter-spacing: 0.01em;
     width: 52px;
     text-align: center;
     pointer-events: none;
   }
+  .view-switch-card.priv-mode .view-switch-label { color: #3A2616; }
   .view-switch-pill {
     width: 44px; height: 26px;
     border-radius: 13px;
-    background: #B97A35;
+    background: #0A84FF;
     position: relative;
     flex-shrink: 0;
     pointer-events: none;
@@ -1298,7 +1300,7 @@
       </div>
       <div class="calendar-iframe-wrap">
         <iframe
-          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFFFF&color=%235E5CE6"
+          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFFFF&color=%230A84FF"
           scrolling="no"
           allowtransparency="true">
         </iframe>
