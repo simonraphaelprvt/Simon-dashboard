@@ -63,9 +63,11 @@
   ───────────────────────────────────── */
   .row-top {
     display: grid;
-    grid-template-columns: 1fr 148px;
+    grid-template-columns: 1fr 140px 148px; /* time | toggle-slot (empty) | weather */
     gap: 12px;
   }
+  .card-time    { grid-column: 1; }
+  .card-weather { grid-column: 3; }
 
   .card-time {
     padding: 16px 22px;
@@ -625,8 +627,8 @@
   }
   #view-toggle {
     position: fixed;
-    top: 20px;
-    right: 178px;   /* left of weather card on business, same spot on private */
+    top: 28px;
+    right: 186px; /* sits in the empty 140px slot between time-card and weather */
     z-index: 10000; /* always above everything */
     background: rgba(255,255,255,0.94);
     border: 0.5px solid rgba(0,0,0,0.08);
@@ -776,10 +778,58 @@
   /* Warm dot grid — adds depth beyond flat gradients */
   .priv-dots {
     position: fixed; inset: 0;
-    background-image: radial-gradient(circle, rgba(185,122,53,0.16) 1.5px, transparent 1.5px);
+    background-image: radial-gradient(circle, rgba(185,122,53,0.18) 1.5px, transparent 1.5px);
     background-size: 26px 26px;
     pointer-events: none;
     z-index: 1;
+  }
+  /* Soft bokeh circles — scattered, blurred, organic feel */
+  .priv-bokeh {
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 18% 20%, rgba(247,179,90,0.50)  60px, transparent 95px),
+      radial-gradient(circle at 76% 14%, rgba(255,213,154,0.55) 75px, transparent 110px),
+      radial-gradient(circle at 38% 70%, rgba(185,122,53,0.40)  85px, transparent 120px),
+      radial-gradient(circle at 88% 62%, rgba(247,179,90,0.55)  55px, transparent 90px),
+      radial-gradient(circle at 14% 90%, rgba(255,224,160,0.50) 95px, transparent 135px),
+      radial-gradient(circle at 60% 92%, rgba(185,122,53,0.30)  70px, transparent 105px);
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 0;
+    animation: privBokeh 30s ease-in-out infinite alternate;
+  }
+  @keyframes privBokeh {
+    0%   { transform: scale(1)    rotate(0deg);   opacity: 0.85; }
+    100% { transform: scale(1.06) rotate(2deg);   opacity: 1; }
+  }
+  /* Diagonal hatching — gives a "hand-drawn paper" feel */
+  .priv-stripes {
+    position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(
+      -22deg,
+      rgba(58,38,22,0.030) 0px,
+      rgba(58,38,22,0.030) 1px,
+      transparent 1px,
+      transparent 32px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Decorative thin curved line (top-right ornament) */
+  .priv-curve {
+    position: fixed;
+    top: -120px; right: -40px;
+    width: 380px; height: 380px;
+    border: 1.5px solid rgba(185,122,53,0.18);
+    border-radius: 50%;
+    border-style: dashed;
+    pointer-events: none;
+    z-index: 1;
+    animation: privCurveSpin 90s linear infinite;
+  }
+  @keyframes privCurveSpin {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
   }
   /* Extra mid-screen floating blobs */
   .priv-blob-mid {
@@ -1208,16 +1258,18 @@
   }
   .life-grid {
     display: grid;
-    grid-template-columns: repeat(52, 1fr);
-    gap: 0.8px;
+    grid-template-columns: repeat(52, 2.5px);
+    gap: 0.6px;
+    justify-content: center;
     margin-bottom: 6px;
-    max-height: 180px;
+    max-height: 220px;
     overflow: hidden;
   }
   .life-cell {
-    height: 1.6px;
+    width: 2.5px;
+    height: 2.5px;
     border-radius: 0.5px;
-    background: rgba(180,140,90,0.20);
+    background: rgba(185,122,53,0.22);
     transition: background 0.2s;
   }
   .life-cell.lived   { background: var(--pt); opacity: 0.62; }
@@ -1432,10 +1484,13 @@
      PRIVATE SCREEN
 ══════════════════════════════════════════════════════════════ -->
 <div id="screen-private">
-  <div class="priv-grain"></div>
-  <div class="priv-dots"></div>
+  <div class="priv-bokeh"></div>
   <div class="priv-blob-mid priv-blob-mid-a"></div>
   <div class="priv-blob-mid priv-blob-mid-b"></div>
+  <div class="priv-grain"></div>
+  <div class="priv-stripes"></div>
+  <div class="priv-dots"></div>
+  <div class="priv-curve"></div>
   <div class="priv-sticker-ring"></div>
   <div class="priv-layout">
 
