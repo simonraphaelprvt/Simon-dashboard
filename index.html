@@ -12,21 +12,21 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg:             #F2F2F7;
-    --card:           #FFFFFF;
-    --card-inner:     #F2F2F7;
-    --text-primary:   #1C1C1E;
-    --text-secondary: #8E8E93;
-    --text-tertiary:  #C7C7CC;
-    --border:         rgba(0,0,0,0.06);
-    --shadow:         0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    --bg:             #FFF2D9;
+    --card:           #FFFDF0;
+    --card-inner:     #FFF5E0;
+    --text-primary:   #3A2616;
+    --text-secondary: #B97A35;
+    --text-tertiary:  #D4A96A;
+    --border:         rgba(185,122,53,0.14);
+    --shadow:         0 2px 16px rgba(58,38,22,0.07), 0 1px 3px rgba(58,38,22,0.04);
     --radius:         18px;
     --radius-sm:      13px;
-    --accent-purple:  #5E5CE6;
-    --accent-green:   #30D158;
-    --accent-orange:  #FF9F0A;
-    --accent-blue:    #0A84FF;
-    --accent-red:     #FF453A;
+    --accent-purple:  #F7B35A;
+    --accent-green:   #4A7C59;
+    --accent-orange:  #F7B35A;
+    --accent-blue:    #B97A35;
+    --accent-red:     #C0392B;
   }
 
   html, body {
@@ -615,21 +615,17 @@
 
 
   /* ═══════════════════════════════════════════════════════════════
-     VIEW SWITCH — floating iOS-style toggle, top-right
+     VIEW SWITCH — embedded in each screen's header
   ═══════════════════════════════════════════════════════════════ */
   .time-actions {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  /* Floating shared toggle — same position across both views */
+  /* Toggle card — no fixed, lives inside each screen's layout */
   .view-switch-card {
-    position: fixed;
-    top: 24px;
-    right: 360px;
-    z-index: 10000;
-    background: #F4F4F6;
-    border: 0.5px solid rgba(0,0,0,0.06);
+    background: rgba(255,253,240,0.90);
+    border: 0.5px solid var(--border);
     border-radius: 14px;
     padding: 7px 11px 7px 12px;
     display: inline-flex;
@@ -639,36 +635,35 @@
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.35s, border-color 0.35s, transform 0.18s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.05);
+    transition: transform 0.18s;
+    box-shadow: 0 1px 3px rgba(58,38,22,0.08), 0 4px 14px rgba(58,38,22,0.06);
+    flex-shrink: 0;
   }
   .view-switch-card:active { transform: scale(0.96); }
   .view-switch-card.priv-mode {
-    background: #F8F1E0;
-    border-color: rgba(180,140,80,0.22);
+    background: rgba(255,242,217,0.92);
+    border-color: rgba(185,122,53,0.22);
   }
   .view-switch-label {
     font-size: 11.5px;
     font-weight: 600;
-    color: #1c1c1e;
+    color: var(--text-primary);
     font-family: -apple-system, 'SF Pro Text', sans-serif;
     letter-spacing: 0.01em;
-    width: 48px;
+    width: 52px;
     text-align: center;
-    transition: color 0.3s;
     pointer-events: none;
   }
-  .view-switch-card.priv-mode .view-switch-label { color: #3A2E24; }
   .view-switch-pill {
     width: 44px; height: 26px;
     border-radius: 13px;
-    background: #0A84FF;
+    background: #B97A35;
     position: relative;
     flex-shrink: 0;
     pointer-events: none;
     transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .view-switch-card.priv-mode .view-switch-pill { background: #B8622A; }
+  .view-switch-card.priv-mode .view-switch-pill { background: #F7B35A; }
   .view-switch-thumb {
     position: absolute;
     top: 3px; left: 3px;
@@ -684,22 +679,22 @@
      PRIVATE SCREEN — VARS + CONTAINER
   ═══════════════════════════════════════════════════════════════ */
   :root {
-    --pb:  #FAF4EC;
-    --pc:  #FFFDF7;
-    --pc2: #FFF8E8;
-    --pb2: rgba(180,140,90,0.13);
-    --pb3: rgba(180,140,90,0.22);
-    --ps:  0 1px 3px rgba(150,100,50,0.05), 0 4px 18px rgba(150,100,50,0.05);
-    --ps2: 0 4px 24px rgba(150,100,50,0.10), 0 1px 2px rgba(150,100,50,0.05);
-    --pt:  #2C2118;
-    --pt2: #7A6651;
-    --pt3: #B5A38A;
-    --pa:  #C4713A;
-    --pa2: #E89B5C;
-    --pg:  #5B8A52;
-    --pg2: #88B783;
+    --pb:  #FFF2D9;
+    --pc:  #FFFDF0;
+    --pc2: #FFF5E0;
+    --pb2: rgba(185,122,53,0.14);
+    --pb3: rgba(185,122,53,0.26);
+    --ps:  0 1px 3px rgba(58,38,22,0.04), 0 4px 18px rgba(58,38,22,0.06);
+    --ps2: 0 4px 24px rgba(58,38,22,0.09), 0 1px 2px rgba(58,38,22,0.04);
+    --pt:  #3A2616;
+    --pt2: #B97A35;
+    --pt3: #D4A96A;
+    --pa:  #F7B35A;
+    --pa2: #FFD59A;
+    --pg:  #4A7C59;
+    --pg2: #7DB87A;
     --pg3: #2D5A27;
-    --phn: #ECE3D4;
+    --phn: rgba(185,122,53,0.14);
   }
 
   #screen-private {
@@ -707,12 +702,12 @@
     inset: 0;
     z-index: 9000;
     background:
-      radial-gradient(circle at 12% 8%,  #FFD2A8 0%, transparent 30%),
-      radial-gradient(circle at 88% 12%, #F4D8A0 0%, transparent 28%),
-      radial-gradient(circle at 78% 88%, #B8D8B0 0%, transparent 32%),
-      radial-gradient(circle at 6% 78%,  #F2A878 0%, transparent 26%),
-      radial-gradient(circle at 50% 48%, #FFEED0 0%, transparent 50%),
-      linear-gradient(135deg, #FAF1E0 0%, #F2E4CC 100%);
+      radial-gradient(circle at 10% 8%,  #FFD59A 0%, transparent 30%),
+      radial-gradient(circle at 88% 10%, #F7B35A 0%, transparent 26%),
+      radial-gradient(circle at 80% 90%, #B97A35 0%, transparent 28%),
+      radial-gradient(circle at 5% 80%,  #FFD59A 0%, transparent 26%),
+      radial-gradient(circle at 50% 50%, #FFF2D9 0%, transparent 55%),
+      linear-gradient(135deg, #FFF2D9 0%, #FFE4A8 100%);
     background-attachment: fixed;
     overflow-y: auto;
     padding: 14px;
@@ -732,7 +727,7 @@
     position: fixed;
     top: -120px; right: -100px;
     width: 380px; height: 380px;
-    background: radial-gradient(circle, #E89B5C 0%, transparent 65%);
+    background: radial-gradient(circle, #F7B35A 0%, transparent 65%);
     opacity: 0.35;
     border-radius: 50%;
     filter: blur(40px);
@@ -745,7 +740,7 @@
     position: fixed;
     bottom: -160px; left: -120px;
     width: 460px; height: 460px;
-    background: radial-gradient(circle, #7FB173 0%, transparent 60%);
+    background: radial-gradient(circle, #B97A35 0%, transparent 60%);
     opacity: 0.30;
     border-radius: 50%;
     filter: blur(50px);
@@ -967,17 +962,17 @@
       Row 3: italiano (1-9) | life (9-13)
       Row 4: empty(1-9)     | mini-calendar (9-13)            */
   .priv-ita-card  {
-    grid-column: 1 / 9;
-    background: linear-gradient(135deg, #FFFDF7 0%, #FFF6E0 100%);
+    grid-column: 1 / 7;
+    background: linear-gradient(135deg, #FFFDF0 0%, #FFF5D0 100%);
   }
   .priv-life-card {
-    grid-column: 9 / 13;
-    background: linear-gradient(160deg, #FFFAF0 0%, #FFEFD4 100%);
+    grid-column: 7 / 10;
+    background: linear-gradient(160deg, #FFFCF0 0%, #FFE8B0 100%);
     box-shadow: var(--ps2);
   }
   .priv-cal-mini {
-    grid-column: 9 / 13;
-    background: linear-gradient(135deg, #FFFDF7 0%, #FAF1E0 100%);
+    grid-column: 10 / 13;
+    background: linear-gradient(135deg, #FFFDF0 0%, #FFF2D9 100%);
     padding: 10px 12px 9px;
   }
   .priv-life-card::after {
@@ -1226,12 +1221,6 @@
 
 
 
-<!-- ── Shared floating view toggle (fixed across both screens) ── -->
-<div class="view-switch-card" id="view-switch-card" onclick="toggleView()">
-  <span class="view-switch-label" id="view-switch-label">Business</span>
-  <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
-</div>
-
 <div class="screen" id="screen-business">
 
   <!-- ── ROW 1: Zeit + Wetter ── -->
@@ -1242,7 +1231,12 @@
         <div class="time-display" id="clock">00:00</div>
         <div class="time-date"    id="datestr">Laden…</div>
       </div>
-      <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
+      <div class="time-actions">
+        <div class="view-switch-card" onclick="toggleView()" title="Zur privaten Ansicht">
+          <span class="view-switch-label">Business</span>
+          <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
+        </div>
+        <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
           <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
@@ -1252,6 +1246,7 @@
         </svg>
         Morning Report
       </button>
+      </div><!-- /.time-actions -->
     </div>
 
     <div class="card card-weather" id="weather-card">
@@ -1390,6 +1385,10 @@
       <span class="priv-greeting" id="priv-greeting"></span>
       <span class="priv-date-label" id="priv-date-label"></span>
       <div class="priv-header-spacer"></div>
+      <div class="view-switch-card priv-mode" onclick="toggleView()" title="Zur Business-Ansicht">
+        <span class="view-switch-label">Privat</span>
+        <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
+      </div>
     </header>
 
     <!-- ── Habit Mini Cards (4 individual bento tiles) ── -->
@@ -1398,7 +1397,7 @@
     <!-- ── Italiano Heatmap ── -->
     <div class="priv-card priv-ita-card">
       <div class="priv-card-label">
-        <span>🇮🇹 &nbsp;Italiano — 6 Monate</span>
+        <span>🇮🇹 &nbsp;Italiano — April bis Juli</span>
       </div>
       <div class="ita-stack">
         <div>
@@ -1423,7 +1422,7 @@
             <div class="ita-stat-val" id="ita-stat-total">0h</div>
             <div class="ita-stat-lbl">Gesamt</div>
           </div>
-          <button class="ita-log-btn-big" onclick="itaLogDay(privDateKey(new Date()))">+ Heute loggen</button>
+          <button class="ita-log-btn-big" onclick="itaLogToday()">+ Heute loggen</button>
         </div>
       </div>
     </div>
@@ -2581,16 +2580,26 @@ let _currentView = 'business';
 function switchView(target) {
   if (target === _currentView) return;
   _currentView = target;
-  const priv  = document.getElementById('screen-private');
-  const card  = document.getElementById('view-switch-card');
-  const label = document.getElementById('view-switch-label');
+  const priv = document.getElementById('screen-private');
   const isPriv = _currentView === 'private';
   if (isPriv) { priv.classList.add('active'); renderPrivate(); }
   else { priv.classList.remove('active'); }
-  if (card)  card.classList.toggle('priv-mode', isPriv);
-  if (label) label.textContent = isPriv ? 'Privat' : 'Business';
+  scheduleAutoSwitch(); // Restart auto-switch timer after every view change
 }
 function toggleView() { switchView(_currentView === 'business' ? 'private' : 'business'); }
+
+// ── Auto-Switch: 20 min Business → 5 min Privat → loop ──────
+const _AUTO_DELAY = { business: 20 * 60_000, private: 5 * 60_000 };
+let _autoTimer = null;
+
+function scheduleAutoSwitch() {
+  if (_autoTimer) clearTimeout(_autoTimer);
+  const delay = _AUTO_DELAY[_currentView];
+  _autoTimer = setTimeout(() => {
+    switchView(_currentView === 'business' ? 'private' : 'business');
+  }, delay);
+}
+scheduleAutoSwitch(); // Start loop on page load
 
 // ── Helpers ──
 function privDateKey(d) {
@@ -2618,10 +2627,12 @@ function privGreeting() {
 function habitsLoad() { try { return JSON.parse(localStorage.getItem('priv_habits')||'{}'); } catch { return {}; } }
 function habitsSave(d) { localStorage.setItem('priv_habits', JSON.stringify(d)); }
 
-function habitToggle(hid, ds) {
+function habitToggle(hid) {
+  // Always use TODAY's date key — never embedded from render-time
+  const today = privDateKey(new Date());
   const d = habitsLoad();
   if (!d[hid]) d[hid] = {};
-  d[hid][ds] = !d[hid][ds];
+  d[hid][today] = !d[hid][today];
   habitsSave(d);
   renderHabits();
 }
@@ -2712,7 +2723,7 @@ function renderHabits() {
           ? '<span class="habit-mini-streak zero">Rekord '+record+'</span>'
           : '<span class="habit-mini-streak zero">—</span>');
 
-    return '<div class="habit-mini'+(done?' done':'')+'" onclick="habitToggle(\''+h.id+'\',\''+today+'\')">'
+    return '<div class="habit-mini'+(done?' done':'')+'" onclick="habitToggle(\''+h.id+'\')">'
       +'<div class="habit-mini-emoji">'+h.emoji+'</div>'
       +'<div class="habit-mini-name">'+esc(h.name)+'</div>'
       +'<div class="habit-mini-goal">'+h.goal+'</div>'
@@ -2757,35 +2768,50 @@ function renderLifeWeeks() {
   if (statsEl) statsEl.textContent=pct+'% des Lebens erlebt';
 }
 
+function itaLogToday() { itaLogDay(privDateKey(new Date())); }
+
 function renderItaHeatmap() {
   const container=document.getElementById('ita-heatmap');
   if (!container) return;
-  const data=itaLoad(), today=new Date(), todayStr=privDateKey(today), WEEKS=26;
+  const data=itaLoad();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const todayStr=privDateKey(today);
 
-  const startDate=new Date(today);
-  startDate.setDate(today.getDate()-WEEKS*7);
-  const dow=startDate.getDay();
-  startDate.setDate(startDate.getDate()-(dow===0?6:dow-1));
+  // Fixed range: April 1 → July 31 of current year
+  const yr=today.getFullYear();
+  const rangeStart=new Date(yr,3,1);  // April 1
+  const rangeEnd  =new Date(yr,6,31); // July 31
 
-  const cur=new Date(startDate), columns=[], monthBreaks=[];
-  let prevMonth=-1;
-  for (let w=0;w<=WEEKS;w++){
+  // Align to Monday on/before April 1
+  const d0=rangeStart.getDay(); // 0=Sun
+  const startDate=new Date(rangeStart);
+  startDate.setDate(rangeStart.getDate()-(d0===0?6:d0-1));
+
+  const columns=[], monthBreaks=[];
+  let cur=new Date(startDate), prevMonth=-1, wIdx=0;
+
+  while(cur<=rangeEnd){
     const cells=[], colMonth=cur.getMonth();
-    if (colMonth!==prevMonth){ monthBreaks.push({w,label:MONTHS[colMonth].substring(0,3)}); prevMonth=colMonth; }
-    for (let day=0;day<7;day++){
-      const k=privDateKey(cur), isFuture=cur>today, isToday=k===todayStr;
-      cells.push({k,isFuture,isToday,color:isFuture?'transparent':itaMinsToColor(data[k]||0),mins:data[k]||0});
+    if(colMonth!==prevMonth){ monthBreaks.push({w:wIdx,label:MONTHS[colMonth].substring(0,3)}); prevMonth=colMonth; }
+    for(let day=0;day<7;day++){
+      const k=privDateKey(cur);
+      const inRange=cur>=rangeStart&&cur<=rangeEnd;
+      const isFuture=cur>today;
+      const isToday=k===todayStr;
+      cells.push({k,isFuture,isToday,inRange,
+        color:(!inRange||isFuture)?'transparent':itaMinsToColor(data[k]||0),
+        mins:data[k]||0});
       cur.setDate(cur.getDate()+1);
     }
-    columns.push(cells);
+    columns.push(cells); wIdx++;
   }
 
   let monthRow='<div class="ita-month-labels">';
   let lastLblW=-6;
   columns.forEach((_,w)=>{
     const mb=monthBreaks.find(m=>m.w===w);
-    if (mb&&w-lastLblW>=3){ monthRow+='<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>'; lastLblW=w; }
-    else { monthRow+='<div style="width:14px;min-width:14px;"></div>'; }
+    if(mb&&w-lastLblW>=3){ monthRow+='<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>'; lastLblW=w; }
+    else{ monthRow+='<div style="width:14px;min-width:14px;"></div>'; }
   });
   monthRow+='</div>';
 
@@ -2793,8 +2819,10 @@ function renderItaHeatmap() {
   columns.forEach(cells=>{
     gridHtml+='<div class="ita-col">';
     cells.forEach(c=>{
-      if (c.isFuture) gridHtml+='<div class="ita-cell" style="background:transparent;cursor:default;pointer-events:none;"></div>';
-      else gridHtml+='<div class="ita-cell'+(c.isToday?' ita-today':'')+'" style="background:'+c.color+'" title="'+c.k+': '+c.mins+' Min" onclick="itaLogDay(\''+c.k+'\')"></div>';
+      if(!c.inRange||c.isFuture)
+        gridHtml+='<div class="ita-cell" style="background:transparent;cursor:default;pointer-events:none;"></div>';
+      else
+        gridHtml+='<div class="ita-cell'+(c.isToday?' ita-today':'')+'" style="background:'+c.color+'" title="'+c.k+': '+c.mins+' Min" onclick="itaLogDay(\''+c.k+'\')"></div>';
     });
     gridHtml+='</div>';
   });
