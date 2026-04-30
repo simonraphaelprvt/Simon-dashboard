@@ -627,38 +627,43 @@
   }
   #view-toggle {
     position: fixed;
-    top: 28px;
-    right: 186px; /* sits in the empty 140px slot between time-card and weather */
-    z-index: 10000; /* always above everything */
-    background: rgba(255,255,255,0.94);
-    border: 0.5px solid rgba(0,0,0,0.08);
-    border-radius: 14px;
-    padding: 7px 11px 7px 12px;
-    display: inline-flex;
+    top: 20px;
+    right: 184px;  /* sits in the empty 140px slot, same height as weather card */
+    width: 132px;
+    height: 96px;
+    z-index: 10000;
+    background: #FFFFFF;
+    border: 0.5px solid rgba(0,0,0,0.06);
+    border-radius: 18px;
+    padding: 14px 14px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 11px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     transition: background 0.38s cubic-bezier(0.22,1,0.36,1),
                 border-color 0.38s cubic-bezier(0.22,1,0.36,1),
+                box-shadow 0.38s cubic-bezier(0.22,1,0.36,1),
                 transform 0.16s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 18px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
   }
-  #view-toggle:active { transform: scale(0.96); }
+  #view-toggle:active { transform: scale(0.97); }
   #view-toggle.priv-mode {
-    background: rgba(255,242,217,0.96);
+    background: #FFFCF0;
     border-color: rgba(185,122,53,0.28);
-    box-shadow: 0 1px 3px rgba(58,38,22,0.10), 0 4px 18px rgba(58,38,22,0.14);
+    box-shadow: 0 4px 24px rgba(58,38,22,0.14), 0 1px 3px rgba(58,38,22,0.06);
   }
   .view-switch-label {
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 600;
     color: #1C1C1E;
     font-family: -apple-system, 'SF Pro Text', sans-serif;
     letter-spacing: 0.01em;
-    width: 52px;
+    width: auto;
     text-align: center;
     pointer-events: none;
     transition: color 0.35s;
@@ -690,21 +695,21 @@
   ═══════════════════════════════════════════════════════════════ */
   :root {
     --pb:  #FFF2D9;
-    --pc:  #FFFDF0;
-    --pc2: #FFF5E0;
-    --pb2: rgba(185,122,53,0.14);
-    --pb3: rgba(185,122,53,0.26);
-    --ps:  0 1px 3px rgba(58,38,22,0.04), 0 4px 18px rgba(58,38,22,0.06);
-    --ps2: 0 4px 24px rgba(58,38,22,0.09), 0 1px 2px rgba(58,38,22,0.04);
-    --pt:  #3A2616;
-    --pt2: #B97A35;
-    --pt3: #D4A96A;
-    --pa:  #F7B35A;
-    --pa2: #FFD59A;
-    --pg:  #4A7C59;
-    --pg2: #7DB87A;
-    --pg3: #2D5A27;
-    --phn: rgba(185,122,53,0.14);
+    --pc:  #FFFFFF;       /* near-pure white for max contrast vs warm bg */
+    --pc2: #FFFCF0;
+    --pb2: rgba(58,38,22,0.10);   /* dark border for definition */
+    --pb3: rgba(58,38,22,0.22);
+    --ps:  0 2px 8px rgba(58,38,22,0.10), 0 8px 28px rgba(58,38,22,0.12);
+    --ps2: 0 4px 16px rgba(58,38,22,0.16), 0 12px 40px rgba(58,38,22,0.14);
+    --pt:  #2C1810;       /* darker text for higher contrast */
+    --pt2: #8A5A28;
+    --pt3: #B89060;
+    --pa:  #D87A2A;       /* punchier orange */
+    --pa2: #F7B35A;
+    --pg:  #2D6A3E;       /* deeper green */
+    --pg2: #5A9D6A;
+    --pg3: #1F4A28;
+    --phn: rgba(58,38,22,0.10);
   }
 
   #screen-private {
@@ -712,12 +717,11 @@
     inset: 0;
     z-index: 9000;
     background:
-      radial-gradient(ellipse at 0%   0%,   rgba(247,179,90,0.85)  0%, transparent 45%),
-      radial-gradient(ellipse at 100% 0%,   rgba(185,122,53,0.70)  0%, transparent 42%),
-      radial-gradient(ellipse at 100% 100%, rgba(58,38,22,0.40)    0%, transparent 48%),
-      radial-gradient(ellipse at 0%   100%, rgba(247,179,90,0.55)  0%, transparent 42%),
-      radial-gradient(circle  at 50%  50%,  rgba(255,242,217,0.90) 0%, transparent 50%),
-      linear-gradient(145deg, #FFE0A0 0%, #FFF2D9 40%, #FFD080 100%);
+      radial-gradient(ellipse at 0%   0%,   rgba(216,122,42,0.55)  0%, transparent 45%),
+      radial-gradient(ellipse at 100% 0%,   rgba(138,90,40,0.55)   0%, transparent 42%),
+      radial-gradient(ellipse at 100% 100%, rgba(44,24,16,0.40)    0%, transparent 48%),
+      radial-gradient(ellipse at 0%   100%, rgba(247,179,90,0.50)  0%, transparent 45%),
+      linear-gradient(145deg, #E8B570 0%, #F4D49A 50%, #D89A56 100%);
     background-attachment: fixed;
     overflow-y: auto;
     padding: 14px;
@@ -931,12 +935,12 @@
     overflow: hidden;
   }
   .priv-card-label {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 10.5px;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--pt2);
-    margin-bottom: 8px;
+    color: var(--pt);
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -945,7 +949,7 @@
   /* ── Habit Mini Cards (Bento) ── */
   .habit-mini {
     grid-column: span 3;
-    background: var(--pc);
+    background: #FFFFFF;
     border: 0.5px solid var(--pb2);
     border-radius: 18px;
     box-shadow: var(--ps);
@@ -1065,17 +1069,17 @@
   }
   .priv-ita-card {
     flex: 6 0 0;
-    background: linear-gradient(135deg, #FFFDF0 0%, #FFF5D0 100%);
+    background: #FFFFFF;
   }
   .priv-life-card {
     flex: 3 0 0;
-    background: linear-gradient(160deg, #FFFCF0 0%, #FFE8B0 100%);
+    background: #FFFFFF;
     box-shadow: var(--ps2);
     overflow: hidden;
   }
   .priv-cal-mini {
     flex: 3 0 0;
-    background: linear-gradient(135deg, #FFFDF0 0%, #FFF2D9 100%);
+    background: #FFFFFF;
     padding: 10px 12px 9px;
   }
   .priv-life-card::after {
