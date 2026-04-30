@@ -582,7 +582,7 @@
   ───────────────────────────────────── */
   .skel {
     display: block;
-    background: linear-gradient(90deg, #ebebf0 25%, #e2e2e8 50%, #ebebf0 75%);
+    background: linear-gradient(90deg, #F5E4BE 25%, #EBCF99 50%, #F5E4BE 75%);
     background-size: 300% 100%;
     animation: shimmer 1.8s ease-in-out infinite;
     border-radius: 5px;
@@ -615,16 +615,18 @@
 
 
   /* ═══════════════════════════════════════════════════════════════
-     VIEW SWITCH — embedded in each screen's header
+     VIEW SWITCH — two fixed elements, identical position on both screens
   ═══════════════════════════════════════════════════════════════ */
   .time-actions {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  /* Toggle card — no fixed, lives inside each screen's layout */
   .view-switch-card {
-    background: rgba(255,253,240,0.90);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,253,240,0.92);
     border: 0.5px solid var(--border);
     border-radius: 14px;
     padding: 7px 11px 7px 12px;
@@ -636,13 +638,16 @@
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.18s;
-    box-shadow: 0 1px 3px rgba(58,38,22,0.08), 0 4px 14px rgba(58,38,22,0.06);
-    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(58,38,22,0.08), 0 4px 16px rgba(58,38,22,0.10);
   }
+  /* Business toggle: z-index below private screen (9000) → hidden when private shows */
+  #vswitch-biz  { z-index: 200; }
+  /* Private toggle: z-index above private screen → always on top when private shows */
+  #vswitch-priv { z-index: 9100; }
   .view-switch-card:active { transform: scale(0.96); }
   .view-switch-card.priv-mode {
-    background: rgba(255,242,217,0.92);
-    border-color: rgba(185,122,53,0.22);
+    background: rgba(255,242,217,0.95);
+    border-color: rgba(185,122,53,0.25);
   }
   .view-switch-label {
     font-size: 11.5px;
@@ -702,12 +707,12 @@
     inset: 0;
     z-index: 9000;
     background:
-      radial-gradient(circle at 10% 8%,  #FFD59A 0%, transparent 30%),
-      radial-gradient(circle at 88% 10%, #F7B35A 0%, transparent 26%),
-      radial-gradient(circle at 80% 90%, #B97A35 0%, transparent 28%),
-      radial-gradient(circle at 5% 80%,  #FFD59A 0%, transparent 26%),
-      radial-gradient(circle at 50% 50%, #FFF2D9 0%, transparent 55%),
-      linear-gradient(135deg, #FFF2D9 0%, #FFE4A8 100%);
+      radial-gradient(ellipse at 0%   0%,   rgba(247,179,90,0.85)  0%, transparent 45%),
+      radial-gradient(ellipse at 100% 0%,   rgba(185,122,53,0.70)  0%, transparent 42%),
+      radial-gradient(ellipse at 100% 100%, rgba(58,38,22,0.40)    0%, transparent 48%),
+      radial-gradient(ellipse at 0%   100%, rgba(247,179,90,0.55)  0%, transparent 42%),
+      radial-gradient(circle  at 50%  50%,  rgba(255,242,217,0.90) 0%, transparent 50%),
+      linear-gradient(145deg, #FFE0A0 0%, #FFF2D9 40%, #FFD080 100%);
     background-attachment: fixed;
     overflow-y: auto;
     padding: 14px;
@@ -728,7 +733,7 @@
     top: -120px; right: -100px;
     width: 380px; height: 380px;
     background: radial-gradient(circle, #F7B35A 0%, transparent 65%);
-    opacity: 0.35;
+    opacity: 0.65;
     border-radius: 50%;
     filter: blur(40px);
     animation: privBlob1 22s ease-in-out infinite alternate;
@@ -741,7 +746,7 @@
     bottom: -160px; left: -120px;
     width: 460px; height: 460px;
     background: radial-gradient(circle, #B97A35 0%, transparent 60%);
-    opacity: 0.30;
+    opacity: 0.55;
     border-radius: 50%;
     filter: blur(50px);
     animation: privBlob2 28s ease-in-out infinite alternate;
@@ -961,17 +966,26 @@
   /*  Row 2 (auto): 4× habit-mini (each span 3)
       Row 3: italiano (1-9) | life (9-13)
       Row 4: empty(1-9)     | mini-calendar (9-13)            */
-  .priv-ita-card  {
-    grid-column: 1 / 7;
+  /* ── Bottom row: flex container spans all 12 cols ── */
+  .priv-bottom-row {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    min-height: 0;
+    align-items: stretch;
+  }
+  .priv-ita-card {
+    flex: 6 0 0;
     background: linear-gradient(135deg, #FFFDF0 0%, #FFF5D0 100%);
   }
   .priv-life-card {
-    grid-column: 7 / 10;
+    flex: 3 0 0;
     background: linear-gradient(160deg, #FFFCF0 0%, #FFE8B0 100%);
     box-shadow: var(--ps2);
+    overflow: hidden;
   }
   .priv-cal-mini {
-    grid-column: 10 / 13;
+    flex: 3 0 0;
     background: linear-gradient(135deg, #FFFDF0 0%, #FFF2D9 100%);
     padding: 10px 12px 9px;
   }
@@ -1158,6 +1172,8 @@
     grid-template-columns: repeat(52, 1fr);
     gap: 0.8px;
     margin-bottom: 6px;
+    max-height: 180px;
+    overflow: hidden;
   }
   .life-cell {
     height: 1.6px;
@@ -1221,6 +1237,17 @@
 
 
 
+<!-- ── Business toggle: visible behind private screen (z:200 < screen z:9000) ── -->
+<div class="view-switch-card" id="vswitch-biz" onclick="toggleView()">
+  <span class="view-switch-label">Business</span>
+  <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
+</div>
+<!-- ── Private toggle: z:9100 — sits above private screen (z:9000) ── -->
+<div class="view-switch-card priv-mode" id="vswitch-priv" onclick="toggleView()">
+  <span class="view-switch-label">Privat</span>
+  <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
+</div>
+
 <div class="screen" id="screen-business">
 
   <!-- ── ROW 1: Zeit + Wetter ── -->
@@ -1232,10 +1259,6 @@
         <div class="time-date"    id="datestr">Laden…</div>
       </div>
       <div class="time-actions">
-        <div class="view-switch-card" onclick="toggleView()" title="Zur privaten Ansicht">
-          <span class="view-switch-label">Business</span>
-          <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
-        </div>
         <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
@@ -1385,16 +1408,13 @@
       <span class="priv-greeting" id="priv-greeting"></span>
       <span class="priv-date-label" id="priv-date-label"></span>
       <div class="priv-header-spacer"></div>
-      <div class="view-switch-card priv-mode" onclick="toggleView()" title="Zur Business-Ansicht">
-        <span class="view-switch-label">Privat</span>
-        <div class="view-switch-pill"><div class="view-switch-thumb"></div></div>
-      </div>
     </header>
 
     <!-- ── Habit Mini Cards (4 individual bento tiles) ── -->
     <div id="habit-tiles" style="display:contents"></div>
 
-    <!-- ── Italiano Heatmap ── -->
+    <!-- ── Bottom row: Italiano + Life + Calendar ── -->
+    <div class="priv-bottom-row">
     <div class="priv-card priv-ita-card">
       <div class="priv-card-label">
         <span>🇮🇹 &nbsp;Italiano — April bis Juli</span>
@@ -1427,17 +1447,6 @@
       </div>
     </div>
 
-    <!-- ── Mini Google Calendar (bottom-right) ── -->
-    <div class="priv-card priv-cal-mini">
-      <div class="priv-card-label"><span>📅 &nbsp;Diese Woche</span></div>
-      <div class="priv-cal-mini-frame">
-        <iframe
-          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFAF0&color=%23C4713A"
-          scrolling="no"
-          allowtransparency="true"></iframe>
-      </div>
-    </div>
-
     <!-- ── Life Weeks ── -->
     <div class="priv-card priv-life-card">
       <div class="priv-card-label"><span>🌱 &nbsp;Wochen deines Lebens</span></div>
@@ -1464,6 +1473,18 @@
         <div class="life-stats" id="life-stats"></div>
       </div>
     </div>
+
+    <!-- ── Mini Google Calendar ── -->
+    <div class="priv-card priv-cal-mini">
+      <div class="priv-card-label"><span>📅 &nbsp;Diese Woche</span></div>
+      <div class="priv-cal-mini-frame">
+        <iframe
+          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFF5E0&color=%23B97A35"
+          scrolling="no"
+          allowtransparency="true"></iframe>
+      </div>
+    </div>
+    </div><!-- /.priv-bottom-row -->
 
   </div>
 </div><!-- /#screen-private -->
