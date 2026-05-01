@@ -8,6 +8,10 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <!-- Morning Report Slideshow -->
 <link rel="stylesheet" href="morningReport.css">
+<!-- Playfair Display for private screen serif typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -653,10 +657,12 @@
   }
   #view-toggle:active { transform: scale(0.97); }
   #view-toggle.priv-mode {
-    background: #FFFCF0;
-    border-color: rgba(185,122,53,0.28);
-    box-shadow: 0 4px 24px rgba(58,38,22,0.14), 0 1px 3px rgba(58,38,22,0.06);
+    background: #F4ECDC;
+    border-color: rgba(58,38,22,0.10);
+    box-shadow: 0 2px 16px rgba(58,38,22,0.08), 0 1px 3px rgba(58,38,22,0.04);
   }
+  #view-toggle.priv-mode .view-switch-label { color: #3A2616; }
+  #view-toggle.priv-mode .view-switch-pill { background: #C7522A; }
   .view-switch-label {
     font-size: 13px;
     font-weight: 600;
@@ -691,42 +697,39 @@
   #view-toggle.priv-mode .view-switch-thumb { transform: translateX(18px); }
 
   /* ═══════════════════════════════════════════════════════════════
-     PRIVATE SCREEN — VARS + CONTAINER
+     PRIVATE SCREEN v2 — WARM LINEN
   ═══════════════════════════════════════════════════════════════ */
   :root {
-    --pb:  #FFF2D9;
-    --pc:  #FFFFFF;       /* near-pure white for max contrast vs warm bg */
-    --pc2: #FFFCF0;
-    --pb2: rgba(58,38,22,0.10);   /* dark border for definition */
-    --pb3: rgba(58,38,22,0.22);
-    --ps:  0 2px 8px rgba(58,38,22,0.10), 0 8px 28px rgba(58,38,22,0.12);
-    --ps2: 0 4px 16px rgba(58,38,22,0.16), 0 12px 40px rgba(58,38,22,0.14);
-    --pt:  #2C1810;       /* darker text for higher contrast */
-    --pt2: #8A5A28;
-    --pt3: #B89060;
-    --pa:  #D87A2A;       /* punchier orange */
-    --pa2: #F7B35A;
-    --pg:  #2D6A3E;       /* deeper green */
-    --pg2: #5A9D6A;
-    --pg3: #1F4A28;
-    --phn: rgba(58,38,22,0.10);
+    --pb:    #EFE5D2;            /* linen background */
+    --pc:    #F4ECDC;            /* card cream */
+    --pc2:   #F9F0DD;            /* card-hover / done */
+    --pb2:   rgba(58,38,22,0.08);
+    --pb3:   rgba(58,38,22,0.18);
+    --ps:    none;
+    --ps2:   none;
+    --pt:    #3A2616;
+    --pt2:   #8A6A42;
+    --pt3:   #A88860;
+    --pa:    #C7522A;            /* terracotta */
+    --pa2:   #D86940;
+    --pg:    #5A7A3F;            /* olive */
+    --pg2:   #7A9258;
+    --pg3:   #2D5A27;
+    --phn:   #E5D8BD;            /* empty-state beige */
+    --pyel:  #D4A24A;            /* yellow accent */
+    --serif: 'Playfair Display', 'EB Garamond', Georgia, serif;
   }
 
   #screen-private {
     position: fixed;
     inset: 0;
     z-index: 9000;
-    /* NEW: bold sunset — deep amber bottom, warm cream top */
     background:
-      radial-gradient(circle at 18% 12%, #FFEAB5 0%, transparent 38%),
-      linear-gradient(165deg,
-        #FFD58A 0%,
-        #F2A85A 35%,
-        #C8732C 75%,
-        #8B4A1A 100%);
+      radial-gradient(ellipse at 50% 35%, #F4EBD8 0%, #E8D9BC 100%),
+      #EFE5D2;
     background-attachment: fixed;
     overflow-y: auto;
-    padding: 14px;
+    padding: 28px 28px 18px;
     font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
     color: var(--pt);
     -webkit-font-smoothing: antialiased;
@@ -738,436 +741,354 @@
   }
   #screen-private.active { opacity: 1; pointer-events: auto; }
 
-  /* NEW: huge sun disc top-left, glows softly */
-  .priv-sun {
-    position: fixed;
-    top: -180px; left: -120px;
-    width: 540px; height: 540px;
-    border-radius: 50%;
-    background: radial-gradient(circle,
-      #FFF4D0 0%,
-      rgba(255,224,160,0.85) 18%,
-      rgba(247,179,90,0.55) 38%,
-      transparent 70%);
-    filter: blur(8px);
-    pointer-events: none;
-    z-index: 0;
-    animation: privSunPulse 14s ease-in-out infinite alternate;
-  }
-  @keyframes privSunPulse {
-    0%   { transform: scale(1)    rotate(0deg); opacity: 0.92; }
-    100% { transform: scale(1.08) rotate(8deg); opacity: 1; }
-  }
-
-  /* NEW: radiating sun rays from upper-left corner */
-  .priv-rays {
+  /* Subtle linen/canvas texture */
+  .priv-texture {
     position: fixed; inset: 0;
-    background:
-      repeating-conic-gradient(
-        from 0deg at 14% 10%,
-        rgba(255,255,255,0)    0deg,
-        rgba(255,255,255,0)    7deg,
-        rgba(255,243,210,0.16) 7deg,
-        rgba(255,243,210,0.16) 9deg
-      );
-    mix-blend-mode: screen;
-    pointer-events: none;
-    z-index: 0;
-    animation: privRaysSpin 240s linear infinite;
-  }
-  @keyframes privRaysSpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
-  /* NEW: dark mountain silhouette band at bottom — adds depth + landscape feel */
-  .priv-mountains {
-    position: fixed;
-    bottom: 0; left: 0;
-    width: 100%; height: 220px;
-    background:
-      linear-gradient(to top, rgba(60,30,12,0.45) 0%, transparent 100%),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 220' preserveAspectRatio='none'><path d='M0,220 L0,140 L120,90 L220,130 L340,60 L460,110 L580,80 L700,150 L820,70 L940,120 L1060,90 L1180,140 L1300,80 L1440,130 L1440,220 Z' fill='rgba(50,25,10,0.55)'/><path d='M0,220 L0,170 L160,130 L290,160 L410,110 L540,150 L660,120 L800,170 L920,130 L1080,160 L1220,130 L1340,170 L1440,150 L1440,220 Z' fill='rgba(35,18,8,0.65)'/></svg>");
-    background-size: cover;
-    background-position: bottom;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /* NEW: scattered floating particles — lazy upward drift */
-  .priv-particles {
-    position: fixed; inset: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .priv-particles::before,
-  .priv-particles::after {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      radial-gradient(circle, rgba(255,243,210,0.55) 1.5px, transparent 2.5px),
-      radial-gradient(circle, rgba(255,223,160,0.35) 1px,   transparent 2px);
-    background-size: 90px 110px, 140px 170px;
-    background-position: 0 0, 45px 65px;
-    animation: privParticleDrift 50s linear infinite;
-  }
-  .priv-particles::after {
-    background-size: 120px 150px, 200px 240px;
-    background-position: 30px 50px, 80px 120px;
-    animation-duration: 75s;
-    animation-direction: reverse;
-    opacity: 0.6;
-  }
-  @keyframes privParticleDrift {
-    0%   { transform: translate(0, 0); }
-    100% { transform: translate(-90px, -110px); }
-  }
-
-  /* NEW: subtle paper grain (kept) */
-  .priv-grain {
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.45;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.32 0 0 0 0 0.2 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: multiply;
+    opacity: 0.85;
     pointer-events: none;
-    z-index: 2;
+    z-index: 1;
   }
-  /* Layout sits above all background layers (sun, rays, particles, mountains, grain) */
   #screen-private .priv-layout { position: relative; z-index: 5; }
 
   .priv-layout {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-auto-rows: auto;
-    gap: 10px;
-    min-height: calc(100dvh - 28px);
+    gap: 14px;
+    min-height: calc(100dvh - 46px);
   }
+
+  /* ── Header ── */
   .priv-header {
     grid-column: 1 / -1;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 4px 2px;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 4px 6px 8px;
+    margin-bottom: 4px;
+    gap: 24px;
   }
-  /* Clearance row under the fixed toggle (toggle: y=20→116, header y≈14→44) */
-  .priv-toggle-clearance {
-    grid-column: 1 / -1;
-    height: 70px;
-  }
-  .priv-header-spacer { flex: 1; }
-  .priv-title {
-    font-size: 22px;
-    font-weight: 800;
+  .priv-greet-block { display: flex; flex-direction: column; gap: 2px; }
+  .priv-greet-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 38px;
     color: var(--pt);
-    letter-spacing: -0.04em;
-    background: linear-gradient(135deg, var(--pt) 0%, #5B3E22 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
   }
-  .priv-greeting {
-    font-size: 13px;
-    color: var(--pt2);
-    font-weight: 500;
-    letter-spacing: -0.005em;
+  .priv-greet-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--pa);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-top: 2px;
   }
-  .priv-date-label {
-    font-size: 11.5px;
-    color: var(--pt3);
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    padding: 3px 9px;
-    background: rgba(255,255,255,0.55);
+  .priv-date-pill {
+    background: var(--pc);
     border: 0.5px solid var(--pb2);
-    border-radius: 99px;
+    border-radius: 14px;
+    padding: 12px 18px;
+    text-align: right;
+    margin-right: 156px; /* clear the fixed toggle (right:184 + width:132 = ~316 from right) */
+    flex-shrink: 0;
+  }
+  .priv-date-day {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--pt);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .priv-date-meta {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--pt3);
+    text-transform: uppercase;
+    margin-top: 5px;
+    font-family: -apple-system, sans-serif;
   }
 
-  /* Bento card base */
+  /* ── Card base ── */
   .priv-card {
     background: var(--pc);
-    border-radius: 18px;
     border: 0.5px solid var(--pb2);
-    box-shadow: var(--ps);
-    padding: 12px 14px;
+    border-radius: 14px;
+    padding: 18px 22px;
     position: relative;
-    overflow: hidden;
   }
   .priv-card-label {
-    font-size: 10.5px;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--pt3);
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--pt);
-    margin-bottom: 10px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
+  }
+  .priv-card-label::before {
+    content: '✦';
+    font-size: 10px;
+    color: var(--pa);
+    font-weight: 400;
   }
 
-  /* ── Habit Mini Cards (Bento) ── */
+  /* ── Habit cards (row of 4) ── */
   .habit-mini {
     grid-column: span 3;
-    background: #FFFFFF;
+    background: var(--pc);
     border: 0.5px solid var(--pb2);
-    border-radius: 18px;
-    box-shadow: var(--ps);
-    padding: 11px 13px 11px;
+    border-radius: 14px;
+    padding: 18px 22px 14px;
     cursor: pointer;
-    transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, background 0.35s, border-color 0.35s;
-    position: relative;
-    overflow: hidden;
+    transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), background 0.25s, border-color 0.25s;
     -webkit-tap-highlight-color: transparent;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-height: 128px;
+    gap: 6px;
+    min-height: 168px;
   }
-  .habit-mini::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(at top right, rgba(255,255,255,0.55), transparent 60%);
-    pointer-events: none;
-  }
-  .habit-mini:active { transform: scale(0.97); }
-  .habit-mini.done {
-    background: linear-gradient(135deg, #ECF5DF 0%, #D9EBC7 100%);
-    border-color: rgba(91,138,82,0.30);
-    box-shadow: 0 2px 10px rgba(91,138,82,0.16), 0 6px 22px rgba(91,138,82,0.10);
-  }
+  .habit-mini:active { transform: scale(0.985); }
+  .habit-mini.done { background: var(--pc2); }
   .habit-mini-emoji {
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
     align-self: flex-start;
+    margin-bottom: 6px;
   }
   .habit-mini-name {
-    font-size: 13px;
-    font-weight: 700;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 22px;
     color: var(--pt);
-    letter-spacing: -0.02em;
-    line-height: 1.18;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
   }
-  .habit-mini-name.placeholder { color: var(--pt3); font-weight: 600; font-style: italic; }
+  .habit-mini-name.placeholder { color: var(--pt3); font-weight: 500; }
   .habit-mini-goal {
-    font-size: 10.5px;
-    color: var(--pt2);
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    color: var(--pt3);
+    text-transform: uppercase;
+    margin-top: 1px;
   }
   .habit-mini-bar {
     display: flex;
-    gap: 2px;
-    margin-top: 4px;
+    gap: 3px;
+    margin-top: 10px;
+    margin-bottom: auto;
   }
   .habit-mini-bar-dot {
     flex: 1;
-    height: 5px;
-    border-radius: 2px;
+    height: 6px;
+    border-radius: 1.5px;
     background: var(--phn);
   }
-  .habit-mini-bar-dot.on { background: var(--pg2); }
-  .habit-mini.done .habit-mini-bar-dot.on { background: var(--pg); }
-  .habit-mini-bar-dot.today { outline: 1.5px solid var(--pa); outline-offset: 1px; }
+  .habit-mini-bar-dot.on { background: var(--pa); }
+  .habit-mini-bar-dot.today { background: var(--pyel); }
   .habit-mini-foot {
-    margin-top: auto;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 6px;
   }
   .habit-mini-streak {
-    font-size: 13px;
-    font-weight: 700;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--pa);
     letter-spacing: -0.01em;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
   }
   .habit-mini-streak.zero {
     color: var(--pt3);
-    font-weight: 500;
-    font-size: 11.5px;
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: 0;
   }
   .habit-mini-checkmark {
     width: 22px; height: 22px;
     border-radius: 50%;
-    border: 1.5px solid var(--pb3);
-    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--pb3);
+    background: transparent;
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+    transition: background 0.25s, border-color 0.25s;
     flex-shrink: 0;
   }
   .habit-mini.done .habit-mini-checkmark {
     background: var(--pg);
     border-color: var(--pg);
-    transform: scale(1.05);
-    box-shadow: 0 1px 4px rgba(91,138,82,0.30);
   }
   .habit-mini.done .habit-mini-checkmark::after {
-    content: '';
-    width: 9px; height: 5px;
-    border-left: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    transform: rotate(-45deg) translateY(-1px);
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
   }
 
-  /* ── Bento Position Cards ── */
-  /*  Row 2 (auto): 4× habit-mini (each span 3)
-      Row 3: italiano (1-9) | life (9-13)
-      Row 4: empty(1-9)     | mini-calendar (9-13)            */
-  /* ── Bottom row: flex container spans all 12 cols ── */
+  /* ── Bottom row ── */
   .priv-bottom-row {
     grid-column: 1 / -1;
     display: flex;
-    gap: 10px;
-    min-height: 0;
-    align-items: stretch;
-  }
-  .priv-ita-card {
-    flex: 6 0 0;
-    background: #FFFFFF;
-  }
-  .priv-life-card {
-    flex: 3 0 0;
-    background: #FFFFFF;
-    box-shadow: var(--ps2);
-    overflow: hidden;
-  }
-  .priv-cal-mini {
-    flex: 3 0 0;
-    background: #FFFFFF;
-    padding: 10px 12px 9px;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .priv-life-card::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; left: -40px;
-    width: 220px; height: 220px;
-    background: radial-gradient(circle, rgba(196,113,58,0.18) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .priv-ita-card::after {
-    content: '';
-    position: absolute;
-    top: -50px; right: -50px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(91,138,82,0.16) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  /* ── Italian Heatmap (bigger, easier, more flair) ── */
-  .ita-stack {
-    display: grid;
-    grid-template-columns: 1fr auto;
     gap: 14px;
     align-items: stretch;
+    min-height: 0;
   }
-  .ita-stats-col {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    min-width: 96px;
-  }
-  .ita-stat-tile {
-    background: rgba(255,255,255,0.60);
-    border: 0.5px solid var(--pb2);
-    border-radius: 11px;
-    padding: 8px 10px;
-  }
-  .ita-stat-val {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--pt);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .ita-stat-lbl {
-    font-size: 8.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    color: var(--pt2);
-    margin-top: 4px;
-  }
-  .ita-log-btn-big {
-    margin-top: auto;
-    background: linear-gradient(135deg, var(--pa) 0%, var(--pa2) 100%);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    letter-spacing: 0.01em;
-    box-shadow: 0 2px 10px rgba(196,113,58,0.30);
-    transition: transform 0.12s, box-shadow 0.18s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .ita-log-btn-big:active { transform: scale(0.96); box-shadow: 0 1px 4px rgba(196,113,58,0.40); }
+  .priv-ita-card { flex: 6 0 0; display: flex; flex-direction: column; }
+  .priv-life-card { flex: 3 0 0; display: flex; flex-direction: column; overflow: hidden; }
+  .priv-cal-mini { flex: 3 0 0; display: flex; flex-direction: column; min-height: 0; }
 
-  .ita-grid { display: flex; gap: 4px; margin-top: 4px; }
-  .ita-col  { display: flex; flex-direction: column; gap: 4px; }
+  /* ── Italian Heatmap ── */
+  .ita-grid { display: flex; gap: 5px; margin-top: 4px; }
+  .ita-col { display: flex; flex-direction: column; gap: 5px; }
   .ita-cell {
-    width: 17px; height: 17px;
+    width: 22px; height: 22px;
     border-radius: 4px;
     cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.18s;
+    background: var(--phn);
+    transition: transform 0.12s;
     flex-shrink: 0;
-    box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.06);
   }
-  .ita-cell:active { transform: scale(1.30); }
+  .ita-cell:active { transform: scale(1.25); }
   .ita-cell.ita-today {
-    outline: 2px solid var(--pa);
+    outline: 1.5px solid var(--pa);
     outline-offset: 2px;
-    animation: itaTodayPulse 2.2s ease-in-out infinite;
   }
-  @keyframes itaTodayPulse {
-    0%, 100% { box-shadow: 0 0 6px rgba(196,113,58,0.30); }
-    50%      { box-shadow: 0 0 14px rgba(196,113,58,0.55); }
-  }
-  .ita-month-labels { display: flex; gap: 4px; margin-bottom: 5px; }
+  .ita-month-labels { display: flex; gap: 5px; margin-bottom: 5px; }
   .ita-month-span {
     font-size: 9.5px;
     font-weight: 600;
-    color: var(--pt2);
-    white-space: nowrap;
-    overflow: hidden;
-    letter-spacing: 0.04em;
-  }
-  .ita-legend {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 9.5px;
-    color: var(--pt2);
-    flex-wrap: wrap;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-  .ita-leg-dot {
-    width: 10px; height: 10px;
-    border-radius: 3px;
-    display: inline-block;
-    vertical-align: middle;
+    color: var(--pt3);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
   }
 
-  /* ── Mini Calendar (private bottom-right) ── */
+  .ita-stats-rows {
+    margin-top: 18px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ita-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 0;
+    border-top: 0.5px solid var(--pb2);
+  }
+  .ita-stat-row:last-of-type { border-bottom: 0.5px solid var(--pb2); }
+  .ita-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--pt3);
+    text-transform: uppercase;
+  }
+  .ita-stat-val {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--pt);
+    letter-spacing: -0.01em;
+  }
+  .ita-log-btn-big {
+    margin-top: auto;
+    background: var(--pa);
+    color: #FBF0DD;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ita-log-btn-big:hover { background: var(--pa2); }
+  .ita-log-btn-big:active { transform: scale(0.99); }
+
+  /* ── Life Weeks Card ── */
+  .life-hero-week {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 56px;
+    color: var(--pa);
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    margin-top: 2px;
+  }
+  .life-hero-total {
+    font-size: 12px;
+    color: var(--pt2);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .life-hero-total strong { color: var(--pt); font-weight: 700; }
+  .life-hero-meta {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--pt2);
+    margin-top: 4px;
+  }
+  .life-progress-bar {
+    height: 4px;
+    background: var(--phn);
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 14px 0 12px;
+  }
+  .life-progress-fill {
+    height: 100%;
+    background: var(--pa);
+    border-radius: 99px;
+    transition: width 0.9s cubic-bezier(0.22,1,0.36,1);
+  }
+  .life-grid {
+    display: grid;
+    grid-template-columns: repeat(52, 4px);
+    grid-auto-rows: 4px;
+    gap: 1.5px;
+    justify-content: start;
+    margin-top: auto;
+    max-height: 200px;
+    overflow: hidden;
+  }
+  .life-cell {
+    width: 4px; height: 4px;
+    background: var(--phn);
+  }
+  .life-cell.lived   { background: var(--pt); opacity: 0.55; }
+  .life-cell.current { background: var(--pa) !important; opacity: 1 !important; }
+
+  /* ── Mini Calendar ── */
   .priv-cal-mini-frame {
     width: 100%;
-    flex: 1;            /* fill remaining card height */
+    flex: 1;
     min-height: 0;
     border: 0.5px solid var(--pb2);
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.4);
   }
   .priv-cal-mini-frame iframe {
     width: 100%; height: 100%;
@@ -1175,86 +1096,7 @@
     pointer-events: auto;
   }
 
-  /* ── Life Weeks Card ── */
-  .life-hero-week {
-    font-size: 42px;
-    font-weight: 200;
-    letter-spacing: -0.05em;
-    line-height: 1;
-    color: var(--pt);
-    font-variant-numeric: tabular-nums;
-    margin-top: 2px;
-  }
-  .life-hero-label {
-    font-size: 9.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--pt2);
-    margin-top: 4px;
-  }
-  .life-hero-total {
-    font-size: 11px;
-    color: var(--pt2);
-    margin-top: 5px;
-    line-height: 1.4;
-  }
-  .life-hero-total strong { color: var(--pt); font-weight: 700; }
-  .life-progress-bar {
-    height: 5px;
-    background: rgba(180,140,90,0.14);
-    border-radius: 99px;
-    overflow: hidden;
-    margin: 9px 0 6px;
-  }
-  .life-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--pa), var(--pa2));
-    border-radius: 99px;
-    transition: width 0.9s cubic-bezier(0.22,1,0.36,1);
-  }
-  .life-age-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--pt3);
-    letter-spacing: 0.05em;
-    margin-bottom: 6px;
-  }
-  .life-grid {
-    display: grid;
-    grid-template-columns: repeat(52, 2.5px);
-    gap: 0.6px;
-    justify-content: center;
-    margin-bottom: 6px;
-    max-height: 220px;
-    overflow: hidden;
-  }
-  .life-cell {
-    width: 2.5px;
-    height: 2.5px;
-    border-radius: 0.5px;
-    background: rgba(185,122,53,0.22);
-    transition: background 0.2s;
-  }
-  .life-cell.lived   { background: var(--pt); opacity: 0.62; }
-  .life-cell.current {
-    background: var(--pa) !important;
-    opacity: 1 !important;
-    box-shadow: 0 0 0 1.5px var(--pa2), 0 0 8px rgba(196,113,58,0.40);
-  }
-  .life-stats {
-    font-size: 11px;
-    color: var(--pt2);
-    text-align: center;
-    margin-top: 6px;
-    padding-top: 8px;
-    border-top: 1px solid var(--pb2);
-    letter-spacing: 0.02em;
-    font-weight: 500;
-  }
-
+  /* ── Life birthday form (first-run) ── */
   .life-bd-form {
     display: flex;
     flex-direction: column;
@@ -1264,28 +1106,39 @@
   .life-bd-form label { font-size: 12px; color: var(--pt2); font-weight: 500; }
   .life-bd-input {
     border: 1px solid var(--pb3);
-    border-radius: 11px;
+    border-radius: 10px;
     padding: 10px 12px;
     font-size: 14px;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.6);
     color: var(--pt);
     font-family: inherit;
     width: 100%;
     -webkit-appearance: none;
   }
   .life-bd-save {
-    background: linear-gradient(135deg, var(--pa), var(--pa2));
-    color: #fff;
+    background: var(--pa);
+    color: #FBF0DD;
     border: none;
-    border-radius: 11px;
-    padding: 11px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    letter-spacing: -0.01em;
-    box-shadow: 0 2px 8px rgba(196,113,58,0.25);
+  }
+
+  /* ── Footer credit ── */
+  .priv-footer-credit {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.30em;
+    color: var(--pt3);
+    text-transform: uppercase;
+    padding: 14px 0 4px;
   }
 
 </style>
@@ -1450,100 +1303,83 @@
      PRIVATE SCREEN
 ══════════════════════════════════════════════════════════════ -->
 <div id="screen-private">
-  <!-- NEW background stack: sun → rays → particles → mountains → grain -->
-  <div class="priv-sun"></div>
-  <div class="priv-rays"></div>
-  <div class="priv-particles"></div>
-  <div class="priv-mountains"></div>
-  <div class="priv-grain"></div>
+  <div class="priv-texture"></div>
   <div class="priv-layout">
 
-    <!-- ── Header ── -->
+    <!-- ── Header: serif greeting + date pill ── -->
     <header class="priv-header">
-      <h1 class="priv-title">Privat</h1>
-      <span class="priv-greeting" id="priv-greeting"></span>
-      <span class="priv-date-label" id="priv-date-label"></span>
-      <div class="priv-header-spacer"></div>
+      <div class="priv-greet-block">
+        <h1 class="priv-greet-title" id="priv-greet-title">Hallo, Simon.</h1>
+        <p class="priv-greet-sub" id="priv-greet-sub">Schön, dich zu sehen.</p>
+      </div>
+      <div class="priv-date-pill">
+        <div class="priv-date-day"  id="priv-date-day">—</div>
+        <div class="priv-date-meta" id="priv-date-meta">—</div>
+      </div>
     </header>
 
-    <!-- ── Spacer to clear the fixed toggle (96px tall at top:20 right:184) ── -->
-    <div class="priv-toggle-clearance"></div>
-
-    <!-- ── Habit Mini Cards (4 individual bento tiles) ── -->
+    <!-- ── Habit Mini Cards (4 in a row) ── -->
     <div id="habit-tiles" style="display:contents"></div>
 
     <!-- ── Bottom row: Italiano + Life + Calendar ── -->
     <div class="priv-bottom-row">
-    <div class="priv-card priv-ita-card">
-      <div class="priv-card-label">
-        <span>🇮🇹 &nbsp;Italiano — April bis Juli</span>
-      </div>
-      <div class="ita-stack">
-        <div>
-          <div id="ita-heatmap"></div>
-          <div class="ita-legend">
-            <span class="ita-leg-dot" style="background:#E8DCC4"></span>0 Min
-            <span class="ita-leg-dot" style="background:#A8DA9F"></span>&lt;10
-            <span class="ita-leg-dot" style="background:#3F8556"></span>10–30
-            <span class="ita-leg-dot" style="background:#1A4A2A"></span>30+
+
+      <!-- Italian Heatmap -->
+      <div class="priv-card priv-ita-card">
+        <div class="priv-card-label">Italiano · April bis Juli</div>
+        <div id="ita-heatmap"></div>
+        <div class="ita-stats-rows">
+          <div class="ita-stat-row">
+            <span class="ita-stat-label">Streak <span style="margin-left:2px">🔥</span></span>
+            <span class="ita-stat-val" id="ita-stat-streak">0 Tage</span>
+          </div>
+          <div class="ita-stat-row">
+            <span class="ita-stat-label">Diese Woche</span>
+            <span class="ita-stat-val" id="ita-stat-week">0 min</span>
+          </div>
+          <div class="ita-stat-row">
+            <span class="ita-stat-label">Gesamt</span>
+            <span class="ita-stat-val" id="ita-stat-total">0 min</span>
           </div>
         </div>
-        <div class="ita-stats-col">
-          <div class="ita-stat-tile">
-            <div class="ita-stat-val" id="ita-stat-streak">0</div>
-            <div class="ita-stat-lbl">Streak 🔥</div>
-          </div>
-          <div class="ita-stat-tile">
-            <div class="ita-stat-val" id="ita-stat-week">0</div>
-            <div class="ita-stat-lbl">Diese Woche</div>
-          </div>
-          <div class="ita-stat-tile">
-            <div class="ita-stat-val" id="ita-stat-total">0h</div>
-            <div class="ita-stat-lbl">Gesamt</div>
-          </div>
-          <button class="ita-log-btn-big" onclick="itaLogToday()">+ Heute loggen</button>
+        <button class="ita-log-btn-big" onclick="itaLogToday()">+ Heute loggen</button>
+      </div>
+
+      <!-- Life Weeks -->
+      <div class="priv-card priv-life-card">
+        <div class="priv-card-label">Wochen deines Lebens</div>
+
+        <div class="life-bd-form" id="life-bd-form">
+          <label>Geburtsdatum:</label>
+          <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
+          <button class="life-bd-save" onclick="lifeSaveBirthdate()">Los geht's</button>
         </div>
-      </div>
-    </div>
 
-    <!-- ── Life Weeks ── -->
-    <div class="priv-card priv-life-card">
-      <div class="priv-card-label"><span>🌱 &nbsp;Wochen deines Lebens</span></div>
-
-      <div class="life-bd-form" id="life-bd-form">
-        <label>Geburtsdatum:</label>
-        <input type="date" class="life-bd-input" id="life-bd-input" value="2006-01-01">
-        <button class="life-bd-save" onclick="lifeSaveBirthdate()">Los geht's</button>
-      </div>
-
-      <div id="life-content" style="display:none">
-        <div class="life-hero">
+        <div id="life-content" style="display:none">
           <div class="life-hero-week" id="life-hero-week">—</div>
-          <div class="life-hero-label">Woche deines Lebens</div>
           <div class="life-hero-total" id="life-hero-total"></div>
+          <div class="life-hero-meta"  id="life-hero-meta"></div>
+          <div class="life-progress-bar">
+            <div class="life-progress-fill" id="life-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="life-grid" id="life-grid"></div>
         </div>
-        <div class="life-progress-bar">
-          <div class="life-progress-fill" id="life-progress-fill" style="width:0%"></div>
-        </div>
-        <div class="life-age-row">
-          <span>0</span><span>21</span><span>42</span><span>63</span><span>85</span>
-        </div>
-        <div class="life-grid" id="life-grid"></div>
-        <div class="life-stats" id="life-stats"></div>
       </div>
-    </div>
 
-    <!-- ── Mini Google Calendar ── -->
-    <div class="priv-card priv-cal-mini">
-      <div class="priv-card-label"><span>📅 &nbsp;Diese Woche</span></div>
-      <div class="priv-cal-mini-frame">
-        <iframe
-          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFF5E0&color=%23B97A35"
-          scrolling="no"
-          allowtransparency="true"></iframe>
+      <!-- Mini Google Calendar -->
+      <div class="priv-card priv-cal-mini">
+        <div class="priv-card-label">Diese Woche</div>
+        <div class="priv-cal-mini-frame">
+          <iframe
+            src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23F4ECDC&color=%23C7522A"
+            scrolling="no"
+            allowtransparency="true"></iframe>
+        </div>
       </div>
-    </div>
+
     </div><!-- /.priv-bottom-row -->
+
+    <div class="priv-footer-credit">VARIANTE 01 — WARM LINEN</div>
 
   </div>
 </div><!-- /#screen-private -->
@@ -2760,10 +2596,10 @@ function lifeSaveBirthdate() {
 // ── Italian Minutes ──
 function itaLoad() { try { return JSON.parse(localStorage.getItem('priv_ita_min')||'{}'); } catch { return {}; } }
 function itaMinsToColor(m) {
-  if (!m)    return '#E8DCC4';   // warm beige — clearly visible on white
-  if (m<10)  return '#A8DA9F';   // light green
-  if (m<=30) return '#3F8556';   // strong green
-  return '#1A4A2A';              // deep dark green
+  if (!m)    return '#E5D8BD';   // empty beige
+  if (m<10)  return '#B8C99F';   // light olive
+  if (m<=30) return '#7A9258';   // mid olive
+  return '#5A7A3F';              // strong olive
 }
 function itaLogDay(ds) {
   const data=itaLoad(), cur=data[ds]||0;
@@ -2775,12 +2611,33 @@ function itaLogDay(ds) {
 }
 
 // ── Master render ──
+function _privWeekNumber(d) {
+  // ISO week number
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  return 1 + Math.ceil((firstThursday - target) / (7 * 86400000));
+}
+function _privDayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+
 function renderPrivate() {
-  const now=new Date();
-  const lbl=document.getElementById('priv-date-label');
-  const grt=document.getElementById('priv-greeting');
-  if (lbl) lbl.textContent=DAYS[now.getDay()]+', '+now.getDate()+'. '+MONTHS[now.getMonth()];
-  if (grt) grt.textContent='— '+privGreeting()+', Simon';
+  const now = new Date();
+  const greetTitle = document.getElementById('priv-greet-title');
+  const greetSub   = document.getElementById('priv-greet-sub');
+  const dateDay    = document.getElementById('priv-date-day');
+  const dateMeta   = document.getElementById('priv-date-meta');
+
+  if (greetTitle) greetTitle.textContent = privGreeting() + ', Simon.';
+  if (greetSub)   greetSub.textContent   = 'Schön, dich zu sehen.';
+  if (dateDay)    dateDay.textContent    = DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()];
+  if (dateMeta)   dateMeta.textContent   = 'KW ' + _privWeekNumber(now) + ' · TAG ' + _privDayOfYear(now);
+
   renderHabits(); renderLifeWeeks(); renderItaHeatmap();
 }
 
@@ -2803,10 +2660,8 @@ function renderHabits() {
     }
 
     const streakHtml = streak>0
-      ? '<span class="habit-mini-streak">'+streak+' 🔥</span>'
-      : (record>0
-          ? '<span class="habit-mini-streak zero">Rekord '+record+'</span>'
-          : '<span class="habit-mini-streak zero">—</span>');
+      ? '<span class="habit-mini-streak">'+streak+' '+(streak===1?'Tag':'Tage')+' 🔥</span>'
+      : '<span class="habit-mini-streak zero">—</span>';
 
     return '<div class="habit-mini'+(done?' done':'')+'" onclick="habitToggle(\''+h.id+'\')">'
       +'<div class="habit-mini-emoji">'+h.emoji+'</div>'
@@ -2834,11 +2689,13 @@ function renderLifeWeeks() {
   const pct=Math.min(100,weeksLived/TOTAL*100).toFixed(1);
   const age=Math.floor((now-birth)/(365.25*24*60*60*1000));
 
-  const heroWk=document.getElementById('life-hero-week');
-  const heroTt=document.getElementById('life-hero-total');
-  const progFill=document.getElementById('life-progress-fill');
-  if (heroWk) heroWk.textContent=weeksLived.toLocaleString('de-DE');
-  if (heroTt) heroTt.innerHTML='<strong>'+weeksLeft.toLocaleString('de-DE')+'</strong> von 4.420 verbleiben · '+age+' Jahre';
+  const heroWk   = document.getElementById('life-hero-week');
+  const heroTt   = document.getElementById('life-hero-total');
+  const heroMeta = document.getElementById('life-hero-meta');
+  const progFill = document.getElementById('life-progress-fill');
+  if (heroWk)   heroWk.textContent   = weeksLived.toLocaleString('de-DE');
+  if (heroTt)   heroTt.innerHTML     = weeksLeft.toLocaleString('de-DE') + ' von 4.420 verbleiben';
+  if (heroMeta) heroMeta.textContent = age + ' Jahre · ' + pct.replace('.',',') + '% des Lebens erlebt';
   if (progFill) setTimeout(()=>{ progFill.style.width=pct+'%'; }, 80);
 
   const gridEl=document.getElementById('life-grid');
@@ -2849,8 +2706,6 @@ function renderLifeWeeks() {
     }
     gridEl.innerHTML=html;
   }
-  const statsEl=document.getElementById('life-stats');
-  if (statsEl) statsEl.textContent=pct+'% des Lebens erlebt';
 }
 
 function itaLogToday() { itaLogDay(privDateKey(new Date())); }
@@ -2895,8 +2750,8 @@ function renderItaHeatmap() {
   let lastLblW=-6;
   columns.forEach((_,w)=>{
     const mb=monthBreaks.find(m=>m.w===w);
-    if(mb&&w-lastLblW>=3){ monthRow+='<div class="ita-month-span" style="width:14px;min-width:14px;">'+mb.label+'</div>'; lastLblW=w; }
-    else{ monthRow+='<div style="width:14px;min-width:14px;"></div>'; }
+    if(mb&&w-lastLblW>=3){ monthRow+='<div class="ita-month-span" style="width:22px;min-width:22px;">'+mb.label+'</div>'; lastLblW=w; }
+    else{ monthRow+='<div style="width:22px;min-width:22px;"></div>'; }
   });
   monthRow+='</div>';
 
@@ -2937,9 +2792,9 @@ function renderItaHeatmap() {
   const sEl=document.getElementById('ita-stat-streak');
   const wEl=document.getElementById('ita-stat-week');
   const tEl=document.getElementById('ita-stat-total');
-  if (sEl) sEl.textContent=streak;
-  if (wEl) wEl.textContent=weekMin+'m';
-  if (tEl) tEl.textContent=totalH;
+  if (sEl) sEl.textContent = streak + ' ' + (streak===1?'Tag':'Tage');
+  if (wEl) wEl.textContent = weekMin + ' min';
+  if (tEl) tEl.textContent = totalMin >= 60 ? (totalMin/60).toFixed(1).replace('.',',')+' h' : totalMin+' min';
 }
 </script>
 
