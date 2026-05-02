@@ -76,11 +76,12 @@
   .card-weather { grid-column: 3; }
 
   .card-time {
-    padding: 16px 22px;
+    padding: 16px 24px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
 
   .time-display {
@@ -558,29 +559,27 @@
     transition: width 1s cubic-bezier(0.16,1,0.3,1);
   }
 
-  /* ── Morning Report Button ── */
+  /* ── Morning Report Button — circular icon button ── */
   .morning-btn {
-    align-self: center;
     flex-shrink: 0;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
     background: var(--accent-purple);
     color: #fff;
     border: none;
-    border-radius: 20px;
-    padding: 8px 15px;
-    font-size: 12px;
-    font-weight: 500;
-    font-family: inherit;
-    letter-spacing: 0.1px;
+    padding: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     transition: opacity 0.15s, transform 0.12s;
-    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(94,92,230,0.30);
   }
-  .morning-btn:active   { transform: scale(0.96); }
+  .morning-btn .btn-label { display: none; } /* text hidden, icon only */
+  .morning-btn:active   { transform: scale(0.93); }
   .morning-btn:disabled { opacity: 0.5; cursor: default; }
-  .morning-btn.speaking { background: var(--accent-red); }
+  .morning-btn.speaking { background: var(--accent-red); box-shadow: 0 4px 16px rgba(255,69,58,0.30); }
   .morning-btn svg      { flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .spin { animation: spin 0.85s linear infinite; }
@@ -1228,16 +1227,9 @@
   }
   #screen-business .morning-btn {
     background: var(--biz-accent);
-    color: #fff;
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-family: var(--sans-biz);
-    font-weight: 500;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    box-shadow: 0 2px 8px rgba(62,126,196,0.20);
+    box-shadow: 0 4px 16px rgba(62,126,196,0.32);
   }
-  #screen-business .morning-btn.speaking { background: #E05C5C; }
+  #screen-business .morning-btn.speaking { background: #E05C5C; box-shadow: 0 4px 16px rgba(224,92,92,0.30); }
 
   /* Weather card */
   #screen-business .weather-temp {
@@ -1428,15 +1420,15 @@
       </div>
       <div class="time-actions">
         <button class="morning-btn" id="morning-btn" onclick="startMorningReport()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
-          <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
-          <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
-        </svg>
-        Morning Report
-      </button>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/>
+            <line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/>
+            <line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/>
+            <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="16.95" y2="7.05"/>
+            <line x1="7.05" y1="16.95" x2="4.93" y2="19.07"/>
+          </svg>
+          <span class="btn-label">Morning Report</span>
+        </button>
       </div><!-- /.time-actions -->
     </div>
 
