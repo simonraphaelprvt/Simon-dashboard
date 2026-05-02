@@ -657,7 +657,7 @@
   }
   #view-toggle:active { transform: scale(0.97); }
   #view-toggle.priv-mode {
-    background: #F4ECDC;
+    background: #FAF6EE;
     border-color: rgba(58,38,22,0.10);
     box-shadow: 0 2px 16px rgba(58,38,22,0.08), 0 1px 3px rgba(58,38,22,0.04);
   }
@@ -701,8 +701,8 @@
   ═══════════════════════════════════════════════════════════════ */
   :root {
     --pb:    #EFE5D2;            /* linen background */
-    --pc:    #F4ECDC;            /* card cream */
-    --pc2:   #F9F0DD;            /* card-hover / done */
+    --pc:    #FAF6EE;            /* card cream — lighter */
+    --pc2:   #FDF9F2;            /* card-hover / done */
     --pb2:   rgba(58,38,22,0.08);
     --pb3:   rgba(58,38,22,0.18);
     --ps:    none;
@@ -749,6 +749,14 @@
     opacity: 0.85;
     pointer-events: none;
     z-index: 1;
+  }
+  /* Subtle dot grid overlay */
+  .priv-dots {
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(139,87,42,0.15) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    pointer-events: none;
+    z-index: 2;
   }
   #screen-private .priv-layout { position: relative; z-index: 5; }
 
@@ -1304,6 +1312,7 @@
 ══════════════════════════════════════════════════════════════ -->
 <div id="screen-private">
   <div class="priv-texture"></div>
+  <div class="priv-dots"></div>
   <div class="priv-layout">
 
     <!-- ── Header: serif greeting + date pill ── -->
