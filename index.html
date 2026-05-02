@@ -12,6 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap">
+<!-- Lora + DM Sans for business screen typography -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -1148,6 +1150,247 @@
     text-transform: uppercase;
     padding: 14px 0 4px;
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     BUSINESS SCREEN v3 — BLUE EDITORIAL (Lora + DM Sans)
+     Toggle position untouched (top:20 right:184 width:132 height:96)
+  ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --biz-bg:        #EEF4FB;
+    --biz-card:      #FFFFFF;
+    --biz-card-soft: #F4F9FF;
+    --biz-text:      #1A3050;
+    --biz-text-mid:  #5B87B8;
+    --biz-text-soft: #8AB5D8;
+    --biz-accent:    #3E7EC4;
+    --biz-border:        rgba(120,170,220,0.30);
+    --biz-border-soft:   rgba(120,170,220,0.18);
+    --biz-shadow:        0 2px 12px rgba(80,140,210,0.06);
+    --biz-shadow-strong: 0 4px 16px rgba(80,140,210,0.10);
+    --serif-biz: 'Lora', Georgia, serif;
+    --sans-biz:  'DM Sans', -apple-system, sans-serif;
+  }
+
+  body { background: var(--biz-bg); }
+
+  #screen-business {
+    background: var(--biz-bg);
+    background-image: radial-gradient(circle at 1px 1px, rgba(160,190,230,0.32) 1px, transparent 0);
+    background-size: 22px 22px;
+    font-family: var(--sans-biz);
+    color: var(--biz-text);
+  }
+
+  /* All cards inside business → white, blue-tinted border */
+  #screen-business .card {
+    background: var(--biz-card);
+    border: 0.5px solid var(--biz-border);
+    border-radius: 18px;
+    box-shadow: var(--biz-shadow);
+  }
+
+  /* Time card → transparent, large Lora italic clock */
+  #screen-business .card-time {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 8px 8px 0 6px;
+    align-items: flex-end;
+  }
+  #screen-business .time-display {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(40px, 5.6vw, 58px);
+    letter-spacing: -1.2px;
+    color: var(--biz-text);
+  }
+  #screen-business .time-date {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--biz-text-mid);
+    letter-spacing: 0;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+  #screen-business .morning-btn {
+    background: var(--biz-accent);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-family: var(--sans-biz);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(62,126,196,0.20);
+  }
+  #screen-business .morning-btn.speaking { background: #E05C5C; }
+
+  /* Weather card */
+  #screen-business .weather-temp {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--biz-text);
+    letter-spacing: -1px;
+  }
+  #screen-business .weather-desc { color: var(--biz-text-mid); font-family: var(--sans-biz); }
+  #screen-business .weather-feel,
+  #screen-business .weather-city { color: var(--biz-text-soft); }
+
+  /* Section labels — uppercase tracked tag with + glyph */
+  #screen-business .section-header {
+    border-bottom: 0.5px solid var(--biz-border-soft);
+  }
+  #screen-business .section-label {
+    font-family: var(--sans-biz);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--biz-text-soft);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  #screen-business .section-label::before {
+    content: '+';
+    font-size: 10px;
+    color: var(--biz-text-soft);
+    font-weight: 400;
+  }
+  #screen-business .section-badge {
+    font-size: 10px;
+    background: rgba(62,126,196,0.10);
+    color: var(--biz-accent);
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* Pipeline */
+  #screen-business .pipeline-list { padding: 10px; gap: 8px; }
+  #screen-business .pipeline-item {
+    background: var(--biz-card-soft);
+    border: 0.5px solid var(--biz-border-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  #screen-business .pipeline-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--biz-shadow-strong);
+  }
+  #screen-business .pipeline-name {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--biz-text);
+    font-size: 14px;
+  }
+  #screen-business .pipeline-status,
+  #screen-business .pipeline-action {
+    color: var(--biz-text-mid);
+    font-size: 12px;
+    font-family: var(--sans-biz);
+  }
+  #screen-business .pipeline-amount {
+    color: var(--biz-accent);
+    font-weight: 500;
+    font-size: 12.5px;
+    font-family: var(--sans-biz);
+  }
+  #screen-business .pipeline-date {
+    color: var(--biz-text-soft);
+    font-family: var(--sans-biz);
+  }
+
+  /* Morgen-Block */
+  #screen-business .morgen-block { border-top: 0.5px solid var(--biz-border-soft); }
+  #screen-business .morgen-time { color: var(--biz-text-soft); }
+  #screen-business .morgen-title { color: var(--biz-text); }
+
+  /* Fokus card */
+  #screen-business .card-fokus {
+    border-left: 3px solid var(--biz-accent);
+    border-radius: 0 18px 18px 0;
+  }
+  #screen-business .fokus-text {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--biz-text);
+    font-size: clamp(15px, 1.8vw, 19px);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+  }
+  #screen-business .ziel-banner {
+    background: rgba(62,126,196,0.08);
+    color: var(--biz-text-mid);
+  }
+  #screen-business .ziel-banner-dot { background: var(--biz-accent); }
+  #screen-business .ziel-banner-text { color: var(--biz-text); }
+
+  /* Cashflow */
+  #screen-business .cashflow-value {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--biz-text);
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+  #screen-business .cashflow-sep,
+  #screen-business .cashflow-goal {
+    color: var(--biz-text-soft);
+    font-family: var(--serif-biz);
+    font-style: italic;
+  }
+  #screen-business .cashflow-sub { color: var(--biz-text-soft); }
+  #screen-business .cashflow-bar-wrap { background: rgba(120,170,220,0.14); height: 4px; }
+  #screen-business .cashflow-bar-fill { background: var(--biz-accent); }
+
+  /* Gmail / Zoho mini cards */
+  #screen-business .gmail-count {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--biz-text);
+    letter-spacing: -0.4px;
+  }
+  #screen-business .gmail-sub { color: var(--biz-text-soft); }
+  #screen-business .gmail-login-btn {
+    background: var(--biz-accent);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: var(--sans-biz);
+  }
+  #screen-business .zoho-main { color: var(--biz-text); }
+  #screen-business .zoho-amount {
+    font-family: var(--serif-biz);
+    font-style: italic;
+    font-weight: 500;
+    color: #D88A3C;
+    letter-spacing: -0.3px;
+  }
+  #screen-business .zoho-due { color: var(--biz-text-soft); }
+
+  /* Calendar iframe — softer container */
+  #screen-business .card-calendar { background: var(--biz-card); }
+  #screen-business .calendar-iframe-wrap iframe { background: var(--biz-card); }
+
+  /* Skeleton loader → blue-tinted */
+  #screen-business .skel {
+    background: linear-gradient(90deg, #E5EEF7 25%, #D5E2EF 50%, #E5EEF7 75%);
+    background-size: 300% 100%;
+  }
+
+  /* Goal modal — match blue editorial */
+  #screen-business .goal-eyebrow { color: var(--biz-accent); }
+  #screen-business .goal-input:focus { box-shadow: 0 0 0 2px var(--biz-accent); }
+  #screen-business .goal-btn-primary { background: var(--biz-accent); }
 
 </style>
 </head>
