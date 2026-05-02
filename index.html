@@ -770,22 +770,31 @@
     min-height: calc(100dvh - 46px);
   }
 
-  /* ── Header ── */
+  /* ── Header row: same 3-col structure as business row-top ── */
   .priv-header {
     grid-column: 1 / -1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 4px 6px 8px;
+    display: grid;
+    grid-template-columns: 1fr 140px 148px; /* greeting | toggle-slot (empty) | date card */
+    gap: 12px;
+    height: 96px;                            /* match toggle / weather height */
     margin-bottom: 4px;
-    gap: 24px;
   }
-  .priv-greet-block { display: flex; flex-direction: column; gap: 2px; }
+  /* Greeting block — left column, transparent (no card) */
+  .priv-greet-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 6px;
+  }
+  /* Middle column intentionally empty — toggle floats here */
+  .priv-toggle-slot { /* placeholder, not rendered */ }
+
   .priv-greet-title {
     font-family: var(--serif);
     font-style: italic;
     font-weight: 600;
-    font-size: 38px;
+    font-size: 36px;
     color: var(--pt);
     letter-spacing: -0.02em;
     line-height: 1.05;
@@ -794,37 +803,40 @@
     font-family: var(--serif);
     font-style: italic;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 15px;
     color: var(--pa);
     letter-spacing: -0.01em;
     line-height: 1.2;
     margin-top: 2px;
   }
+  /* Date card — column 3, same dimensions as weather card */
   .priv-date-pill {
     background: var(--pc);
     border: 0.5px solid var(--pb2);
-    border-radius: 12px;
-    padding: 9px 13px;
-    text-align: right;
-    margin-right: 0; /* date pill sits right of toggle (toggle ends at right:184, pill is at right:28) */
-    flex-shrink: 0;
+    border-radius: 18px;
+    padding: 14px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    /* no margin — column 3 of grid handles positioning */
   }
   .priv-date-day {
     font-family: var(--serif);
     font-style: italic;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--pt);
     letter-spacing: -0.01em;
-    line-height: 1.1;
+    line-height: 1.15;
   }
   .priv-date-meta {
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 600;
     letter-spacing: 0.16em;
     color: var(--pt3);
     text-transform: uppercase;
-    margin-top: 3px;
+    margin-top: 2px;
     font-family: -apple-system, sans-serif;
   }
 
@@ -1558,12 +1570,16 @@
   <div class="priv-dots"></div>
   <div class="priv-layout">
 
-    <!-- ── Header: serif greeting + date pill ── -->
+    <!-- ── Header: greeting | toggle-slot (empty) | date card ── -->
     <header class="priv-header">
+      <!-- col 1: greeting -->
       <div class="priv-greet-block">
         <h1 class="priv-greet-title" id="priv-greet-title">Hallo, Simon.</h1>
         <p class="priv-greet-sub" id="priv-greet-sub">Schön, dich zu sehen.</p>
       </div>
+      <!-- col 2: empty — fixed toggle floats here -->
+      <div></div>
+      <!-- col 3: date card (same width as weather card on business) -->
       <div class="priv-date-pill">
         <div class="priv-date-day"  id="priv-date-day">—</div>
         <div class="priv-date-meta" id="priv-date-meta">—</div>
