@@ -1866,7 +1866,8 @@ async function loadCashflow() {
 
     const einnahmen = parseNum(entry['Einnahmen'] || entry['Revenue'] || 0);
     const ziel      = parseNum(entry['Ziel']      || entry['Goal']    || 0);
-    const offen     = entry['Offene Rechnungen']  || entry['Offen']   || null;
+    const offenRaw  = entry['Offene Rechnungen']  || entry['Offen']   || null;
+    const offenNum  = offenRaw ? parseNum(offenRaw) : null;
     const pct       = ziel > 0 ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
 
     document.getElementById('cashflow-inner').innerHTML = `
@@ -1879,8 +1880,8 @@ async function loadCashflow() {
         <div class="cashflow-bar-wrap">
           <div class="cashflow-bar-fill" style="width:${pct}%;"></div>
         </div>
-        <div class="cashflow-sub" style="margin-top:4px;">
-          ${pct} % des Ziels${offen ? ' · ' + esc(offen) + ' € offen' : ''}
+        <div class="cashflow-sub" style="margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${pct} % des Ziels${offenNum ? ' · ' + fmtNum(offenNum) + ' € offen' : ''}
         </div>
       </div>`;
 
