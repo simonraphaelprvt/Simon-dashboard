@@ -224,114 +224,6 @@
     padding: 4px 0;
   }
 
-  /* ── Heutiges Ziel Banner (in Fokus-Karte) ── */
-  .ziel-banner {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    padding: 3px 8px;
-    background: rgba(94, 92, 230, 0.08);
-    border-radius: 8px;
-    align-self: flex-start;
-    margin-bottom: 2px;
-    max-width: 100%;
-  }
-  .ziel-banner.show { display: inline-flex; }
-  .ziel-banner-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--accent-purple);
-    flex-shrink: 0;
-  }
-  .ziel-banner-text {
-    color: var(--text-primary);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* ── Evening Goal Modal Overlay ── */
-  .goal-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(28, 28, 30, 0.55);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 24px;
-  }
-  .goal-modal.show { display: flex; }
-  .goal-card {
-    background: var(--card);
-    border-radius: 22px;
-    padding: 28px 26px 22px;
-    width: 100%;
-    max-width: 460px;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
-    animation: goalIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-  }
-  @keyframes goalIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .goal-eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent-purple);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 6px;
-  }
-  .goal-title {
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--text-primary);
-    letter-spacing: -0.5px;
-    line-height: 1.25;
-    margin-bottom: 16px;
-  }
-  .goal-input {
-    width: 100%;
-    background: var(--card-inner);
-    border: none;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 15px;
-    font-family: inherit;
-    color: var(--text-primary);
-    outline: none;
-    margin-bottom: 14px;
-  }
-  .goal-input:focus { box-shadow: 0 0 0 2px var(--accent-purple); }
-  .goal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
-  .goal-btn {
-    border: none;
-    border-radius: 12px;
-    padding: 9px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-  }
-  .goal-btn-secondary {
-    background: var(--card-inner);
-    color: var(--text-secondary);
-  }
-  .goal-btn-primary {
-    background: var(--accent-purple);
-    color: #fff;
-  }
-  .goal-btn:active { transform: scale(0.97); }
 
   .pipeline-list {
     flex: 1;
@@ -1322,12 +1214,6 @@
     letter-spacing: -0.3px;
     line-height: 1.3;
   }
-  #screen-business .ziel-banner {
-    background: rgba(62,126,196,0.08);
-    color: var(--biz-text-mid);
-  }
-  #screen-business .ziel-banner-dot { background: var(--biz-accent); }
-  #screen-business .ziel-banner-text { color: var(--biz-text); }
 
   /* Cashflow */
   #screen-business .cashflow-value {
@@ -1490,10 +1376,6 @@
 
     <div class="card card-fokus">
       <span class="section-label">Fokus heute</span>
-      <span class="ziel-banner" id="ziel-banner">
-        <span class="ziel-banner-dot"></span>
-        Mein Ziel:&nbsp;<span class="ziel-banner-text" id="ziel-banner-text"></span>
-      </span>
       <div class="fokus-text" id="fokus-text">
         <span class="skel" style="display:inline-block;width:78%;height:17px;"></span>
       </div>
@@ -1528,18 +1410,6 @@
 
   </div>
 
-  <!-- ── Evening Goal Modal ── -->
-  <div class="goal-modal" id="goal-modal">
-    <div class="goal-card">
-      <div class="goal-eyebrow">Abend-Check · <span id="goal-modal-day"></span></div>
-      <div class="goal-title">Was ist dein wichtigstes Ziel für morgen?</div>
-      <input type="text" class="goal-input" id="goal-input" placeholder="z.B. Hochzeitsvideo Müller fertigstellen" maxlength="120" autocomplete="off">
-      <div class="goal-actions">
-        <button class="goal-btn goal-btn-secondary" onclick="goalSkip()">Später</button>
-        <button class="goal-btn goal-btn-primary" onclick="goalSave()">Speichern</button>
-      </div>
-    </div>
-  </div>
 
 </div><!-- /.screen -->
 
@@ -2417,76 +2287,6 @@ async function _legacyTtsReport() {
   }
 }
 
-// ═════════════════════════════════════════════════════════════
-// TOMORROW'S GOAL (Abend-Prompt + Morgens-Banner)
-// ═════════════════════════════════════════════════════════════
-function dateKey(d) {
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-function goalKey(d) { return 'goal_for_' + dateKey(d); }
-
-function goalCheckEvening() {
-  const now = new Date();
-  const hour = now.getHours();
-  // Zwischen 20:00 und 23:59 — und nur einmal pro Abend
-  if (hour < 20 || hour > 23) return;
-
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  const key = goalKey(tomorrow);
-
-  // Wenn heute schon gespeichert oder geskipped → nicht erneut zeigen
-  if (localStorage.getItem(key) !== null) return;
-  // Nicht erneut zeigen, wenn Modal bereits offen
-  if (document.getElementById('goal-modal').classList.contains('show')) return;
-
-  goalShowModal(tomorrow);
-}
-
-function goalShowModal(tomorrow) {
-  document.getElementById('goal-modal-day').textContent = DAYS[tomorrow.getDay()];
-  document.getElementById('goal-input').value = '';
-  document.getElementById('goal-modal').classList.add('show');
-  setTimeout(() => document.getElementById('goal-input').focus(), 200);
-}
-
-function goalSave() {
-  const val = document.getElementById('goal-input').value.trim();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  if (val) localStorage.setItem(goalKey(tomorrow), val);
-  else     localStorage.setItem(goalKey(tomorrow), ''); // leer = bewusst übersprungen
-  document.getElementById('goal-modal').classList.remove('show');
-  goalRenderToday();
-}
-
-function goalSkip() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  // Markieren als "heute nicht mehr fragen", aber leer lassen
-  localStorage.setItem(goalKey(tomorrow), '');
-  document.getElementById('goal-modal').classList.remove('show');
-}
-
-function goalRenderToday() {
-  const today = new Date();
-  const stored = localStorage.getItem(goalKey(today));
-  const banner = document.getElementById('ziel-banner');
-  if (stored && stored.trim()) {
-    document.getElementById('ziel-banner-text').textContent = stored;
-    banner.classList.add('show');
-  } else {
-    banner.classList.remove('show');
-  }
-}
-
-// Initial + jede Minute prüfen
-goalRenderToday();
-goalCheckEvening();
-setInterval(() => {
-  goalCheckEvening();
-  goalRenderToday(); // nach Mitternacht aktualisiert sich der Banner
-}, 60_000);
 
 // ═════════════════════════════════════════════════════════════
 // CALENDAR — TERMINE MORGEN
