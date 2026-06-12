@@ -18,28 +18,30 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg:             #F2F2F7;
-    --card:           #FFFFFF;
-    --card-inner:     #F2F2F7;
-    --text-primary:   #1C1C1E;
-    --text-secondary: #8E8E93;
-    --text-tertiary:  #C7C7CC;
-    --border:         rgba(0,0,0,0.06);
-    --shadow:         0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    --bg:             #0E1016;
+    --card:           #171A23;
+    --card-inner:     #1F2330;
+    --text-primary:   #E9EBF2;
+    --text-secondary: #9AA1B5;
+    --text-tertiary:  #5E6577;
+    --border:         rgba(255,255,255,0.06);
+    --shadow:         0 8px 24px rgba(0,0,0,0.32), 0 1px 3px rgba(0,0,0,0.25);
     --radius:         18px;
     --radius-sm:      13px;
-    --accent-purple:  #5E5CE6;
-    --accent-green:   #30D158;
-    --accent-orange:  #FF9F0A;
-    --accent-blue:    #0A84FF;
-    --accent-red:     #FF453A;
+    --accent-purple:  #8E84E8;
+    --accent-green:   #5BBE8D;
+    --accent-orange:  #D9A05B;
+    --accent-blue:    #6BA3DC;
+    --accent-red:     #E0716C;
+    --grad-violet:    linear-gradient(135deg, #4A4290 0%, #6C5FBF 55%, #7E6FD0 100%);
+    --grad-blue:      linear-gradient(135deg, #2E5B8F 0%, #4380B5 60%, #52A0BD 100%);
   }
 
   html, body {
     width: 100%;
     height: 100%;
     background: var(--bg);
-    font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'DM Sans', -apple-system, sans-serif;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
   }
@@ -50,10 +52,12 @@
     height: 100dvh;
     padding: 20px;
     display: grid;
-    grid-template-rows: 96px 1fr 90px;
+    grid-template-rows: 96px 112px 1fr 74px;
     gap: 12px;
     overflow: hidden;
     position: relative;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.045) 1px, transparent 0);
+    background-size: 24px 24px;
   }
 
   .card {
@@ -76,7 +80,7 @@
   .card-weather { grid-column: 3; }
 
   .card-time {
-    padding: 16px 24px;
+    padding: 14px 24px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -85,20 +89,20 @@
   }
 
   .time-display {
-    font-size: clamp(46px, 7vw, 66px);
+    font-size: clamp(40px, 5.4vw, 54px);
     font-weight: 200;
     color: var(--text-primary);
-    letter-spacing: -2.5px;
+    letter-spacing: -2px;
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
   .time-date {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
     font-weight: 400;
     margin-top: 5px;
-    letter-spacing: -0.2px;
+    letter-spacing: -0.1px;
   }
 
   .card-weather {
@@ -149,79 +153,102 @@
     font-weight: 400;
   }
 
-  /* Kalender */
-  .card-calendar {
+  /* ── Agenda (eigener dunkler Kalender) ── */
+  .card-agenda {
     display: flex;
     flex-direction: column;
-  }
-
-  .calendar-iframe-wrap {
-    flex: 1;
-    overflow: hidden;
     min-height: 0;
   }
-
-  .calendar-iframe-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
+  .agenda-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 16px 12px;
+    min-height: 0;
+    scrollbar-width: none;
   }
+  .agenda-body::-webkit-scrollbar { display: none; }
+  .agenda-day { padding-top: 10px; }
+  .agenda-day + .agenda-day { margin-top: 6px; border-top: 0.5px solid var(--border); }
+  .agenda-day-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0 6px;
+  }
+  .agenda-day-bubble {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--card-inner);
+    color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .agenda-day-bubble.today { background: var(--grad-violet); color: #fff; }
+  .agenda-day-name {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .agenda-day-count { font-size: 10.5px; color: var(--text-tertiary); flex-shrink: 0; }
+  .agenda-ev {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0 5px 40px;
+  }
+  .agenda-ev-time {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    min-width: 86px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .agenda-ev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .agenda-ev-title {
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .agenda-ev.past { opacity: 0.35; }
+  .agenda-free { font-size: 11.5px; color: var(--text-tertiary); padding: 0 0 6px 40px; }
+  .agenda-login {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; height: 100%;
+    color: var(--text-secondary); font-size: 13px;
+    text-align: center; padding: 0 24px;
+  }
+  .agenda-login button {
+    background: var(--grad-violet);
+    color: #fff; border: none; border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+  }
+  .agenda-login button:active { transform: scale(0.97); }
+  .agenda-next {
+    font-size: 11px;
+    color: var(--accent-purple);
+    font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    max-width: 50%;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .agenda-next-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-purple); flex-shrink: 0; }
+  .agenda-next-dot.live { background: var(--accent-green); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
   /* Pipeline */
   .card-pipeline {
     display: flex;
     flex-direction: column;
     min-height: 0;
-  }
-
-  /* ── Morgen (Termine morgen) — unten in Pipeline-Spalte ── */
-  .morgen-block {
-    border-top: 0.5px solid var(--border);
-    padding: 8px 12px 10px;
-    flex-shrink: 0;
-    max-height: 118px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .morgen-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2px;
-  }
-  .morgen-list {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    overflow: hidden;
-  }
-  .morgen-item {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 11.5px;
-    line-height: 1.25;
-  }
-  .morgen-time {
-    font-variant-numeric: tabular-nums;
-    color: var(--text-tertiary);
-    font-size: 10.5px;
-    flex-shrink: 0;
-    min-width: 40px;
-  }
-  .morgen-title {
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-  }
-  .morgen-empty {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    padding: 4px 0;
   }
 
 
@@ -303,89 +330,153 @@
   }
 
   /* ─────────────────────────────────────
-     ROW 3: Fokus + Cashflow
+     ROW 2: KPI-Reihe (4 Karten)
   ───────────────────────────────────── */
-  .row-bottom {
+  .row-kpi {
     display: grid;
-    grid-template-columns: 1fr 175px 130px 200px;
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
+    min-height: 0;
   }
-
-  /* ── Gmail Widget ── */
-  .card-gmail {
-    padding: 10px 14px;
+  .kpi-card {
+    padding: 13px 18px 12px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-  }
-  .gmail-count {
-    font-size: 24px;
-    font-weight: 200;
-    color: var(--text-primary);
-    letter-spacing: -0.8px;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .gmail-sub { font-size: 11px; color: var(--text-tertiary); }
-  .gmail-login-btn {
-    font-size: 11px;
-    font-family: inherit;
-    font-weight: 500;
-    background: var(--accent-blue);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 5px 10px;
-    cursor: pointer;
-    align-self: flex-start;
-    margin-top: 2px;
-  }
-
-  /* ── Zoho Widget ── */
-  .card-zoho {
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 3px;
-  }
-  .zoho-main {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-    letter-spacing: -0.2px;
-    white-space: nowrap;
+    gap: 5px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
   }
-  .zoho-amount {
-    font-size: 18px;
-    font-weight: 200;
-    color: var(--accent-orange);
-    letter-spacing: -0.5px;
-    line-height: 1;
+  .kpi-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .kpi-label .kpi-label-extra { font-weight: 500; letter-spacing: 0.02em; text-transform: none; }
+  .kpi-value {
+    font-size: 25px;
+    font-weight: 300;
+    letter-spacing: -0.8px;
+    color: var(--text-primary);
+    line-height: 1.05;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
-  .zoho-due {
-    font-size: 11px;
+  .kpi-value-sub { font-size: 14px; color: var(--text-secondary); font-weight: 300; }
+  .kpi-sub {
+    font-size: 10.5px;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .kpi-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 3px 0 1px;
+    flex-shrink: 0;
+  }
+  .kpi-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #5D54B8, #8A7FD6);
+    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  /* Gradient-Varianten (wie CRM-Vorbild, entsättigt) */
+  .kpi-grad-violet { background: var(--grad-violet); border-color: rgba(255,255,255,0.10); }
+  .kpi-grad-blue   { background: var(--grad-blue);   border-color: rgba(255,255,255,0.10); }
+  .kpi-grad-violet .kpi-label, .kpi-grad-blue .kpi-label { color: rgba(255,255,255,0.60); }
+  .kpi-grad-violet .kpi-value, .kpi-grad-blue .kpi-value { color: #FFFFFF; }
+  .kpi-grad-violet .kpi-value-sub, .kpi-grad-blue .kpi-value-sub,
+  .kpi-grad-violet .kpi-sub, .kpi-grad-blue .kpi-sub { color: rgba(255,255,255,0.70); }
+  .kpi-grad-violet .kpi-bar, .kpi-grad-blue .kpi-bar { background: rgba(255,255,255,0.20); }
+  .kpi-grad-violet .kpi-bar-fill, .kpi-grad-blue .kpi-bar-fill { background: rgba(255,255,255,0.92); }
+
+  /* Lead-Anteils-Balken (Pipeline-KPI) */
+  .kpi-segbar {
+    display: flex;
+    gap: 3px;
+    height: 5px;
+    margin: 3px 0 1px;
+    flex-shrink: 0;
+  }
+  .kpi-segbar span {
+    background: rgba(255,255,255,0.85);
+    border-radius: 2px;
+    min-width: 5px;
+  }
+
+  /* Umsatz-Mini-Balkenchart */
+  .kpi-bars {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .kpi-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .kpi-bar-track {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .kpi-bar-v {
+    width: 100%;
+    background: #4A5066;
+    border-radius: 3px 3px 0 0;
+  }
+  .kpi-bar-col.cur .kpi-bar-v { background: linear-gradient(180deg, #8A7FD6, #5D54B8); }
+  .kpi-bar-col span {
+    font-size: 8px;
+    text-align: center;
+    color: var(--text-tertiary);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .kpi-bar-col.cur span { color: var(--accent-purple); font-weight: 700; }
+
+  /* ─────────────────────────────────────
+     ROW 4: Fokus + Status (Gmail/Rechnungen)
+  ───────────────────────────────────── */
+  .row-bottom {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 12px;
+  }
 
   .card-fokus {
-    padding: 12px 20px 12px;
+    padding: 11px 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
+    border-left: 3px solid var(--accent-purple);
+    border-radius: 0 var(--radius) var(--radius) 0;
   }
 
   .fokus-text {
-    font-size: clamp(15px, 1.8vw, 20px);
-    font-weight: 300;
+    font-size: clamp(15px, 1.8vw, 19px);
+    font-weight: 400;
     color: var(--text-primary);
     letter-spacing: -0.3px;
     line-height: 1.35;
@@ -394,62 +485,67 @@
     text-overflow: ellipsis;
   }
 
-  .card-cashflow {
-    padding: 12px 18px 12px;
+  /* Kombinierte Status-Karte: Gmail + Rechnungen */
+  .card-status {
+    padding: 8px 18px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
+    align-items: center;
+    gap: 14px;
   }
-
-  .cashflow-row {
+  .status-seg {
+    flex: 1;
+    min-width: 0;
     display: flex;
-    align-items: baseline;
-    gap: 3px;
-    margin-top: 2px;
+    align-items: center;
   }
-
-  .cashflow-value {
-    font-size: 26px;
-    font-weight: 200;
-    color: var(--text-primary);
-    letter-spacing: -1px;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
+  .status-div {
+    width: 0.5px;
+    align-self: stretch;
+    margin: 8px 0;
+    background: var(--border);
+    flex-shrink: 0;
   }
-
-  .cashflow-sep {
-    font-size: 16px;
-    font-weight: 200;
-    color: var(--text-tertiary);
-  }
-
-  .cashflow-goal {
-    font-size: 16px;
+  .status-item { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .status-num {
+    font-size: 24px;
     font-weight: 300;
-    color: var(--text-secondary);
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
   }
-
-  .cashflow-sub {
-    font-size: 11px;
-    color: var(--text-tertiary);
+  .status-num.hot   { color: var(--accent-blue); }
+  .status-num.amber { color: var(--accent-orange); }
+  .status-ok {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(91,190,141,0.14);
+    color: var(--accent-green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
   }
-
-  .cashflow-bar-wrap {
-    height: 3px;
-    background: var(--card-inner);
-    border-radius: 2px;
+  .status-text {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+    min-width: 0;
     overflow: hidden;
-    margin-top: 6px;
+    text-overflow: ellipsis;
   }
-
-  .cashflow-bar-fill {
-    height: 100%;
-    background: var(--accent-green);
-    border-radius: 2px;
-    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  .gmail-login-btn {
+    font-size: 11.5px;
+    font-family: inherit;
+    font-weight: 600;
+    background: var(--card-inner);
+    border: 0.5px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
   }
+  .gmail-login-btn:active { transform: scale(0.97); }
 
   /* ── Morning Report Button — circular icon button ── */
   .morning-btn {
@@ -457,7 +553,7 @@
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    background: var(--accent-purple);
+    background: var(--grad-violet);
     color: #fff;
     border: none;
     padding: 0;
@@ -466,12 +562,12 @@
     align-items: center;
     justify-content: center;
     transition: opacity 0.15s, transform 0.12s;
-    box-shadow: 0 4px 16px rgba(94,92,230,0.30);
+    box-shadow: 0 4px 18px rgba(108,95,191,0.40);
   }
   .morning-btn .btn-label { display: none; } /* text hidden, icon only */
   .morning-btn:active   { transform: scale(0.93); }
   .morning-btn:disabled { opacity: 0.5; cursor: default; }
-  .morning-btn.speaking { background: var(--accent-red); box-shadow: 0 4px 16px rgba(255,69,58,0.30); }
+  .morning-btn.speaking { background: var(--accent-red); box-shadow: 0 4px 18px rgba(224,113,108,0.35); }
   .morning-btn svg      { flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .spin { animation: spin 0.85s linear infinite; }
@@ -481,7 +577,7 @@
   ───────────────────────────────────── */
   .skel {
     display: block;
-    background: linear-gradient(90deg, #ebebf0 25%, #e2e2e8 50%, #ebebf0 75%);
+    background: linear-gradient(90deg, #20242F 25%, #2A2F3D 50%, #20242F 75%);
     background-size: 300% 100%;
     animation: shimmer 1.8s ease-in-out infinite;
     border-radius: 5px;
@@ -529,8 +625,8 @@
     width: 132px;
     height: 96px;
     z-index: 10000;
-    background: #FFFFFF;
-    border: 0.5px solid rgba(0,0,0,0.06);
+    background: #171A23;
+    border: 0.5px solid rgba(255,255,255,0.07);
     border-radius: 18px;
     padding: 14px 14px;
     display: flex;
@@ -546,7 +642,7 @@
                 border-color 0.38s cubic-bezier(0.22,1,0.36,1),
                 box-shadow 0.38s cubic-bezier(0.22,1,0.36,1),
                 transform 0.16s;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.32), 0 1px 3px rgba(0,0,0,0.25);
   }
   #view-toggle:active { transform: scale(0.97); }
   #view-toggle.priv-mode {
@@ -559,8 +655,8 @@
   .view-switch-label {
     font-size: 13px;
     font-weight: 600;
-    color: #1C1C1E;
-    font-family: -apple-system, 'SF Pro Text', sans-serif;
+    color: #E9EBF2;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     letter-spacing: 0.01em;
     width: auto;
     text-align: center;
@@ -571,7 +667,7 @@
   .view-switch-pill {
     width: 44px; height: 26px;
     border-radius: 13px;
-    background: #0A84FF;
+    background: linear-gradient(135deg, #5D54B8, #8A7FD6);
     position: relative;
     flex-shrink: 0;
     pointer-events: none;
@@ -1049,228 +1145,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-
-  /* ═══════════════════════════════════════════════════════════════
-     BUSINESS SCREEN v3 — BLUE EDITORIAL (Lora + DM Sans)
-     Toggle position untouched (top:20 right:184 width:132 height:96)
-  ═══════════════════════════════════════════════════════════════ */
-  :root {
-    --biz-bg:        #EEF4FB;
-    --biz-card:      #FFFFFF;
-    --biz-card-soft: #F4F9FF;
-    --biz-text:      #1A3050;
-    --biz-text-mid:  #5B87B8;
-    --biz-text-soft: #8AB5D8;
-    --biz-accent:    #3E7EC4;
-    --biz-border:        rgba(120,170,220,0.30);
-    --biz-border-soft:   rgba(120,170,220,0.18);
-    --biz-shadow:        0 2px 12px rgba(80,140,210,0.06);
-    --biz-shadow-strong: 0 4px 16px rgba(80,140,210,0.10);
-    --serif-biz: 'Plus Jakarta Sans', 'DM Sans', sans-serif; /* no actual serif — clean modern */
-    --sans-biz:  'Plus Jakarta Sans', 'DM Sans', sans-serif;
-  }
-
-  body { background: var(--biz-bg); }
-
-  #screen-business {
-    background: var(--biz-bg);
-    background-image: radial-gradient(circle at 1px 1px, rgba(160,190,230,0.32) 1px, transparent 0);
-    background-size: 22px 22px;
-    font-family: var(--sans-biz);
-    color: var(--biz-text);
-  }
-
-  /* All cards inside business → white, blue-tinted border */
-  #screen-business .card {
-    background: var(--biz-card);
-    border: 0.5px solid var(--biz-border);
-    border-radius: 18px;
-    box-shadow: var(--biz-shadow);
-  }
-
-  /* Time card → transparent, large Lora italic clock */
-  #screen-business .card-time {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 8px 8px 0 6px;
-    align-items: flex-end;
-  }
-  #screen-business .time-display {
-    font-family: var(--sans-biz);
-    font-weight: 300;
-    font-size: clamp(40px, 5.6vw, 58px);
-    letter-spacing: -2px;
-    color: var(--biz-text);
-  }
-  #screen-business .time-date {
-    font-family: var(--sans-biz);
-    font-size: 13px;
-    color: var(--biz-text-mid);
-    letter-spacing: 0.01em;
-    margin-top: 4px;
-    font-weight: 400;
-  }
-  #screen-business .morning-btn {
-    background: var(--biz-accent);
-    box-shadow: 0 4px 16px rgba(62,126,196,0.32);
-  }
-  #screen-business .morning-btn.speaking { background: #E05C5C; box-shadow: 0 4px 16px rgba(224,92,92,0.30); }
-
-  /* Weather card */
-  #screen-business .weather-temp {
-    font-family: var(--sans-biz);
-    font-weight: 300;
-    color: var(--biz-text);
-    letter-spacing: -1.5px;
-  }
-  #screen-business .weather-desc { color: var(--biz-text-mid); font-family: var(--sans-biz); }
-  #screen-business .weather-feel,
-  #screen-business .weather-city { color: var(--biz-text-soft); }
-
-  /* Section labels — uppercase tracked tag with + glyph */
-  #screen-business .section-header {
-    border-bottom: 0.5px solid var(--biz-border-soft);
-  }
-  #screen-business .section-label {
-    font-family: var(--sans-biz);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--biz-text-soft);
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-  #screen-business .section-label::before {
-    content: '+';
-    font-size: 10px;
-    color: var(--biz-text-soft);
-    font-weight: 400;
-  }
-  #screen-business .section-badge {
-    font-size: 10px;
-    background: rgba(62,126,196,0.10);
-    color: var(--biz-accent);
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-  }
-
-  /* Pipeline */
-  #screen-business .pipeline-list { padding: 10px; gap: 8px; }
-  #screen-business .pipeline-item {
-    background: var(--biz-card-soft);
-    border: 0.5px solid var(--biz-border-soft);
-    border-radius: 12px;
-    padding: 12px 14px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  #screen-business .pipeline-item:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--biz-shadow-strong);
-  }
-  #screen-business .pipeline-name {
-    font-family: var(--sans-biz);
-    font-weight: 600;
-    color: var(--biz-text);
-    font-size: 13.5px;
-    letter-spacing: -0.2px;
-  }
-  #screen-business .pipeline-status,
-  #screen-business .pipeline-action {
-    color: var(--biz-text-mid);
-    font-size: 12px;
-    font-family: var(--sans-biz);
-  }
-  #screen-business .pipeline-amount {
-    color: var(--biz-accent);
-    font-weight: 500;
-    font-size: 12.5px;
-    font-family: var(--sans-biz);
-  }
-  #screen-business .pipeline-date {
-    color: var(--biz-text-soft);
-    font-family: var(--sans-biz);
-  }
-
-  /* Morgen-Block */
-  #screen-business .morgen-block { border-top: 0.5px solid var(--biz-border-soft); }
-  #screen-business .morgen-time { color: var(--biz-text-soft); }
-  #screen-business .morgen-title { color: var(--biz-text); }
-
-  /* Fokus card */
-  #screen-business .card-fokus {
-    border-left: 3px solid var(--biz-accent);
-    border-radius: 0 18px 18px 0;
-  }
-  #screen-business .fokus-text {
-    font-family: var(--sans-biz);
-    font-weight: 500;
-    color: var(--biz-text);
-    font-size: clamp(15px, 1.8vw, 18px);
-    letter-spacing: -0.3px;
-    line-height: 1.3;
-  }
-
-  /* Cashflow */
-  #screen-business .cashflow-value {
-    font-family: var(--sans-biz);
-    font-weight: 300;
-    color: var(--biz-text);
-    font-size: 28px;
-    letter-spacing: -1px;
-  }
-  #screen-business .cashflow-sep,
-  #screen-business .cashflow-goal {
-    color: var(--biz-text-soft);
-    font-family: var(--sans-biz);
-    font-weight: 300;
-  }
-  #screen-business .cashflow-sub { color: var(--biz-text-soft); }
-  #screen-business .cashflow-bar-wrap { background: rgba(120,170,220,0.14); height: 4px; }
-  #screen-business .cashflow-bar-fill { background: var(--biz-accent); }
-
-  /* Gmail / Zoho mini cards */
-  #screen-business .gmail-count {
-    font-family: var(--sans-biz);
-    font-weight: 300;
-    color: var(--biz-text);
-    letter-spacing: -0.8px;
-  }
-  #screen-business .gmail-sub { color: var(--biz-text-soft); }
-  #screen-business .gmail-login-btn {
-    background: var(--biz-accent);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-family: var(--sans-biz);
-  }
-  #screen-business .zoho-main { color: var(--biz-text); }
-  #screen-business .zoho-amount {
-    font-family: var(--sans-biz);
-    font-weight: 300;
-    color: #D88A3C;
-    letter-spacing: -0.8px;
-  }
-  #screen-business .zoho-due { color: var(--biz-text-soft); }
-
-  /* Calendar iframe — softer container */
-  #screen-business .card-calendar { background: var(--biz-card); }
-  #screen-business .calendar-iframe-wrap iframe { background: var(--biz-card); }
-
-  /* Skeleton loader → blue-tinted */
-  #screen-business .skel {
-    background: linear-gradient(90deg, #E5EEF7 25%, #D5E2EF 50%, #E5EEF7 75%);
-    background-size: 300% 100%;
-  }
-
-  /* Goal modal — match blue editorial */
-  #screen-business .goal-eyebrow { color: var(--biz-accent); }
-  #screen-business .goal-input:focus { box-shadow: 0 0 0 2px var(--biz-accent); }
-  #screen-business .goal-btn-primary { background: var(--biz-accent); }
-
 </style>
 </head>
 <body>
@@ -1323,20 +1197,50 @@
 
   </div>
 
-  <!-- ── ROW 2: Kalender + Pipeline ── -->
+  <!-- ── ROW 2: KPI-Reihe ── -->
+  <div class="row-kpi">
+
+    <div class="card kpi-card kpi-grad-violet">
+      <div class="kpi-label">Cashflow · <span id="kpi-month-name">—</span></div>
+      <div id="cashflow-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;">
+        <span class="skel" style="width:110px;height:24px;"></span>
+        <span class="skel" style="width:80%;height:10px;"></span>
+      </div>
+    </div>
+
+    <div class="card kpi-card kpi-grad-blue">
+      <div class="kpi-label">Pipeline-Wert</div>
+      <div id="kpi-pipeline-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;">
+        <span class="skel" style="width:96px;height:24px;"></span>
+        <span class="skel" style="width:70%;height:10px;"></span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-label">Umsatz <span class="kpi-label-extra" id="kpi-rev-sum"></span></div>
+      <div id="kpi-revenue-inner" style="display:flex;flex-direction:column;flex:1;min-height:0;justify-content:center;">
+        <span class="skel" style="width:100%;height:40px;"></span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-label">Jahresfortschritt</div>
+      <div id="kpi-year-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;"></div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 3: Agenda + Pipeline ── -->
   <div class="row-middle">
 
-    <div class="card card-calendar">
+    <div class="card card-agenda">
       <div class="section-header">
-        <span class="section-label">Kalender</span>
+        <span class="section-label">Agenda</span>
+        <span class="agenda-next" id="agenda-next" style="display:none;"></span>
         <span class="section-badge" id="cal-date"></span>
       </div>
-      <div class="calendar-iframe-wrap">
-        <iframe
-          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=1&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFFFF&color=%230A84FF"
-          scrolling="no"
-          allowtransparency="true">
-        </iframe>
+      <div class="agenda-body" id="agenda-body">
+        <div class="state-msg">Lädt…</div>
       </div>
     </div>
 
@@ -1358,20 +1262,11 @@
           <span class="skel" style="width:76%;height:11px;margin-top:4px;"></span>
         </div>
       </div>
-      <div class="morgen-block">
-        <div class="morgen-header">
-          <span class="section-label">Morgen</span>
-          <span class="section-badge" id="morgen-badge"></span>
-        </div>
-        <div class="morgen-list" id="morgen-list">
-          <div class="morgen-empty">Lädt…</div>
-        </div>
-      </div>
     </div>
 
   </div>
 
-  <!-- ── ROW 3: Fokus + Cashflow ── -->
+  <!-- ── ROW 4: Fokus + Status ── -->
   <div class="row-bottom">
 
     <div class="card card-fokus">
@@ -1381,30 +1276,13 @@
       </div>
     </div>
 
-    <div class="card card-cashflow">
-      <span class="section-label">Cashflow</span>
-      <div id="cashflow-inner">
-        <div class="cashflow-row">
-          <span class="skel" style="display:inline-block;width:110px;height:24px;"></span>
-        </div>
+    <div class="card card-status">
+      <div class="status-seg" id="gmail-inner">
+        <span class="skel" style="width:80%;height:22px;"></span>
       </div>
-    </div>
-
-    <!-- Gmail Unread -->
-    <div class="card card-gmail">
-      <span class="section-label">Gmail</span>
-      <div id="gmail-inner">
-        <span class="skel" style="display:block;width:48px;height:22px;margin-top:4px;"></span>
-        <span class="skel" style="display:block;width:68px;height:11px;margin-top:5px;"></span>
-      </div>
-    </div>
-
-    <!-- Zoho Offene Rechnungen -->
-    <div class="card card-zoho">
-      <span class="section-label">Rechnungen</span>
-      <div id="zoho-inner">
-        <span class="skel" style="display:block;width:110px;height:18px;margin-top:3px;"></span>
-        <span class="skel" style="display:block;width:85px;height:11px;margin-top:5px;"></span>
+      <div class="status-div"></div>
+      <div class="status-seg" id="zoho-inner">
+        <span class="skel" style="width:80%;height:22px;"></span>
       </div>
     </div>
 
@@ -1594,7 +1472,36 @@ function updateClock() {
     DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
   document.getElementById('cal-date').textContent =
     now.getDate() + '. ' + MONTHS[now.getMonth()];
+  agendaUpdateNext();   // "Als Nächstes"-Countdown live halten
+  renderYearKpi();      // Jahresfortschritt (rendert nur bei Tageswechsel neu)
 }
+
+// ── KPI: Jahresfortschritt ───────────────────────────────────
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - y0) / 86400000 + 1) / 7);
+}
+
+function renderYearKpi() {
+  const el = document.getElementById('kpi-year-inner');
+  if (!el) return;
+  const now  = new Date();
+  const y0   = new Date(now.getFullYear(), 0, 1);
+  const y1   = new Date(now.getFullYear() + 1, 0, 1);
+  const doy  = Math.floor((now - y0) / 86400000) + 1;
+  if (el._doy === doy) return; // nur bei Tageswechsel neu rendern
+  el._doy = doy;
+  const days = Math.round((y1 - y0) / 86400000);
+  const pct  = Math.round((now - y0) / (y1 - y0) * 100);
+  el.innerHTML = `
+    <div class="kpi-value">KW ${isoWeek(now)}</div>
+    <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%"></div></div>
+    <div class="kpi-sub">Tag ${doy} von ${days} · ${pct} % von ${now.getFullYear()}</div>`;
+}
+
 updateClock();
 setInterval(updateClock, 10_000);
 
@@ -1680,11 +1587,38 @@ async function loadPipeline() {
         </div>`;
     }).join('');
 
+    renderPipelineKpi(rows);
+
   } catch (err) {
     console.error('Pipeline:', err);
     document.getElementById('pipeline-list').innerHTML =
       '<div class="state-msg">Nicht verfügbar</div>';
   }
+}
+
+// ── KPI: Pipeline-Gesamtwert (Summe der €/Monat-Beträge) ─────
+function renderPipelineKpi(rows) {
+  const el = document.getElementById('kpi-pipeline-inner');
+  if (!el) return;
+  const monthly = rows.map(r => {
+    const s = String(r['Betrag'] || r['Amount'] || '');
+    // Bevorzugt "X €/Monat", sonst erste €-Zahl im Text
+    let m = s.match(/([\d.][\d.,]*)\s*€\s*\/?\s*Monat/i);
+    if (!m) m = s.match(/([\d.][\d.,]*)\s*€/);
+    return m ? parseNum(m[1]) : 0;
+  });
+  const total = monthly.reduce((a, b) => a + b, 0);
+  const segs  = monthly.filter(v => v > 0);
+  const segHtml = segs.length
+    ? '<div class="kpi-segbar">' + segs.map((v, i) =>
+        `<span style="flex:${v};opacity:${Math.max(1 - i * 0.18, 0.35)}"></span>`).join('') + '</div>'
+    : '';
+  el.innerHTML = `
+    <div class="fade-in" style="display:flex;flex-direction:column;gap:5px;">
+      <div class="kpi-value">${fmtNum(total)} €</div>
+      ${segHtml}
+      <div class="kpi-sub">${rows.length} ${rows.length === 1 ? 'Lead' : 'Leads'} · potenziell pro Monat</div>
+    </div>`;
 }
 
 // ── Fokus heute ───────────────────────────────────────────────
@@ -1740,26 +1674,49 @@ async function loadCashflow() {
     const offenNum  = offenRaw ? parseNum(offenRaw) : null;
     const pct       = ziel > 0 ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
 
+    const monthEl = document.getElementById('kpi-month-name');
+    if (monthEl) monthEl.textContent = MONTHS[now.getMonth()];
+
     document.getElementById('cashflow-inner').innerHTML = `
-      <div class="fade-in">
-        <div class="cashflow-row">
-          <span class="cashflow-value">${fmtNum(einnahmen)}</span>
-          <span class="cashflow-sep"> / </span>
-          <span class="cashflow-goal">${fmtNum(ziel)} €</span>
-        </div>
-        <div class="cashflow-bar-wrap">
-          <div class="cashflow-bar-fill" style="width:${pct}%;"></div>
-        </div>
-        <div class="cashflow-sub" style="margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          ${pct} % des Ziels${offenNum ? ' · ' + fmtNum(offenNum) + ' € offen' : ''}
-        </div>
+      <div class="fade-in" style="display:flex;flex-direction:column;gap:5px;">
+        <div class="kpi-value">${fmtNum(einnahmen)} € <span class="kpi-value-sub">/ ${fmtNum(ziel)} €</span></div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;"></div></div>
+        <div class="kpi-sub">${pct} % des Ziels${offenNum ? ' · ' + fmtNum(offenNum) + ' € offen' : ''}</div>
       </div>`;
+
+    renderRevenueChart(rows);
 
   } catch (err) {
     console.error('Cashflow:', err);
     document.getElementById('cashflow-inner').innerHTML =
-      '<div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>';
+      '<div style="font-size:12px;color:rgba(255,255,255,0.6);">Nicht verfügbar</div>';
   }
+}
+
+// ── KPI: Umsatz-Balkenchart über alle Monate ─────────────────
+function renderRevenueChart(rows) {
+  const el = document.getElementById('kpi-revenue-inner');
+  if (!el) return;
+  const vals = new Array(12).fill(null);
+  rows.forEach(r => {
+    const label = String(r['Monat'] || r['Month'] || r['Name'] || '').toLowerCase();
+    let idx = MONTHS.findIndex(mn => label.includes(mn.toLowerCase()));
+    if (idx < 0) { const m = label.match(/(\d{1,2})/); if (m) idx = parseInt(m[1]) - 1; }
+    if (idx >= 0 && idx < 12) vals[idx] = parseNum(r['Einnahmen'] || r['Revenue'] || 0);
+  });
+  const max = Math.max(...vals.map(v => v || 0), 1);
+  const cur = new Date().getMonth();
+  const sum = vals.reduce((a, b) => a + (b || 0), 0);
+  const sumEl = document.getElementById('kpi-rev-sum');
+  if (sumEl) sumEl.textContent = 'Σ ' + fmtNum(sum) + ' €';
+  const letters = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+  el.innerHTML = '<div class="kpi-bars fade-in">' + vals.map((v, i) => {
+    const h = v ? Math.max(Math.round(v / max * 100), 8) : 0;
+    return `<div class="kpi-bar-col${i === cur ? ' cur' : ''}">
+      <div class="kpi-bar-track"><div class="kpi-bar-v" style="height:${h}%"></div></div>
+      <span>${letters[i]}</span>
+    </div>`;
+  }).join('') + '</div>';
 }
 
 // ── Alle Notion-Daten laden ───────────────────────────────────
@@ -1857,7 +1814,7 @@ async function _googleSilentRefresh() {
     console.log('[Auth] Token still erneuert ✓');
     // UI im Hintergrund aktualisieren
     try { gmailRenderCount(await gmailFetch(token)); } catch {}
-    morgenLoad();
+    agendaLoad();
   } else {
     // Stilles Refresh fehlgeschlagen → dezenter Hinweis ohne UI zu brechen
     console.warn('[Auth] Stilles Refresh fehlgeschlagen');
@@ -1880,22 +1837,22 @@ function _gmailShowRefreshHint() {
 function gmailRenderCount(n) {
   window._mrGmail = n;
   const display = n > 99 ? '99+' : String(n);
-  const color = n > 0 ? 'var(--accent-blue)' : 'var(--text-tertiary)';
   document.getElementById('gmail-inner').innerHTML = `
-    <div class="fade-in">
-      <div class="gmail-count" style="color:${color}">${display}</div>
-      <div class="gmail-sub">${n === 0 ? 'Posteingang leer' : 'neue Mails'}</div>
+    <div class="status-item fade-in">
+      ${n === 0
+        ? '<span class="status-ok">✓</span><span class="status-text">Posteingang<br>leer</span>'
+        : `<span class="status-num hot">${display}</span><span class="status-text">ungelesene<br>Mails</span>`}
     </div>`;
 }
 
 function gmailRenderLogin() {
   document.getElementById('gmail-inner').innerHTML =
-    `<button class="gmail-login-btn" onclick="gmailLogin()">Anmelden</button>`;
+    `<button class="gmail-login-btn" onclick="gmailLogin()">Google verbinden</button>`;
 }
 
 function gmailRenderError() {
   document.getElementById('gmail-inner').innerHTML =
-    `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>`;
+    `<div class="status-text">Gmail nicht<br>verfügbar</div>`;
 }
 
 async function gmailFetch(token) {
@@ -1926,7 +1883,7 @@ async function gmailLoad() {
     _googleScheduleRefresh(stored.expires); // Refresh-Timer (neu) starten
     try {
       gmailRenderCount(await gmailFetch(stored.token));
-      morgenLoad();
+      agendaLoad();
       return;
     } catch (e) {
       if (e.status === 401) { gmailTokenClear(); _googleToken = null; }
@@ -1954,18 +1911,18 @@ async function gmailLoad() {
     const calOk = await hasCalendarScope(token);
     if (!calOk) {
       // Scope fehlt → manueller Login mit consent nötig
-      gmailRenderLogin(); morgenRenderLoginHint(); return;
+      gmailRenderLogin(); agendaRenderLogin(); return;
     }
     gmailTokenSave(token, 3600);
     _googleToken = token;
     try { gmailRenderCount(await gmailFetch(token)); } catch { gmailRenderError(); }
-    morgenLoad();
+    agendaLoad();
     return;
   }
 
   // 3. Alles fehlgeschlagen → Login-Button
   gmailRenderLogin();
-  morgenRenderLoginHint();
+  agendaRenderLogin();
 }
 
 function gmailLogin() {
@@ -1979,7 +1936,7 @@ function gmailLogin() {
       _googleToken = r.access_token;
       try { gmailRenderCount(await gmailFetch(r.access_token)); }
       catch { gmailRenderError(); }
-      morgenLoad();
+      agendaLoad();
     },
   }).requestAccessToken({ prompt: 'consent' });
 }
@@ -2027,27 +1984,24 @@ function zohoRender(data) {
   }
   if (!list.length) {
     document.getElementById('zoho-inner').innerHTML = `
-      <div class="fade-in">
-        <div class="zoho-amount" style="color:var(--accent-green);font-size:13px;font-weight:500;">
-          Alles beglichen
-        </div>
-        <div class="zoho-due">Keine offenen Rechnungen</div>
+      <div class="status-item fade-in">
+        <span class="status-ok">✓</span>
+        <span class="status-text">Rechnungen<br>alle beglichen</span>
       </div>`;
     return;
   }
   const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
   const next  = [...list].sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0];
   document.getElementById('zoho-inner').innerHTML = `
-    <div class="fade-in">
-      <div class="zoho-main">${list.length} offen</div>
-      <div class="zoho-amount">${fmtNum(total)} €</div>
-      <div class="zoho-due">Fällig ${fmtDateShort(next.due_date)} · ${esc(next.customer_name || '—')}</div>
+    <div class="status-item fade-in">
+      <span class="status-num amber">${list.length}</span>
+      <span class="status-text">${fmtNum(total)} € offen<br>fällig ${fmtDateShort(next.due_date)}</span>
     </div>`;
 }
 
 function zohoRenderError() {
   document.getElementById('zoho-inner').innerHTML =
-    `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht verfügbar</div>`;
+    `<div class="status-text">Rechnungen<br>nicht verfügbar</div>`;
 }
 
 async function zohoLoad() {
@@ -2065,7 +2019,7 @@ async function zohoLoad() {
     // Kein Refresh-Token gesetzt → neutral zeigen statt Fehler-Alert
     if (ZOHO_REFRESH_TOKEN === 'DEIN_ZOHO_REFRESH_TOKEN') {
       document.getElementById('zoho-inner').innerHTML =
-        `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Nicht konfiguriert</div>`;
+        `<div class="status-text">Rechnungen<br>nicht konfiguriert</div>`;
     } else {
       zohoRenderError();
     }
@@ -2343,60 +2297,144 @@ async function todayLoad() {
   } catch { /* ignorieren */ }
 }
 
-async function morgenLoad() {
-  if (!_googleToken) { morgenRenderLoginHint(); return; }
+// ═════════════════════════════════════════════════════════════
+// AGENDA — eigener dunkler Kalender (heute + 4 Folgetage)
+// ═════════════════════════════════════════════════════════════
+const AGENDA_DAYS   = 5;
+const AGENDA_COLORS = ['#8E84E8', '#6BA3DC', '#5BBE8D', '#D9A05B', '#D777A8', '#7FC4CE'];
+let _agendaEvents = []; // flach, sortiert, mit _color je Kalender
+
+function _agDateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function _agTime(d) {
+  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+function _agDur(ms) {
+  const m = Math.max(Math.round(ms / 60000), 1);
+  if (m < 60) return m + ' min';
+  const h = Math.floor(m / 60), rest = m % 60;
+  return rest ? `${h} h ${rest} min` : `${h} h`;
+}
+
+async function agendaLoad() {
+  if (!_googleToken) { agendaRenderLogin(); return; }
   todayLoad(); // Heute-Termine für Morning Report parallel laden
+  const body = document.getElementById('agenda-body');
   try {
-    const start = new Date();
-    start.setDate(start.getDate() + 1);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setHours(23, 59, 59, 999);
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const end   = new Date(start);
+    end.setDate(end.getDate() + AGENDA_DAYS);
+    end.setMilliseconds(-1);
 
-    const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?`
-      + `timeMin=${encodeURIComponent(start.toISOString())}`
-      + `&timeMax=${encodeURIComponent(end.toISOString())}`
-      + `&singleEvents=true&orderBy=startTime&maxResults=10`;
+    const listRes = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+      { headers: { Authorization: 'Bearer ' + _googleToken } }
+    );
+    if (listRes.status === 401) { gmailTokenClear(); _googleToken = null; agendaRenderLogin(); return; }
+    const calList = listRes.ok ? await listRes.json() : { items: [] };
+    const calIds  = [...new Set([DASHBOARD_CAL_ID, 'primary', ...(calList.items || []).map(c => c.id)])];
 
-    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + _googleToken } });
-    if (r.status === 401) { gmailTokenClear(); _googleToken = null; morgenRenderLoginHint(); return; }
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    morgenRender(d.items || []);
+    const results = await Promise.all(calIds.map((id, i) =>
+      fetchEventsForDay(id, start, end).then(evs =>
+        evs.map(e => ({ ...e, _color: AGENDA_COLORS[i % AGENDA_COLORS.length] })))
+    ));
+
+    const seen = new Set();
+    _agendaEvents = results.flat()
+      .filter(e => { const k = e.id; if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a, b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date));
+
+    agendaRender();
+    agendaUpdateNext();
   } catch (e) {
-    console.error('Morgen:', e);
-    document.getElementById('morgen-list').innerHTML =
-      '<div class="morgen-empty">Nicht verfügbar</div>';
+    console.error('Agenda:', e);
+    if (body) body.innerHTML = '<div class="state-msg">Nicht verfügbar</div>';
   }
 }
 
-function morgenRender(items) {
-  const badge = document.getElementById('morgen-badge');
-  const list  = document.getElementById('morgen-list');
-  if (!items.length) {
-    badge.textContent = '';
-    list.innerHTML = '<div class="morgen-empty">Frei</div>';
-    return;
+function agendaRender() {
+  const body = document.getElementById('agenda-body');
+  if (!body) return;
+  const now = new Date();
+  let html = '';
+
+  for (let i = 0; i < AGENDA_DAYS; i++) {
+    const d = new Date(now); d.setDate(now.getDate() + i); d.setHours(0, 0, 0, 0);
+    const key = _agDateKey(d);
+
+    const evs = _agendaEvents.filter(ev => {
+      if (ev.start?.dateTime) return _agDateKey(new Date(ev.start.dateTime)) === key;
+      return ev.start?.date === key;
+    });
+
+    const dayName = i === 0 ? 'Heute · ' + DAYS[d.getDay()]
+                  : i === 1 ? 'Morgen · ' + DAYS[d.getDay()]
+                  : DAYS[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS[d.getMonth()];
+    const count = evs.length ? (evs.length === 1 ? '1 Termin' : evs.length + ' Termine') : '';
+
+    const rows = evs.length ? evs.map(ev => {
+      const allDay = !ev.start?.dateTime;
+      const s  = allDay ? null : new Date(ev.start.dateTime);
+      const e2 = ev.end?.dateTime ? new Date(ev.end.dateTime) : null;
+      const time = allDay ? 'Ganztägig' : _agTime(s) + (e2 ? '–' + _agTime(e2) : '');
+      const past = i === 0 && !allDay && ((e2 || s) < now);
+      return `<div class="agenda-ev${past ? ' past' : ''}">
+        <span class="agenda-ev-time">${time}</span>
+        <span class="agenda-ev-dot" style="background:${ev._color}"></span>
+        <span class="agenda-ev-title">${esc(ev.summary || '(ohne Titel)')}</span>
+      </div>`;
+    }).join('') : '<div class="agenda-free">Frei</div>';
+
+    html += `<div class="agenda-day">
+      <div class="agenda-day-head">
+        <span class="agenda-day-bubble${i === 0 ? ' today' : ''}">${d.getDate()}</span>
+        <span class="agenda-day-name">${dayName}</span>
+        <span class="agenda-day-count">${count}</span>
+      </div>
+      ${rows}
+    </div>`;
   }
-  badge.textContent = items.length === 1 ? '1 Termin' : items.length + ' Termine';
-  const visible = items.slice(0, 3);
-  const more    = items.length - visible.length;
-  list.innerHTML = visible.map(ev => {
-    const time = ev.start?.dateTime
-      ? new Date(ev.start.dateTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-      : 'Ganztags';
-    const title = ev.summary || '(ohne Titel)';
-    return `<div class="morgen-item"><span class="morgen-time">${time}</span><span class="morgen-title">${esc(title)}</span></div>`;
-  }).join('') + (more > 0 ? `<div class="morgen-empty">+${more} weitere</div>` : '');
+  body.innerHTML = html;
 }
 
-function morgenRenderLoginHint() {
-  document.getElementById('morgen-list').innerHTML =
-    '<div class="morgen-empty">Mit Gmail anmelden, um Termine zu sehen</div>';
+// "Als Nächstes"-Chip im Header — läuft gerade / startet in X
+function agendaUpdateNext() {
+  const el = document.getElementById('agenda-next');
+  if (!el) return;
+  const now = new Date();
+  let running = null, next = null;
+  for (const ev of _agendaEvents) {
+    if (!ev.start?.dateTime) continue;
+    const s = new Date(ev.start.dateTime);
+    const e = ev.end?.dateTime ? new Date(ev.end.dateTime) : null;
+    if (e && s <= now && now < e) { running = { ev, e }; break; }
+    if (s > now) { next = { ev, s }; break; }
+  }
+  if (running) {
+    el.innerHTML = `<span class="agenda-next-dot live"></span>${esc(running.ev.summary || 'Termin')} · noch ${_agDur(running.e - now)}`;
+    el.style.display = '';
+  } else if (next) {
+    el.innerHTML = `<span class="agenda-next-dot"></span>${esc(next.ev.summary || 'Termin')} · in ${_agDur(next.s - now)}`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
 }
 
-// Aktualisiere Morgen-Termine alle 15 Min
-setInterval(() => { if (_googleToken) morgenLoad(); }, 15 * 60_000);
+function agendaRenderLogin() {
+  const body = document.getElementById('agenda-body');
+  if (body) body.innerHTML = `
+    <div class="agenda-login">
+      <p>Verbinde dein Google-Konto,<br>um deine Termine hier zu sehen.</p>
+      <button onclick="gmailLogin()">Mit Google anmelden</button>
+    </div>`;
+  const el = document.getElementById('agenda-next');
+  if (el) el.style.display = 'none';
+}
+
+// Agenda alle 15 Min aktualisieren
+setInterval(() => { if (_googleToken) agendaLoad(); }, 15 * 60_000);
 
 // ═════════════════════════════════════════════════════════════
 // KALENDER-DEBUG — URL: ?debug
