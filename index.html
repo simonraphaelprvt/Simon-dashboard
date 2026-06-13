@@ -52,12 +52,32 @@
     height: 100dvh;
     padding: 20px;
     display: grid;
-    grid-template-rows: 96px 112px 1fr 74px;
+    grid-template-rows: 96px 1fr;   /* Top-Reihe | Hauptbereich */
     gap: 12px;
     overflow: hidden;
     position: relative;
     background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.045) 1px, transparent 0);
     background-size: 24px 24px;
+  }
+
+  /* Hauptbereich: links Inhalt, rechts schmale Agenda-Spalte */
+  .main-area {
+    display: grid;
+    grid-template-columns: 1fr 296px;
+    gap: 12px;
+    min-height: 0;
+  }
+  .main-left {
+    display: grid;
+    grid-template-rows: 1fr auto auto;  /* Revenue-Hero | KPIs | Fokus-Leiste */
+    gap: 12px;
+    min-height: 0;
+  }
+  .agenda-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
   }
 
   .card {
@@ -195,28 +215,28 @@
     flex: 1;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .agenda-day-count { font-size: 10.5px; color: var(--text-tertiary); flex-shrink: 0; }
+  .agenda-day-count { font-size: 10px; color: var(--text-tertiary); flex-shrink: 0; }
   .agenda-ev {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 5px 0 5px 40px;
-  }
-  .agenda-ev-time {
-    font-size: 11.5px;
-    color: var(--text-secondary);
-    min-width: 86px;
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
+    gap: 8px;
+    padding: 4px 0 4px 6px;
   }
   .agenda-ev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .agenda-ev-body { min-width: 0; flex: 1; display: flex; flex-direction: column; }
   .agenda-ev-title {
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text-primary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.25;
+  }
+  .agenda-ev-time {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
   }
   .agenda-ev.past { opacity: 0.35; }
-  .agenda-free { font-size: 11.5px; color: var(--text-tertiary); padding: 0 0 6px 40px; }
+  .agenda-free { font-size: 11.5px; color: var(--text-tertiary); padding: 0 0 6px 6px; }
   .agenda-login {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -243,6 +263,84 @@
   .agenda-next-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-purple); flex-shrink: 0; }
   .agenda-next-dot.live { background: var(--accent-green); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  /* "Als Nächstes"-Chip sitzt im schmalen Sidebar-Header unter dem Label */
+  .agenda-sidebar .section-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .agenda-sidebar .agenda-next { max-width: 100%; font-size: 11px; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     REVENUE HERO — großer Flächen-Chart (wie Referenz)
+  ═══════════════════════════════════════════════════════════════ */
+  .card-revenue {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 22px 10px;
+    min-height: 0;
+  }
+  .rev-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .rev-metrics { display: flex; gap: 40px; }
+  .rev-metric { display: flex; flex-direction: column; gap: 4px; }
+  .rev-metric-top { display: flex; align-items: center; gap: 9px; }
+  .rev-value {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: -1.4px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .rev-value.accent { color: var(--accent-purple); }
+  .rev-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+  }
+  .rev-badge.up   { background: rgba(91,190,141,0.16); color: var(--accent-green); }
+  .rev-badge.down { background: rgba(224,113,108,0.16); color: var(--accent-red); }
+  .rev-badge.flat { background: rgba(255,255,255,0.07); color: var(--text-secondary); }
+  .rev-metric-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
+  }
+  .rev-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--card-inner);
+    border-radius: 999px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .rev-toggle button {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .rev-toggle button.active { background: var(--grad-violet); color: #fff; }
+  .rev-chart {
+    flex: 1;
+    min-height: 0;
+    margin-top: 6px;
+    position: relative;
+  }
+  .rev-chart svg { width: 100%; height: 100%; display: block; }
 
   /* Pipeline */
   .card-pipeline {
@@ -257,21 +355,21 @@
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 6px;
     min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  .pipeline-list::-webkit-scrollbar { display: none; }
 
   .pipeline-item {
     background: var(--card-inner);
     border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    flex: 1;
+    padding: 9px 12px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: 2px;
-    min-height: 0;
+    flex-shrink: 0;
   }
 
   .pipeline-row {
@@ -339,13 +437,28 @@
     min-height: 0;
   }
   .kpi-card {
-    padding: 13px 18px 12px;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     overflow: hidden;
     min-width: 0;
+    height: 96px;
+    justify-content: center;
   }
+  /* Mini-Statistik mit Icon (Drehtage etc.) */
+  .kpi-row2 { display: flex; align-items: baseline; gap: 7px; }
+  .kpi-chip {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-secondary);
+  }
+  .kpi-chip.up   { background: rgba(91,190,141,0.16); color: var(--accent-green); }
+  .kpi-chip.amber{ background: rgba(217,160,91,0.16); color: var(--accent-orange); }
+  .kpi-dotrow { display: flex; gap: 4px; margin: 4px 0 1px; flex-wrap: wrap; }
+  .kpi-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.10); }
+  .kpi-dot.on { background: var(--accent-purple); }
   .kpi-label {
     font-size: 9.5px;
     font-weight: 600;
@@ -460,18 +573,27 @@
   ───────────────────────────────────── */
   .row-bottom {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: 1fr 150px;
     gap: 12px;
+    height: 62px;
   }
 
   .card-fokus {
-    padding: 11px 20px;
+    padding: 9px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     border-left: 3px solid var(--accent-purple);
     border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  /* Gmail-Chip (kompakt, in der Fokus-Leiste rechts) */
+  .card-gmailchip {
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .fokus-text {
@@ -1197,96 +1319,106 @@
 
   </div>
 
-  <!-- ── ROW 2: KPI-Reihe ── -->
-  <div class="row-kpi">
+  <!-- ── HAUPTBEREICH: links Inhalt, rechts Agenda+Pipeline ── -->
+  <div class="main-area">
 
-    <div class="card kpi-card kpi-grad-violet">
-      <div class="kpi-label">Cashflow · <span id="kpi-month-name">—</span></div>
-      <div id="cashflow-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;">
-        <span class="skel" style="width:110px;height:24px;"></span>
-        <span class="skel" style="width:80%;height:10px;"></span>
-      </div>
-    </div>
+    <div class="main-left">
 
-    <div class="card kpi-card kpi-grad-blue">
-      <div class="kpi-label">Pipeline-Wert</div>
-      <div id="kpi-pipeline-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;">
-        <span class="skel" style="width:96px;height:24px;"></span>
-        <span class="skel" style="width:70%;height:10px;"></span>
-      </div>
-    </div>
-
-    <div class="card kpi-card">
-      <div class="kpi-label">Umsatz <span class="kpi-label-extra" id="kpi-rev-sum"></span></div>
-      <div id="kpi-revenue-inner" style="display:flex;flex-direction:column;flex:1;min-height:0;justify-content:center;">
-        <span class="skel" style="width:100%;height:40px;"></span>
-      </div>
-    </div>
-
-    <div class="card kpi-card">
-      <div class="kpi-label">Jahresfortschritt</div>
-      <div id="kpi-year-inner" style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;justify-content:center;"></div>
-    </div>
-
-  </div>
-
-  <!-- ── ROW 3: Agenda + Pipeline ── -->
-  <div class="row-middle">
-
-    <div class="card card-agenda">
-      <div class="section-header">
-        <span class="section-label">Agenda</span>
-        <span class="agenda-next" id="agenda-next" style="display:none;"></span>
-        <span class="section-badge" id="cal-date"></span>
-      </div>
-      <div class="agenda-body" id="agenda-body">
-        <div class="state-msg">Lädt…</div>
-      </div>
-    </div>
-
-    <div class="card card-pipeline">
-      <div class="section-header">
-        <span class="section-label">Pipeline</span>
-        <span class="section-badge" id="pipeline-badge"></span>
-      </div>
-      <div class="pipeline-list" id="pipeline-list">
-        <!-- Skeleton -->
-        <div class="pipeline-item">
-          <span class="skel" style="width:72%;height:13px;"></span>
-          <span class="skel" style="width:52%;height:12px;margin-top:5px;"></span>
-          <span class="skel" style="width:84%;height:11px;margin-top:4px;"></span>
+      <!-- Revenue Hero (großer Flächen-Chart) -->
+      <div class="card card-revenue">
+        <div class="rev-head">
+          <div class="rev-metrics">
+            <div class="rev-metric">
+              <div class="rev-metric-top">
+                <span class="rev-value" id="rev-month-value">—</span>
+                <span class="rev-badge flat" id="rev-month-badge"></span>
+              </div>
+              <span class="rev-metric-label" id="rev-month-label">Umsatz · diesen Monat</span>
+            </div>
+            <div class="rev-metric">
+              <div class="rev-metric-top">
+                <span class="rev-value accent" id="rev-mrr-value">—</span>
+              </div>
+              <span class="rev-metric-label" id="rev-mrr-label">MRR · wiederkehrend</span>
+            </div>
+          </div>
+          <div class="rev-toggle" id="rev-toggle">
+            <button data-range="6">6M</button>
+            <button data-range="12" class="active">12M</button>
+            <button data-range="max">Max</button>
+          </div>
         </div>
-        <div class="pipeline-item">
-          <span class="skel" style="width:64%;height:13px;"></span>
-          <span class="skel" style="width:44%;height:12px;margin-top:5px;"></span>
-          <span class="skel" style="width:76%;height:11px;margin-top:4px;"></span>
+        <div class="rev-chart" id="rev-chart"></div>
+      </div>
+
+      <!-- KPI-Reihe -->
+      <div class="row-kpi">
+        <div class="card kpi-card">
+          <div class="kpi-label">Jahresumsatz <span class="kpi-label-extra" id="kpi-yearrev-year"></span></div>
+          <div id="kpi-yearrev-inner"><span class="skel" style="width:80%;height:22px;"></span></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">Drehtage · <span id="kpi-shoots-month">—</span></div>
+          <div id="kpi-shoots-inner"><span class="skel" style="width:60%;height:22px;"></span></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">Offene Rechnungen</div>
+          <div id="zoho-inner"><span class="skel" style="width:70%;height:22px;"></span></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">Jahresfortschritt</div>
+          <div id="kpi-year-inner"></div>
         </div>
       </div>
-    </div>
 
-  </div>
-
-  <!-- ── ROW 4: Fokus + Status ── -->
-  <div class="row-bottom">
-
-    <div class="card card-fokus">
-      <span class="section-label">Fokus heute</span>
-      <div class="fokus-text" id="fokus-text">
-        <span class="skel" style="display:inline-block;width:78%;height:17px;"></span>
+      <!-- Fokus + Gmail -->
+      <div class="row-bottom">
+        <div class="card card-fokus">
+          <span class="section-label">Fokus heute</span>
+          <div class="fokus-text" id="fokus-text">
+            <span class="skel" style="display:inline-block;width:62%;height:16px;"></span>
+          </div>
+        </div>
+        <div class="card card-gmailchip" id="gmail-inner">
+          <span class="skel" style="width:70%;height:20px;"></span>
+        </div>
       </div>
-    </div>
 
-    <div class="card card-status">
-      <div class="status-seg" id="gmail-inner">
-        <span class="skel" style="width:80%;height:22px;"></span>
-      </div>
-      <div class="status-div"></div>
-      <div class="status-seg" id="zoho-inner">
-        <span class="skel" style="width:80%;height:22px;"></span>
-      </div>
-    </div>
+    </div><!-- /.main-left -->
 
-  </div>
+    <!-- Rechte Spalte: Agenda + kompakte Pipeline -->
+    <div class="agenda-sidebar">
+
+      <div class="card card-agenda" style="flex:1.4;min-height:0;">
+        <div class="section-header">
+          <span class="section-label">Agenda</span>
+          <span class="agenda-next" id="agenda-next" style="display:none;"></span>
+        </div>
+        <div class="agenda-body" id="agenda-body">
+          <div class="state-msg">Lädt…</div>
+        </div>
+      </div>
+
+      <div class="card card-pipeline" style="flex:1;min-height:0;">
+        <div class="section-header">
+          <span class="section-label">Pipeline</span>
+          <span class="section-badge" id="pipeline-badge"></span>
+        </div>
+        <div class="pipeline-list" id="pipeline-list">
+          <div class="pipeline-item">
+            <span class="skel" style="width:72%;height:12px;"></span>
+            <span class="skel" style="width:52%;height:11px;margin-top:5px;"></span>
+          </div>
+          <div class="pipeline-item">
+            <span class="skel" style="width:64%;height:12px;"></span>
+            <span class="skel" style="width:44%;height:11px;margin-top:5px;"></span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.agenda-sidebar -->
+
+  </div><!-- /.main-area -->
 
 
 </div><!-- /.screen -->
@@ -1390,7 +1522,13 @@ const TABLE = {
   pipeline: '9971f418-7f5f-4989-b815-c971bb65215a',
   fokus:    'e7ca1761-15c1-4791-84af-1c3320cec475',
   cashflow: 'ffae9691-2a24-4c15-87c1-41cda34db9fd',
+  kunden:   '1df61d95-23bc-4711-9a65-9885a0f62e8d',  // Aktive Kunden → MRR
 };
+
+// Revenue-Chart: Geschäftsstart (rollierender Zeitraum ab hier)
+const BIZ_START = { year: 2025, month: 7 }; // August 2025 (0-basiert)
+let _revRange = 12;   // aktiver Zeitraum-Filter (6 | 12 | 'max')
+let _cashflowRows = []; // zuletzt geladene Cashflow-Zeilen (für Chart-Neuzeichnen)
 
 const DAYS   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -1474,8 +1612,8 @@ function updateClock() {
   document.getElementById('clock').textContent   = h + ':' + m;
   document.getElementById('datestr').textContent =
     DAYS[now.getDay()] + ', ' + now.getDate() + '. ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
-  document.getElementById('cal-date').textContent =
-    now.getDate() + '. ' + MONTHS[now.getMonth()];
+  const calDateEl = document.getElementById('cal-date');
+  if (calDateEl) calDateEl.textContent = now.getDate() + '. ' + MONTHS[now.getMonth()];
   agendaUpdateNext();   // "Als Nächstes"-Countdown live halten
   renderYearKpi();      // Jahresfortschritt (rendert nur bei Tageswechsel neu)
 }
@@ -1576,22 +1714,16 @@ async function loadPipeline() {
     document.getElementById('pipeline-list').innerHTML = rows.map(row => {
       const name   = row['Name']   || row['Titel']         || 'Unbenannt';
       const status = row['Status'] || '';
-      const action = row['Nächste Aktion'] || row['Aktion'] || '';
-      const date   = row['Datum']  || row['Date']           || '';
       const amount = row['Betrag'] || row['Amount']         || '';
       return `
         <div class="pipeline-item fade-in">
           <div class="pipeline-row">
             <span class="pipeline-name">${esc(name)}</span>
-            ${date ? `<span class="pipeline-date">${esc(date)}</span>` : ''}
+            ${amount ? `<span class="pipeline-amount" style="margin:0;flex-shrink:0;">${esc(amount.replace(/\s*\/\s*Monat/i,'/M'))}</span>` : ''}
           </div>
           ${status ? `<div class="pipeline-status">${esc(status)}</div>` : ''}
-          ${action ? `<div class="pipeline-action">${esc(action)}</div>` : ''}
-          ${amount ? `<div class="pipeline-amount">${esc(amount)}</div>` : ''}
         </div>`;
     }).join('');
-
-    renderPipelineKpi(rows);
 
   } catch (err) {
     console.error('Pipeline:', err);
@@ -1600,29 +1732,20 @@ async function loadPipeline() {
   }
 }
 
-// ── KPI: Pipeline-Gesamtwert (Summe der €/Monat-Beträge) ─────
-function renderPipelineKpi(rows) {
-  const el = document.getElementById('kpi-pipeline-inner');
-  if (!el) return;
-  const monthly = rows.map(r => {
-    const s = String(r['Betrag'] || r['Amount'] || '');
-    // Bevorzugt "X €/Monat", sonst erste €-Zahl im Text
-    let m = s.match(/([\d.][\d.,]*)\s*€\s*\/?\s*Monat/i);
-    if (!m) m = s.match(/([\d.][\d.,]*)\s*€/);
-    return m ? parseNum(m[1]) : 0;
-  });
-  const total = monthly.reduce((a, b) => a + b, 0);
-  const segs  = monthly.filter(v => v > 0);
-  const segHtml = segs.length
-    ? '<div class="kpi-segbar">' + segs.map((v, i) =>
-        `<span style="flex:${v};opacity:${Math.max(1 - i * 0.18, 0.35)}"></span>`).join('') + '</div>'
-    : '';
-  el.innerHTML = `
-    <div class="fade-in" style="display:flex;flex-direction:column;gap:5px;">
-      <div class="kpi-value">${fmtNum(total)} €</div>
-      ${segHtml}
-      <div class="kpi-sub">${rows.length} ${rows.length === 1 ? 'Lead' : 'Leads'} · potenziell pro Monat</div>
-    </div>`;
+// ── MRR: aus „Aktive Kunden"-Tabelle ─────────────────────────
+async function loadMRR() {
+  const valEl = document.getElementById('rev-mrr-value');
+  const lblEl = document.getElementById('rev-mrr-label');
+  try {
+    const rows = parseNotionTable(await notionGetBlocks(TABLE.kunden));
+    const total = rows.reduce((s, r) => s + parseNum(r['€/Monat'] || r['Betrag'] || r['Monat'] || 0), 0);
+    if (valEl) valEl.textContent = fmtNum(total) + ' €';
+    if (lblEl) lblEl.textContent = `MRR · ${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`;
+    window._mrMRR = total;
+  } catch (err) {
+    console.error('MRR:', err);
+    if (valEl) valEl.textContent = '–';
+  }
 }
 
 // ── Fokus heute ───────────────────────────────────────────────
@@ -1651,83 +1774,189 @@ async function loadFokus() {
   }
 }
 
-// ── Cashflow ──────────────────────────────────────────────────
+// ── Cashflow → Revenue-Hero + Jahresumsatz-KPI + Chart ───────
+// Baut eine durchgehende Monatsreihe von BIZ_START bis aktueller Monat
+function monthSeriesFromRows(rows) {
+  const map = {};
+  rows.forEach(r => {
+    const label = String(r['Monat'] || r['Month'] || r['Name'] || '');
+    const mIdx  = MONTHS.findIndex(mn => label.toLowerCase().includes(mn.toLowerCase()));
+    const ym    = label.match(/(20\d{2})/);
+    if (mIdx >= 0 && ym) {
+      map[`${ym[1]}-${mIdx}`] = {
+        rev:  parseNum(r['Einnahmen'] || r['Revenue'] || 0),
+        goal: parseNum(r['Ziel'] || r['Goal'] || 0),
+      };
+    }
+  });
+  const now = new Date();
+  const series = [];
+  let y = BIZ_START.year, m = BIZ_START.month;
+  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) {
+    const d = map[`${y}-${m}`] || { rev: null, goal: null };
+    series.push({ year: y, mIdx: m, rev: d.rev, goal: d.goal });
+    if (++m > 11) { m = 0; y++; }
+  }
+  return series;
+}
+
+function renderTrendBadge(id, cur, prev) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (prev === null || prev === undefined) { el.className = 'rev-badge flat'; el.textContent = 'neu'; return; }
+  if (prev === 0 && cur === 0)             { el.className = 'rev-badge flat'; el.textContent = '±0 %'; return; }
+  if (prev === 0)                          { el.className = 'rev-badge up';   el.textContent = '↗ neu'; return; }
+  const pct = Math.round((cur - prev) / prev * 100);
+  el.className   = 'rev-badge ' + (pct === 0 ? 'flat' : pct > 0 ? 'up' : 'down');
+  el.textContent = (pct > 0 ? '↗ +' : pct < 0 ? '↘ ' : '') + pct + ' %';
+}
+
 async function loadCashflow() {
   try {
-    const now  = new Date();
-    const data = await notionGetBlocks(TABLE.cashflow);
-    const rows = parseNotionTable(data);
+    const rows = parseNotionTable(await notionGetBlocks(TABLE.cashflow));
+    _cashflowRows = rows;
+    const now    = new Date();
+    const series = monthSeriesFromRows(rows);
 
-    if (!rows.length) {
-      document.getElementById('cashflow-inner').innerHTML =
-        '<div class="state-msg" style="padding:0;margin-top:4px;">Keine Daten</div>';
-      return;
-    }
+    const cur  = series[series.length - 1] || { rev: 0 };
+    const prev = series[series.length - 2];
+    const curRev = cur.rev || 0;
 
-    // Aktuellen Monat suchen, sonst letzte Zeile
-    const curMonthName = MONTHS[now.getMonth()].toLowerCase();
-    const curMonthNum  = String(now.getMonth() + 1).padStart(2, '0');
-    let entry = rows.find(r => {
-      const m = String(r['Monat'] || r['Month'] || r['Name'] || '').toLowerCase();
-      return m.includes(curMonthName) || m.includes(curMonthNum);
-    }) || rows[rows.length - 1];
+    document.getElementById('rev-month-value').textContent = fmtNum(curRev) + ' €';
+    document.getElementById('rev-month-label').textContent =
+      'Umsatz · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+    renderTrendBadge('rev-month-badge', curRev, prev ? prev.rev : null);
 
-    const einnahmen = parseNum(entry['Einnahmen'] || entry['Revenue'] || 0);
-    const ziel      = parseNum(entry['Ziel']      || entry['Goal']    || 0);
-    const offenRaw  = entry['Offene Rechnungen']  || entry['Offen']   || null;
-    const offenNum  = offenRaw ? parseNum(offenRaw) : null;
-    const pct       = ziel > 0 ? Math.min(Math.round((einnahmen / ziel) * 100), 100) : 0;
+    // Jahresumsatz-KPI (laufendes Jahr)
+    const ytdMonths = series.filter(s => s.year === now.getFullYear());
+    const ytd       = ytdMonths.reduce((a, s) => a + (s.rev || 0), 0);
+    const goalSum   = ytdMonths.reduce((a, s) => a + (s.goal || 0), 0);
+    const goalPct   = goalSum > 0 ? Math.round(ytd / goalSum * 100) : 0;
+    const yrEl = document.getElementById('kpi-yearrev-year');
+    if (yrEl) yrEl.textContent = now.getFullYear();
+    document.getElementById('kpi-yearrev-inner').innerHTML = `
+      <div class="kpi-value fade-in">${fmtNum(ytd)} €</div>
+      <div class="kpi-sub">${goalSum > 0 ? goalPct + ' % vom Jahresziel' : ytdMonths.length + ' Monate'}</div>`;
 
-    const monthEl = document.getElementById('kpi-month-name');
-    if (monthEl) monthEl.textContent = MONTHS[now.getMonth()];
-
-    document.getElementById('cashflow-inner').innerHTML = `
-      <div class="fade-in" style="display:flex;flex-direction:column;gap:5px;">
-        <div class="kpi-value">${fmtNum(einnahmen)} € <span class="kpi-value-sub">/ ${fmtNum(ziel)} €</span></div>
-        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;"></div></div>
-        <div class="kpi-sub">${pct} % des Ziels${offenNum ? ' · ' + fmtNum(offenNum) + ' € offen' : ''}</div>
-      </div>`;
-
-    renderRevenueChart(rows);
-
+    renderRevenueChart();
   } catch (err) {
     console.error('Cashflow:', err);
-    document.getElementById('cashflow-inner').innerHTML =
-      '<div style="font-size:12px;color:rgba(255,255,255,0.6);">Nicht verfügbar</div>';
+    const v = document.getElementById('rev-month-value');
+    if (v) v.textContent = '–';
   }
 }
 
-// ── KPI: Umsatz-Balkenchart über alle Monate ─────────────────
-function renderRevenueChart(rows) {
-  const el = document.getElementById('kpi-revenue-inner');
-  if (!el) return;
-  const vals = new Array(12).fill(null);
-  rows.forEach(r => {
-    const label = String(r['Monat'] || r['Month'] || r['Name'] || '').toLowerCase();
-    let idx = MONTHS.findIndex(mn => label.includes(mn.toLowerCase()));
-    if (idx < 0) { const m = label.match(/(\d{1,2})/); if (m) idx = parseInt(m[1]) - 1; }
-    if (idx >= 0 && idx < 12) vals[idx] = parseNum(r['Einnahmen'] || r['Revenue'] || 0);
-  });
-  const max = Math.max(...vals.map(v => v || 0), 1);
-  const cur = new Date().getMonth();
-  const sum = vals.reduce((a, b) => a + (b || 0), 0);
-  const sumEl = document.getElementById('kpi-rev-sum');
-  if (sumEl) sumEl.textContent = 'Σ ' + fmtNum(sum) + ' €';
-  const letters = ['J','F','M','A','M','J','J','A','S','O','N','D'];
-  el.innerHTML = '<div class="kpi-bars fade-in">' + vals.map((v, i) => {
-    const h = v ? Math.max(Math.round(v / max * 100), 8) : 0;
-    return `<div class="kpi-bar-col${i === cur ? ' cur' : ''}">
-      <div class="kpi-bar-track"><div class="kpi-bar-v" style="height:${h}%"></div></div>
-      <span>${letters[i]}</span>
-    </div>`;
-  }).join('') + '</div>';
+// ── Großer Revenue-Area-Chart (SVG, smooth, mit Ziel-Linie) ──
+function smoothPath(pts) {
+  if (!pts.length) return '';
+  if (pts.length < 2) return `M${pts[0].x},${pts[0].y}`;
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+  return d;
 }
+
+function renderRevenueChart() {
+  const el = document.getElementById('rev-chart');
+  if (!el || !_cashflowRows.length) return;
+  const W = el.clientWidth, H = el.clientHeight;
+  if (W < 40 || H < 40) { requestAnimationFrame(renderRevenueChart); return; }
+
+  let series = monthSeriesFromRows(_cashflowRows);
+  if (_revRange !== 'max' && series.length > _revRange) series = series.slice(-_revRange);
+
+  const padL = 12, padR = 14, padT = 16, padB = 22;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const n = series.length;
+  const xAt = i => padL + (n <= 1 ? innerW / 2 : innerW * i / (n - 1));
+  const maxV = Math.max(...series.map(s => Math.max(s.rev || 0, s.goal || 0)), 1);
+  const yAt = v => padT + innerH * (1 - (v || 0) / maxV);
+
+  const revPts  = series.map((s, i) => ({ x: xAt(i), y: yAt(s.rev || 0) }));
+  const goalPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.goal || 0) }));
+  const hasGoal = series.every(s => s.goal);  // nur durchgehende Ziel-Linie zeigen
+
+  const revLine = smoothPath(revPts);
+  const areaPath = revLine
+    + ` L${xAt(n - 1).toFixed(1)},${(padT + innerH).toFixed(1)}`
+    + ` L${padL.toFixed(1)},${(padT + innerH).toFixed(1)} Z`;
+
+  // Gridlines (3)
+  let grid = '';
+  for (let g = 0; g <= 3; g++) {
+    const gy = padT + innerH * g / 3;
+    grid += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+  }
+
+  // X-Labels (bei vielen Monaten ausdünnen)
+  const stepLbl = n > 9 ? 2 : 1;
+  let labels = '';
+  series.forEach((s, i) => {
+    if (i % stepLbl !== 0 && i !== n - 1) return;
+    labels += `<text x="${xAt(i).toFixed(1)}" y="${H - 6}" fill="rgba(255,255,255,0.38)" font-size="9.5" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[s.mIdx].slice(0,3)}</text>`;
+  });
+
+  // Aktueller Monat (letzter Punkt): Marker + Pill
+  const ci = n - 1, cx = xAt(ci), cy = revPts[ci].y, cVal = series[ci].rev || 0;
+  const pillW = Math.max(44, (fmtNum(cVal) + ' €').length * 7 + 16);
+  let pillX = cx - pillW / 2;
+  pillX = Math.max(padL, Math.min(pillX, W - padR - pillW));
+  const pillY = Math.max(2, cy - 30);
+  const marker = `
+    <line x1="${cx.toFixed(1)}" y1="${padT}" x2="${cx.toFixed(1)}" y2="${padT + innerH}" stroke="rgba(142,132,232,0.45)" stroke-width="1" stroke-dasharray="3 3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="rgba(142,132,232,0.20)"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="#8E84E8" stroke="#0E1016" stroke-width="1.5"/>
+    <rect x="${pillX.toFixed(1)}" y="${pillY}" width="${pillW}" height="21" rx="7" fill="#26223A" stroke="rgba(142,132,232,0.4)" stroke-width="0.5"/>
+    <text x="${(pillX + pillW/2).toFixed(1)}" y="${pillY + 14}" fill="#C9C2F2" font-size="11" font-weight="600" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${fmtNum(cVal)} €</text>`;
+
+  const goalLine = hasGoal
+    ? `<path d="${smoothPath(goalPts)}" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-dasharray="4 4"/>`
+    : '';
+
+  el.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#8E84E8" stop-opacity="0.42"/>
+          <stop offset="55%" stop-color="#6C5FBF" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#6C5FBF" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${grid}
+      <path d="${areaPath}" fill="url(#revGrad)"/>
+      ${goalLine}
+      <path d="${revLine}" fill="none" stroke="#8E84E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${labels}
+      ${marker}
+    </svg>`;
+}
+
+// Zeitraum-Toggle verdrahten
+(function wireRevToggle() {
+  const wrap = document.getElementById('rev-toggle');
+  if (!wrap) return;
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const r = btn.dataset.range;
+    _revRange = r === 'max' ? 'max' : parseInt(r);
+    renderRevenueChart();
+  });
+})();
+window.addEventListener('resize', () => renderRevenueChart());
 
 // ── Alle Notion-Daten laden ───────────────────────────────────
 function refreshNotion() {
   loadPipeline();
   loadFokus();
   loadCashflow();
+  loadMRR();
 }
 refreshNotion();
 setInterval(refreshNotion, 5 * 60_000);
@@ -1841,22 +2070,19 @@ function _gmailShowRefreshHint() {
 function gmailRenderCount(n) {
   window._mrGmail = n;
   const display = n > 99 ? '99+' : String(n);
-  document.getElementById('gmail-inner').innerHTML = `
-    <div class="status-item fade-in">
-      ${n === 0
-        ? '<span class="status-ok">✓</span><span class="status-text">Posteingang<br>leer</span>'
-        : `<span class="status-num hot">${display}</span><span class="status-text">ungelesene<br>Mails</span>`}
-    </div>`;
+  document.getElementById('gmail-inner').innerHTML = n === 0
+    ? `<span class="status-ok fade-in">✓</span><div class="status-text" style="font-size:11px;">Gmail<br>leer</div>`
+    : `<span class="status-num hot fade-in">${display}</span><div class="status-text" style="font-size:11px;">neue<br>Mails</div>`;
 }
 
 function gmailRenderLogin() {
   document.getElementById('gmail-inner').innerHTML =
-    `<button class="gmail-login-btn" onclick="gmailLogin()">Google verbinden</button>`;
+    `<button class="gmail-login-btn" onclick="gmailLogin()" style="white-space:nowrap;">Verbinden</button>`;
 }
 
 function gmailRenderError() {
   document.getElementById('gmail-inner').innerHTML =
-    `<div class="status-text">Gmail nicht<br>verfügbar</div>`;
+    `<div class="status-text" style="font-size:11px;">Gmail<br>n.&nbsp;verfügbar</div>`;
 }
 
 async function gmailFetch(token) {
@@ -1988,24 +2214,24 @@ function zohoRender(data) {
   }
   if (!list.length) {
     document.getElementById('zoho-inner').innerHTML = `
-      <div class="status-item fade-in">
-        <span class="status-ok">✓</span>
-        <span class="status-text">Rechnungen<br>alle beglichen</span>
+      <div class="fade-in">
+        <div class="kpi-value" style="color:var(--accent-green);font-size:20px;">Alles bezahlt</div>
+        <div class="kpi-sub">keine offenen Posten</div>
       </div>`;
     return;
   }
   const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
   const next  = [...list].sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0];
   document.getElementById('zoho-inner').innerHTML = `
-    <div class="status-item fade-in">
-      <span class="status-num amber">${list.length}</span>
-      <span class="status-text">${fmtNum(total)} € offen<br>fällig ${fmtDateShort(next.due_date)}</span>
+    <div class="fade-in">
+      <div class="kpi-value" style="color:var(--accent-orange);">${fmtNum(total)} €</div>
+      <div class="kpi-sub">${list.length} offen · fällig ${fmtDateShort(next.due_date)}</div>
     </div>`;
 }
 
 function zohoRenderError() {
   document.getElementById('zoho-inner').innerHTML =
-    `<div class="status-text">Rechnungen<br>nicht verfügbar</div>`;
+    `<div class="kpi-sub">nicht verfügbar</div>`;
 }
 
 async function zohoLoad() {
@@ -2351,9 +2577,60 @@ async function agendaLoad() {
 
     agendaRender();
     agendaUpdateNext();
+    loadShoots();   // Drehtage-KPI aus demselben Token
   } catch (e) {
     console.error('Agenda:', e);
     if (body) body.innerHTML = '<div class="state-msg">Nicht verfügbar</div>';
+  }
+}
+
+// ── KPI: Drehtage diesen Monat (Stichwort „Shoot/Dreh" im Titel) ──
+const SHOOT_RE = /shoot|dreh/i;
+async function loadShoots() {
+  const el  = document.getElementById('kpi-shoots-inner');
+  const mEl = document.getElementById('kpi-shoots-month');
+  const now = new Date();
+  if (mEl) mEl.textContent = MONTHS[now.getMonth()].slice(0, 3) + '.';
+  if (!el) return;
+  if (!_googleToken) {
+    el.innerHTML = `<div class="kpi-value">–</div><div class="kpi-sub">Google verbinden</div>`;
+    return;
+  }
+  try {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0); end.setHours(23, 59, 59, 999);
+    const listRes = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+      { headers: { Authorization: 'Bearer ' + _googleToken } });
+    const calList = listRes.ok ? await listRes.json() : { items: [] };
+    const calIds  = [...new Set([DASHBOARD_CAL_ID, 'primary', ...(calList.items || []).map(c => c.id)])];
+    const evs = (await Promise.all(calIds.map(id => fetchEventsForDay(id, start, end)))).flat();
+
+    const seen = new Set();
+    const shoots = evs.filter(e => {
+      if (seen.has(e.id)) return false; seen.add(e.id);
+      return SHOOT_RE.test(e.summary || '');
+    });
+    const days = new Set(shoots.map(e => {
+      const d = e.start?.dateTime ? new Date(e.start.dateTime) : (e.start?.date ? new Date(e.start.date) : null);
+      return d ? _agDateKey(d) : null;
+    }).filter(Boolean));
+    const count = days.size;
+
+    const future = shoots
+      .map(e => ({ s: new Date(e.start?.dateTime || e.start?.date) }))
+      .filter(o => o.s >= now).sort((a, b) => a.s - b.s)[0];
+    let sub = count === 0 ? 'keiner geplant' : (count === 1 ? '1 Drehtag' : count + ' Drehtage');
+    if (future) {
+      const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const d1 = new Date(future.s.getFullYear(), future.s.getMonth(), future.s.getDate());
+      const diff = Math.round((d1 - d0) / 86400000);
+      sub += diff <= 0 ? ' · heute' : diff === 1 ? ' · morgen' : ` · in ${diff} T`;
+    }
+    el.innerHTML = `<div class="kpi-value fade-in">${count}</div><div class="kpi-sub">${sub}</div>`;
+  } catch (e) {
+    console.error('Shoots:', e);
+    el.innerHTML = `<div class="kpi-value">–</div>`;
   }
 }
 
@@ -2383,10 +2660,13 @@ function agendaRender() {
       const e2 = ev.end?.dateTime ? new Date(ev.end.dateTime) : null;
       const time = allDay ? 'Ganztägig' : _agTime(s) + (e2 ? '–' + _agTime(e2) : '');
       const past = i === 0 && !allDay && ((e2 || s) < now);
+      const shoot = /shoot|dreh/i.test(ev.summary || '');
       return `<div class="agenda-ev${past ? ' past' : ''}">
-        <span class="agenda-ev-time">${time}</span>
         <span class="agenda-ev-dot" style="background:${ev._color}"></span>
-        <span class="agenda-ev-title">${esc(ev.summary || '(ohne Titel)')}</span>
+        <span class="agenda-ev-body">
+          <span class="agenda-ev-title">${shoot ? '🎬 ' : ''}${esc(ev.summary || '(ohne Titel)')}</span>
+          <span class="agenda-ev-time">${time}</span>
+        </span>
       </div>`;
     }).join('') : '<div class="agenda-free">Frei</div>';
 
@@ -2435,6 +2715,7 @@ function agendaRenderLogin() {
     </div>`;
   const el = document.getElementById('agenda-next');
   if (el) el.style.display = 'none';
+  loadShoots(); // zeigt „Google verbinden"-Platzhalter
 }
 
 // Agenda alle 15 Min aktualisieren
