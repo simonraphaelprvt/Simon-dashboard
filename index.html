@@ -475,6 +475,26 @@
     height: 96px;
     justify-content: center;
   }
+  /* Cockpit-Instrument-Karten (Gauges/Donut/Ring) */
+  .gauge-card {
+    height: 148px;
+    padding: 9px 10px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .gauge-card .kpi-label { align-self: stretch; }
+  .gauge-wrap {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gauge-wrap svg { height: 100%; width: 100%; display: block; }
   /* Mini-Statistik mit Icon (Drehtage etc.) */
   .kpi-row2 { display: flex; align-items: baseline; gap: 7px; }
   .kpi-chip {
@@ -602,7 +622,7 @@
   ───────────────────────────────────── */
   .row-bottom {
     display: grid;
-    grid-template-columns: 1fr 150px;
+    grid-template-columns: 1fr 138px 138px;
     gap: 12px;
     height: 62px;
   }
@@ -1385,27 +1405,27 @@
         <div class="rev-chart" id="rev-chart"></div>
       </div>
 
-      <!-- KPI-Reihe -->
+      <!-- Instrument-Cluster (Cockpit) -->
       <div class="row-kpi">
-        <div class="card kpi-card">
-          <div class="kpi-label">Jahresumsatz <span class="kpi-label-extra" id="kpi-yearrev-year"></span></div>
-          <div id="kpi-yearrev-inner"><span class="skel" style="width:80%;height:22px;"></span></div>
+        <div class="card gauge-card">
+          <div class="kpi-label">Jahresziel <span class="kpi-label-extra" id="kpi-yearrev-year"></span></div>
+          <div class="gauge-wrap" id="gauge-goal"></div>
         </div>
-        <div class="card kpi-card">
+        <div class="card gauge-card">
+          <div class="kpi-label">Gewinn <span class="kpi-label-extra">Einnahmen vs. Ausgaben</span></div>
+          <div class="gauge-wrap" id="gauge-profit"></div>
+        </div>
+        <div class="card gauge-card">
           <div class="kpi-label">Drehtage · <span id="kpi-shoots-month">—</span></div>
-          <div id="kpi-shoots-inner"><span class="skel" style="width:60%;height:22px;"></span></div>
+          <div class="gauge-wrap" id="gauge-shoots"></div>
         </div>
-        <div class="card kpi-card">
-          <div class="kpi-label">Offene Rechnungen</div>
-          <div id="zoho-inner"><span class="skel" style="width:70%;height:22px;"></span></div>
-        </div>
-        <div class="card kpi-card">
+        <div class="card gauge-card">
           <div class="kpi-label">Jahresfortschritt</div>
-          <div id="kpi-year-inner"></div>
+          <div class="gauge-wrap" id="gauge-year"></div>
         </div>
       </div>
 
-      <!-- Fokus + Gmail -->
+      <!-- Fokus + Gmail + Rechnungen -->
       <div class="row-bottom">
         <div class="card card-fokus">
           <span class="section-label">Fokus heute</span>
@@ -1414,6 +1434,9 @@
           </div>
         </div>
         <div class="card card-gmailchip" id="gmail-inner">
+          <span class="skel" style="width:70%;height:20px;"></span>
+        </div>
+        <div class="card card-gmailchip" id="zoho-inner">
           <span class="skel" style="width:70%;height:20px;"></span>
         </div>
       </div>
@@ -1602,6 +1625,74 @@ function fmtNum(n, unit) {
   return unit ? formatted + '\u202F' + unit : formatted;
 }
 
+// Kompakte K-Notation f\u00FCr Gauges/Achsen: 1500 \u2192 "1,5K"
+function fmtK(v) {
+  v = Number(v) || 0;
+  if (v >= 1000) { const k = v / 1000; return (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1).replace('.', ',')) + 'K'; }
+  return String(Math.round(v));
+}
+
+// \u2550\u2550\u2550 Cockpit-Instrumente: Tacho / Donut / Ring (SVG) \u2550\u2550\u2550
+function _gp(cx, cy, r, deg) { const a = deg * Math.PI / 180; return [cx + r * Math.sin(a), cy - r * Math.cos(a)]; }
+function _arc(cx, cy, r, d0, d1) {
+  const [x0, y0] = _gp(cx, cy, r, d0), [x1, y1] = _gp(cx, cy, r, d1);
+  const large = Math.abs(d1 - d0) > 180 ? 1 : 0, sweep = d1 >= d0 ? 1 : 0;
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+
+// 270\u00B0-Tacho mit Skalen-Ticks
+function renderGauge(id, { pct, value, sub, color }) {
+  const el = document.getElementById(id); if (!el) return;
+  pct = Math.max(0, Math.min(1, pct || 0));
+  const cx = 50, cy = 52, r = 33, A0 = -135, SW = 270;
+  let ticks = '';
+  for (let t = 0; t <= 10; t++) {
+    const d = A0 + SW * t / 10, [ox, oy] = _gp(cx, cy, r + 6, d), [ix, iy] = _gp(cx, cy, r + 2, d);
+    ticks += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke="rgba(255,255,255,0.14)" stroke-width="${t % 5 === 0 ? 1.4 : 0.7}"/>`;
+  }
+  el.innerHTML = `<svg viewBox="0 0 100 100" class="fade-in">
+    ${ticks}
+    <path d="${_arc(cx, cy, r, A0, A0 + SW)}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="7" stroke-linecap="round"/>
+    <path d="${_arc(cx, cy, r, A0, A0 + SW * pct)}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/>
+    <text x="50" y="50" text-anchor="middle" fill="#E9EBF2" font-size="20" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${value}</text>
+    <text x="50" y="64" text-anchor="middle" fill="#9AA1B5" font-size="8" font-family="Plus Jakarta Sans,sans-serif">${sub}</text>
+  </svg>`;
+}
+
+// Donut aus Segmenten
+function renderDonut(id, { segs, top, sub, topColor }) {
+  const el = document.getElementById(id); if (!el) return;
+  const total = segs.reduce((a, s) => a + (s.val || 0), 0);
+  const cx = 50, cy = 50, r = 32; let ang = 0, arcs = '';
+  if (total > 0) segs.forEach(s => {
+    const sw = 360 * (s.val || 0) / total;
+    if (sw > 0.6) { arcs += `<path d="${_arc(cx, cy, r, ang + 1, ang + Math.min(sw, 358) - 1)}" fill="none" stroke="${s.color}" stroke-width="8" stroke-linecap="round"/>`; }
+    ang += sw;
+  });
+  el.innerHTML = `<svg viewBox="0 0 100 100" class="fade-in">
+    <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+    ${arcs}
+    <text x="50" y="49" text-anchor="middle" fill="${topColor || '#E9EBF2'}" font-size="14" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${top}</text>
+    <text x="50" y="62" text-anchor="middle" fill="#9AA1B5" font-size="8.5" font-family="Plus Jakarta Sans,sans-serif">${sub}</text>
+  </svg>`;
+}
+
+// Fortschritts-Ring (0..1)
+function renderRing(id, { pct, top, sub, color }) {
+  const el = document.getElementById(id); if (!el) return;
+  pct = Math.max(0, Math.min(1, pct || 0));
+  const cx = 50, cy = 50, r = 32;
+  const prog = pct >= 0.999
+    ? `<circle cx="50" cy="50" r="32" fill="none" stroke="${color}" stroke-width="7"/>`
+    : `<path d="${_arc(cx, cy, r, 0, 360 * pct)}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/>`;
+  el.innerHTML = `<svg viewBox="0 0 100 100" class="fade-in">
+    <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"/>
+    ${prog}
+    <text x="50" y="48" text-anchor="middle" fill="#E9EBF2" font-size="16" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${top}</text>
+    <text x="50" y="62" text-anchor="middle" fill="#9AA1B5" font-size="8" font-family="Plus Jakarta Sans,sans-serif">${sub}</text>
+  </svg>`;
+}
+
 // ── Notion Blocks API ────────────────────────────────────────
 // Liest eine einfache Notion-Tabelle (type: "table") per Blocks API
 async function notionGetBlocks(blockId) {
@@ -1663,7 +1754,7 @@ function isoWeek(d) {
 }
 
 function renderYearKpi() {
-  const el = document.getElementById('kpi-year-inner');
+  const el = document.getElementById('gauge-year');
   if (!el) return;
   const now  = new Date();
   const y0   = new Date(now.getFullYear(), 0, 1);
@@ -1672,11 +1763,13 @@ function renderYearKpi() {
   if (el._doy === doy) return; // nur bei Tageswechsel neu rendern
   el._doy = doy;
   const days = Math.round((y1 - y0) / 86400000);
-  const pct  = Math.round((now - y0) / (y1 - y0) * 100);
-  el.innerHTML = `
-    <div class="kpi-value">KW ${isoWeek(now)}</div>
-    <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%"></div></div>
-    <div class="kpi-sub">Tag ${doy} von ${days} · ${pct} % von ${now.getFullYear()}</div>`;
+  const frac = (now - y0) / (y1 - y0);
+  renderRing('gauge-year', {
+    pct:   frac,
+    top:   'KW ' + isoWeek(now),
+    sub:   Math.round(frac * 100) + ' % · Tag ' + doy,
+    color: '#6BA3DC',
+  });
 }
 
 updateClock();
@@ -1863,16 +1956,30 @@ async function loadCashflow() {
       'Umsatz · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
     renderTrendBadge('rev-month-badge', curRev, prev ? prev.rev : null);
 
-    // Jahresumsatz-KPI (laufendes Jahr)
+    // Laufendes Jahr: Einnahmen / Ausgaben / Ziel
     const ytdMonths = series.filter(s => s.year === now.getFullYear());
     const ytd       = ytdMonths.reduce((a, s) => a + (s.rev || 0), 0);
+    const expYtd    = ytdMonths.reduce((a, s) => a + (s.exp || 0), 0);
     const goalSum   = ytdMonths.reduce((a, s) => a + (s.goal || 0), 0);
     const goalPct   = goalSum > 0 ? Math.round(ytd / goalSum * 100) : 0;
     const yrEl = document.getElementById('kpi-yearrev-year');
     if (yrEl) yrEl.textContent = now.getFullYear();
-    document.getElementById('kpi-yearrev-inner').innerHTML = `
-      <div class="kpi-value fade-in">${fmtNum(ytd)} €</div>
-      <div class="kpi-sub">${goalSum > 0 ? goalPct + ' % vom Jahresziel' : ytdMonths.length + ' Monate'}</div>`;
+
+    // Instrument 1: Jahresziel-Gauge
+    renderGauge('gauge-goal', {
+      pct:   goalSum > 0 ? ytd / goalSum : 0,
+      value: goalSum > 0 ? goalPct + '%' : '–',
+      sub:   fmtK(ytd) + ' / ' + fmtK(goalSum) + ' €',
+      color: '#8E84E8',
+    });
+    // Instrument 2: Gewinn-Donut (Einnahmen vs Ausgaben)
+    const profit = ytd - expYtd;
+    renderDonut('gauge-profit', {
+      segs: [{ val: ytd, color: '#8E84E8' }, { val: expYtd, color: '#D9A05B' }],
+      top:  (profit >= 0 ? '' : '−') + fmtNum(Math.abs(profit)) + ' €',
+      sub:  'Gewinn',
+      topColor: profit >= 0 ? '#5BBE8D' : '#E0716C',
+    });
 
     renderRevenueChart();
   } catch (err) {
@@ -1916,8 +2023,6 @@ function renderRevenueChart() {
     for (let v = 0; v <= max + step * 0.001; v += step) lines.push(v);
     return { max, lines };
   };
-  const fmtK = v => v >= 1000 ? ((v / 1000) % 1 === 0 ? (v/1000).toFixed(0) : (v/1000).toFixed(1)) + 'K' : String(Math.round(v));
-
   const padL = 40, padR = 16, padT = 22, padB = 24;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = series.length;
@@ -2296,25 +2401,19 @@ function zohoRender(data) {
     window._mrZoho = { count: 0, total: 0 };
   }
   if (!list.length) {
-    document.getElementById('zoho-inner').innerHTML = `
-      <div class="fade-in">
-        <div class="kpi-value" style="color:var(--accent-green);font-size:20px;">Alles bezahlt</div>
-        <div class="kpi-sub">keine offenen Posten</div>
-      </div>`;
+    document.getElementById('zoho-inner').innerHTML =
+      `<span class="status-ok fade-in">✓</span><div class="status-text" style="font-size:11px;">Rechnungen<br>bezahlt</div>`;
     return;
   }
   const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
-  const next  = [...list].sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0];
   document.getElementById('zoho-inner').innerHTML = `
-    <div class="fade-in">
-      <div class="kpi-value" style="color:var(--accent-orange);">${fmtNum(total)} €</div>
-      <div class="kpi-sub">${list.length} offen · fällig ${fmtDateShort(next.due_date)}</div>
-    </div>`;
+    <span class="status-num amber fade-in" style="font-size:20px;">${fmtNum(total)}</span>
+    <div class="status-text" style="font-size:11px;">€ offen<br>${list.length} Rechn.</div>`;
 }
 
 function zohoRenderError() {
   document.getElementById('zoho-inner').innerHTML =
-    `<div class="kpi-sub">nicht verfügbar</div>`;
+    `<div class="status-text" style="font-size:11px;">Rechnungen<br>n.&nbsp;verfügbar</div>`;
 }
 
 async function zohoLoad() {
@@ -2669,14 +2768,14 @@ async function agendaLoad() {
 
 // ── KPI: Drehtage diesen Monat (Stichwort „Shoot/Dreh" im Titel) ──
 const SHOOT_RE = /shoot|dreh/i;
+const SHOOT_TARGET = 8; // Drehtage/Monat = Gauge-Vollausschlag
 async function loadShoots() {
-  const el  = document.getElementById('kpi-shoots-inner');
   const mEl = document.getElementById('kpi-shoots-month');
   const now = new Date();
   if (mEl) mEl.textContent = MONTHS[now.getMonth()].slice(0, 3) + '.';
-  if (!el) return;
+  if (!document.getElementById('gauge-shoots')) return;
   if (!_googleToken) {
-    el.innerHTML = `<div class="kpi-value">–</div><div class="kpi-sub">Google verbinden</div>`;
+    renderGauge('gauge-shoots', { pct: 0, value: '–', sub: 'Google verbinden', color: '#5BBE8D' });
     return;
   }
   try {
@@ -2703,17 +2802,19 @@ async function loadShoots() {
     const future = shoots
       .map(e => ({ s: new Date(e.start?.dateTime || e.start?.date) }))
       .filter(o => o.s >= now).sort((a, b) => a.s - b.s)[0];
-    let sub = count === 0 ? 'keiner geplant' : (count === 1 ? '1 Drehtag' : count + ' Drehtage');
+    let sub;
     if (future) {
       const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const d1 = new Date(future.s.getFullYear(), future.s.getMonth(), future.s.getDate());
       const diff = Math.round((d1 - d0) / 86400000);
-      sub += diff <= 0 ? ' · heute' : diff === 1 ? ' · morgen' : ` · in ${diff} T`;
+      sub = diff <= 0 ? 'nächster: heute' : diff === 1 ? 'nächster: morgen' : `nächster in ${diff} T`;
+    } else {
+      sub = count === 0 ? 'keiner geplant' : 'diesen Monat';
     }
-    el.innerHTML = `<div class="kpi-value fade-in">${count}</div><div class="kpi-sub">${sub}</div>`;
+    renderGauge('gauge-shoots', { pct: count / SHOOT_TARGET, value: String(count), sub, color: '#5BBE8D' });
   } catch (e) {
     console.error('Shoots:', e);
-    el.innerHTML = `<div class="kpi-value">–</div>`;
+    renderGauge('gauge-shoots', { pct: 0, value: '–', sub: 'nicht verfügbar', color: '#5BBE8D' });
   }
 }
 
