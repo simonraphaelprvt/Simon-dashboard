@@ -1462,6 +1462,10 @@ function parseNum(s) {
   return parseFloat(str.replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
 }
 
+// Agenda-Eventcache — muss VOR updateClock() initialisiert sein,
+// da updateClock() sofort läuft und agendaUpdateNext() darauf zugreift
+let _agendaEvents = []; // flach, sortiert, mit _color je Kalender
+
 // ── Uhrzeit ──────────────────────────────────────────────────
 function updateClock() {
   const now = new Date();
@@ -2302,7 +2306,7 @@ async function todayLoad() {
 // ═════════════════════════════════════════════════════════════
 const AGENDA_DAYS   = 5;
 const AGENDA_COLORS = ['#8E84E8', '#6BA3DC', '#5BBE8D', '#D9A05B', '#D777A8', '#7FC4CE'];
-let _agendaEvents = []; // flach, sortiert, mit _color je Kalender
+// _agendaEvents wird oben (vor updateClock) deklariert
 
 function _agDateKey(d) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
