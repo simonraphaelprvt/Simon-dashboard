@@ -313,6 +313,35 @@
     color: var(--text-secondary);
     letter-spacing: 0.01em;
   }
+  .rev-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .rev-exp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-inner);
+    border: 0.5px solid var(--border);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .rev-exp-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    transition: background 0.2s;
+  }
+  .rev-exp-toggle.active {
+    background: rgba(217,160,91,0.16);
+    color: var(--accent-orange);
+    border-color: rgba(217,160,91,0.42);
+  }
+  .rev-exp-toggle.active .rev-exp-dot { background: var(--accent-orange); }
+  .rev-exp-toggle:active { transform: scale(0.97); }
   .rev-toggle {
     display: flex;
     gap: 2px;
@@ -1342,10 +1371,15 @@
               <span class="rev-metric-label" id="rev-mrr-label">MRR · wiederkehrend</span>
             </div>
           </div>
-          <div class="rev-toggle" id="rev-toggle">
-            <button data-range="6">6M</button>
-            <button data-range="12" class="active">12M</button>
-            <button data-range="max">Max</button>
+          <div class="rev-controls">
+            <button class="rev-exp-toggle" id="rev-exp-toggle" type="button">
+              <span class="rev-exp-dot"></span>Ausgaben
+            </button>
+            <div class="rev-toggle" id="rev-toggle">
+              <button data-range="6">6M</button>
+              <button data-range="12" class="active">12M</button>
+              <button data-range="max">Max</button>
+            </div>
           </div>
         </div>
         <div class="rev-chart" id="rev-chart"></div>
@@ -1527,8 +1561,9 @@ const TABLE = {
 
 // Revenue-Chart: Geschäftsstart (rollierender Zeitraum ab hier)
 const BIZ_START = { year: 2025, month: 7 }; // August 2025 (0-basiert)
-let _revRange = 12;   // aktiver Zeitraum-Filter (6 | 12 | 'max')
-let _cashflowRows = []; // zuletzt geladene Cashflow-Zeilen (für Chart-Neuzeichnen)
+let _revRange = 12;          // aktiver Zeitraum-Filter (6 | 12 | 'max')
+let _revShowExpenses = false; // Ausgaben-Overlay an/aus
+let _cashflowRows = [];      // zuletzt geladene Cashflow-Zeilen (für Chart-Neuzeichnen)
 
 const DAYS   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -1785,6 +1820,7 @@ function monthSeriesFromRows(rows) {
     if (mIdx >= 0 && ym) {
       map[`${ym[1]}-${mIdx}`] = {
         rev:  parseNum(r['Einnahmen'] || r['Revenue'] || 0),
+        exp:  parseNum(r['Ausgaben'] || r['Aufwendungen'] || r['Expenses'] || 0),
         goal: parseNum(r['Ziel'] || r['Goal'] || 0),
       };
     }
@@ -1793,8 +1829,8 @@ function monthSeriesFromRows(rows) {
   const series = [];
   let y = BIZ_START.year, m = BIZ_START.month;
   while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) {
-    const d = map[`${y}-${m}`] || { rev: null, goal: null };
-    series.push({ year: y, mIdx: m, rev: d.rev, goal: d.goal });
+    const d = map[`${y}-${m}`] || { rev: null, exp: null, goal: null };
+    series.push({ year: y, mIdx: m, rev: d.rev, exp: d.exp, goal: d.goal });
     if (++m > 11) { m = 0; y++; }
   }
   return series;
@@ -1869,21 +1905,44 @@ function renderRevenueChart() {
   let series = monthSeriesFromRows(_cashflowRows);
   if (_revRange !== 'max' && series.length > _revRange) series = series.slice(-_revRange);
 
+  const showExp = _revShowExpenses;
   const padL = 12, padR = 14, padT = 16, padB = 22;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = series.length;
   const xAt = i => padL + (n <= 1 ? innerW / 2 : innerW * i / (n - 1));
-  const maxV = Math.max(...series.map(s => Math.max(s.rev || 0, s.goal || 0)), 1);
+  const maxV = Math.max(...series.map(s => Math.max(s.rev || 0, s.goal || 0, showExp ? (s.exp || 0) : 0)), 1);
   const yAt = v => padT + innerH * (1 - (v || 0) / maxV);
 
   const revPts  = series.map((s, i) => ({ x: xAt(i), y: yAt(s.rev || 0) }));
+  const expPts  = series.map((s, i) => ({ x: xAt(i), y: yAt(s.exp || 0) }));
   const goalPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.goal || 0) }));
-  const hasGoal = series.every(s => s.goal);  // nur durchgehende Ziel-Linie zeigen
+  const hasGoal = !showExp && series.every(s => s.goal);  // Ziel-Linie nur ohne Ausgaben-Overlay
 
   const revLine = smoothPath(revPts);
   const areaPath = revLine
     + ` L${xAt(n - 1).toFixed(1)},${(padT + innerH).toFixed(1)}`
     + ` L${padL.toFixed(1)},${(padT + innerH).toFixed(1)} Z`;
+
+  // Ausgaben-Serie (orange) — hinter der Einnahmen-Linie
+  let expSvg = '';
+  if (showExp) {
+    const expLine = smoothPath(expPts);
+    const expArea = expLine
+      + ` L${xAt(n - 1).toFixed(1)},${(padT + innerH).toFixed(1)}`
+      + ` L${padL.toFixed(1)},${(padT + innerH).toFixed(1)} Z`;
+    expSvg = `
+      <path d="${expArea}" fill="url(#expGrad)"/>
+      <path d="${expLine}" fill="none" stroke="#D9A05B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  // Legende (nur wenn Ausgaben aktiv)
+  const legend = showExp ? `
+    <g font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="600">
+      <circle cx="${padL + 4}" cy="${padT - 4}" r="4" fill="#8E84E8"/>
+      <text x="${padL + 12}" y="${padT - 1}" fill="rgba(255,255,255,0.7)">Einnahmen</text>
+      <circle cx="${padL + 78}" cy="${padT - 4}" r="4" fill="#D9A05B"/>
+      <text x="${padL + 86}" y="${padT - 1}" fill="rgba(255,255,255,0.7)">Ausgaben</text>
+    </g>` : '';
 
   // Gridlines (3)
   let grid = '';
@@ -1925,27 +1984,39 @@ function renderRevenueChart() {
           <stop offset="55%" stop-color="#6C5FBF" stop-opacity="0.14"/>
           <stop offset="100%" stop-color="#6C5FBF" stop-opacity="0"/>
         </linearGradient>
+        <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#D9A05B" stop-opacity="0.28"/>
+          <stop offset="60%" stop-color="#D9A05B" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#D9A05B" stop-opacity="0"/>
+        </linearGradient>
       </defs>
       ${grid}
+      ${expSvg}
       <path d="${areaPath}" fill="url(#revGrad)"/>
       ${goalLine}
       <path d="${revLine}" fill="none" stroke="#8E84E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       ${labels}
       ${marker}
+      ${legend}
     </svg>`;
 }
 
-// Zeitraum-Toggle verdrahten
+// Zeitraum- + Ausgaben-Toggle verdrahten
 (function wireRevToggle() {
   const wrap = document.getElementById('rev-toggle');
-  if (!wrap) return;
-  wrap.addEventListener('click', e => {
+  if (wrap) wrap.addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
     wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const r = btn.dataset.range;
     _revRange = r === 'max' ? 'max' : parseInt(r);
+    renderRevenueChart();
+  });
+  const exp = document.getElementById('rev-exp-toggle');
+  if (exp) exp.addEventListener('click', () => {
+    _revShowExpenses = !_revShowExpenses;
+    exp.classList.toggle('active', _revShowExpenses);
     renderRevenueChart();
   });
 })();
