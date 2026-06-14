@@ -1467,9 +1467,9 @@
           <div class="metric-bar"><i id="m-umsatz-bar" style="width:0%"></i></div>
         </div>
         <div class="card metric-card">
-          <div class="metric-label">Gewinn <span id="m-gewinn-year"></span></div>
-          <div class="metric-top"><span class="metric-num" id="m-gewinn-num">—</span></div>
-          <div class="metric-sub">Einnahmen − Ausgaben</div>
+          <div class="metric-label">Bester Monat</div>
+          <div class="metric-top"><span class="metric-num" id="m-best-num">—</span></div>
+          <div class="metric-sub" id="m-best-sub">—</div>
         </div>
         <div class="card metric-card">
           <div class="metric-label">Drehtage · <span id="m-shoots-month">—</span></div>
@@ -2041,14 +2041,10 @@ async function loadCashflow() {
     const ub = document.getElementById('m-umsatz-bar');
     if (ub) ub.style.width = Math.min(goalPct, 100) + '%';
 
-    // Kachel: Gewinn (Einnahmen − Ausgaben)
-    const profit = ytd - expYtd;
-    setTxt('m-gewinn-year', yr);
-    const gn = document.getElementById('m-gewinn-num');
-    if (gn) {
-      gn.textContent = (profit >= 0 ? '+' : '−') + fmtNum(Math.abs(profit)) + ' €';
-      gn.className = 'metric-num ' + (profit >= 0 ? 'green' : 'red');
-    }
+    // Kachel: Bester Monat (höchster Umsatz über alle Monate)
+    const best = series.reduce((b, s) => (s.rev || 0) > (b.rev || 0) ? s : b, { rev: 0, mIdx: null });
+    setTxt('m-best-num', best.mIdx === null || !best.rev ? '—' : fmtNum(best.rev) + ' €');
+    setTxt('m-best-sub', best.mIdx === null || !best.rev ? 'noch keine Daten' : MONTHS[best.mIdx] + ' ' + best.year);
 
     renderRevenueChart();
   } catch (err) {
