@@ -68,20 +68,26 @@
       var(--bg);
   }
 
-  /* Hauptbereich: Cockpit-Grid (2 Reihen, wie Referenz) */
-  .main-area {
+  /* Hauptbereich: Bento-Cockpit (Instrumenten-Cluster) */
+  .cockpit {
     display: grid;
-    grid-template-columns: 1.55fr 1.02fr 1.02fr;
-    grid-template-rows: 1.12fr 0.88fr;
-    gap: 12px;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 1.12fr 1.12fr 50px;
+    grid-template-areas:
+      "acq acq acq acq acq rev rev rev rev rev rev rev"
+      "fin fin fin fin time time time pipe pipe growth growth growth"
+      "ann ann ann ann ann ann ann ann ann ann ann ann";
+    gap: 10px;
     min-height: 0;
   }
-  .card-revenue   { grid-column: 1; grid-row: 1; }
-  .card-monthcal  { grid-column: 2; grid-row: 1; }
-  .card-week      { grid-column: 3; grid-row: 1; }
-  .card-pipeline  { grid-column: 1; grid-row: 2; }
-  .card-stats     { grid-column: 2; grid-row: 2; }
-  .card-agenda    { grid-column: 3; grid-row: 2; }
+  .cl-acq    { grid-area: acq; }
+  .cl-rev    { grid-area: rev; }
+  .cl-fin    { grid-area: fin; }
+  .cl-time   { grid-area: time; }
+  .cl-pipe   { grid-area: pipe; }
+  .cl-growth { grid-area: growth; }
+  .cl-ann    { grid-area: ann; }
+  .cockpit > section { display: flex; flex-direction: column; min-height: 0; padding: 12px 14px; }
 
   .card {
     background: var(--card);
@@ -1470,6 +1476,94 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     COCKPIT v7 — Instrumenten-Cluster
+  ═══════════════════════════════════════════════════════════════ */
+  .cl-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; flex-shrink:0; }
+  .cl-title { font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-secondary); }
+  .cl-tag { font-size:9.5px; font-weight:600; color:var(--text-tertiary); background:var(--card-inner); border:1px solid var(--border); padding:2px 8px; border-radius:999px; white-space:nowrap; }
+  .cl-tag.muted { opacity:0.6; }
+  .cl-head-right { display:flex; align-items:center; gap:12px; }
+  .cl-legend { display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--text-secondary); }
+  .lg-dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .lg-dot.lg-cash { background:#C9B8F5; } .lg-dot.lg-inv { background:#E9E08C; margin-left:6px; }
+  .rev-src { color:var(--text-tertiary); margin-left:8px; font-size:9px; }
+  .cl-sub-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0 4px; }
+
+  /* generisches Instrument-Tile */
+  .ins { background:var(--card-inner); border:1px solid var(--border); border-radius:13px; padding:9px 11px; display:flex; flex-direction:column; gap:3px; min-width:0; overflow:hidden; }
+  .ins-label { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ins-num { font-size:23px; font-weight:600; letter-spacing:-0.6px; color:var(--text-primary); line-height:1.02; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ins-num.sm { font-size:18px; }
+  .ins-num.amber { color:var(--accent-orange); } .ins-num.red { color:var(--accent-red); }
+  .ins-unit { font-size:10px; color:var(--text-secondary); }
+  .ins-sub { font-size:9.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ins-row { display:flex; align-items:baseline; gap:7px; }
+  .ins-delta { font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; white-space:nowrap; }
+  .ins-delta.up { background:var(--badge-green-bg); color:var(--badge-green-fg); }
+  .ins-delta.down { background:var(--badge-red-bg); color:var(--badge-red-fg); }
+  .ins-delta.flat { background:var(--card-2); color:var(--text-secondary); }
+  .ins-target { font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-tertiary); font-size:8.5px; }
+  .ins-muted { opacity:0.5; }
+  .ins-spark { flex:1; min-height:22px; }
+  .ins-spark svg, .ins-arc svg, .ins-bars svg { width:100%; height:100%; display:block; }
+  .ins-arc { flex:1; min-height:0; }
+  .ins-bars { flex:1; min-height:24px; }
+  .ins-list { display:flex; flex-direction:column; gap:1px; overflow:hidden; }
+  .ins-list span { font-size:10px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ins-split { flex-direction:row; gap:10px; }
+  .ins-half { flex:1; display:flex; flex-direction:column; gap:3px; min-width:0; }
+
+  /* AKQUISE-Grid */
+  .acq-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1.15fr 1fr 0.9fr; gap:9px; }
+  .acq-grid .ins-hero { grid-column:1 / -1; }
+  .acq-grid .ins-split { grid-column:1 / -1; }
+  .ins-hero .ins-num { font-size:34px; }
+
+  /* FINANZEN-Grid */
+  .fin-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:8px; }
+  .fin-grid .ins-wide { grid-column:1 / -1; }
+  .agebar, .targetbar { display:flex; height:9px; border-radius:5px; overflow:hidden; background:var(--card-2); margin-top:5px; }
+  .agebar i { display:block; height:100%; }
+  .agebar i.a1 { background:#E0B96A; } .agebar i.a2 { background:#D98E5B; } .agebar i.a3 { background:#E0716C; }
+  .targetbar i { display:block; height:100%; background:linear-gradient(90deg,#6C5FBF,#9A8CF0); border-radius:5px; }
+  .topbars { display:flex; flex-direction:column; gap:4px; margin-top:4px; }
+  .topbar { display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:7px; }
+  .topbar .tb-name { font-size:9.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .topbar .tb-track { height:6px; background:var(--card-2); border-radius:3px; overflow:hidden; }
+  .topbar .tb-fill { height:100%; background:linear-gradient(90deg,#6C5FBF,#C9B8F5); border-radius:3px; }
+  .topbar .tb-val { font-size:9.5px; color:var(--text-primary); font-weight:600; font-variant-numeric:tabular-nums; }
+
+  /* ZEIT */
+  .cl-time .wk-bars { flex:0 0 64px; min-height:0; padding:6px 0 2px; }
+  .tm-agenda { flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; padding:0; }
+  .tm-agenda::-webkit-scrollbar { display:none; }
+  .tm-agenda .agenda-day + .agenda-day { margin-top:5px; }
+
+  /* WACHSTUM */
+  .growth-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:8px; }
+
+  /* ANNUNCIATOR */
+  .cl-ann { flex-direction:row !important; align-items:center; gap:10px; padding:0 16px !important; }
+  .lamp { flex:1; display:flex; align-items:center; gap:9px; font-size:11px; font-weight:600; color:var(--text-tertiary); height:100%; }
+  .lamp-led { width:9px; height:9px; border-radius:50%; background:#2A2A33; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06); flex-shrink:0; transition:background .3s, box-shadow .3s; }
+  .lamp.on   { color:var(--text-primary); }
+  .lamp.amber .lamp-led { background:var(--accent-orange); box-shadow:0 0 9px rgba(224,185,106,0.7); }
+  .lamp.red   .lamp-led { background:var(--accent-red);    box-shadow:0 0 9px rgba(224,113,108,0.8); animation:lampPulse 1.6s ease-in-out infinite; }
+  @keyframes lampPulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+
+  /* Pipeline kompakt (schmaler Cluster) */
+  .cl-pipe .pipeline-list { padding:0; gap:6px; }
+  .cl-pipe .pipeline-item { padding:7px 9px; border-radius:10px; }
+  .cl-pipe .pipeline-name { font-size:11.5px; }
+  .cl-pipe .pipeline-status { font-size:9.5px; }
+  .cl-pipe .pipeline-amt { font-size:11px; padding:5px 8px; }
+
+  /* Revenue-Cluster: Kopf + Metriken kompakter im Cockpit */
+  .cl-rev .rev-metrics { padding:6px 2px 4px; gap:30px; }
+  .cl-rev .rev-value { font-size:26px; }
+  .cl-rev .rev-chart { padding:0; }
+
 </style>
 </head>
 <body>
@@ -1523,101 +1617,113 @@
   </div>
 
   <!-- ── COCKPIT-GRID (6 Karten) ── -->
-  <div class="main-area">
+  <div class="main-area cockpit">
 
-    <!-- 1 · Revenue -->
-    <div class="card card-revenue">
-      <div class="rev-top">
-        <span class="card-title">Umsatz</span>
-        <div class="seg" id="rev-toggle">
-          <button data-range="6">6M</button>
-          <button data-range="12" class="active">12M</button>
-          <button data-range="max">Max</button>
+    <!-- ░ AKQUISE (Gmail) — größter Cluster ░ -->
+    <section class="card cl-acq">
+      <div class="cl-head"><span class="cl-title">Akquise</span><span class="cl-tag">Gmail</span></div>
+      <div class="acq-grid">
+        <div class="ins ins-hero">
+          <div class="ins-label">Erstkontakte · diese Woche</div>
+          <div class="ins-row"><span class="ins-num" id="gm-first">—</span><span class="ins-delta" id="gm-first-d"></span></div>
+          <div class="ins-spark" id="gm-first-spark"></div>
+        </div>
+        <div class="ins">
+          <div class="ins-label">Antwortrate</div>
+          <div class="ins-arc" id="gm-reply"></div>
+        </div>
+        <div class="ins">
+          <div class="ins-label">Wartende Threads</div>
+          <div class="ins-num" id="gm-wait">—</div>
+          <div class="ins-list" id="gm-wait-list"></div>
+        </div>
+        <div class="ins ins-split">
+          <div class="ins-half">
+            <div class="ins-label">Ältester offen</div>
+            <div class="ins-num" id="gm-oldest">—</div>
+            <div class="ins-sub">Tage</div>
+          </div>
+          <div class="ins-half">
+            <div class="ins-label">Aktivität</div>
+            <div class="ins-bars" id="gm-activity"></div>
+            <div class="ins-sub" id="gm-activity-sub">gesendet / empf.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░ REVENUE (Zoho live · Notion-Fallback) ░ -->
+    <section class="card cl-rev">
+      <div class="cl-head">
+        <span class="cl-title">Umsatz</span>
+        <div class="cl-head-right">
+          <span class="cl-legend"><i class="lg-dot lg-cash"></i><span id="lg-a">Cash</span><i class="lg-dot lg-inv"></i><span id="lg-b">Fakturiert</span><span id="rev-src" class="rev-src"></span></span>
+          <div class="seg" id="rev-toggle"><button data-range="6">6M</button><button data-range="12" class="active">12M</button><button data-range="max">Max</button></div>
         </div>
       </div>
       <div class="rev-metrics">
         <div class="rev-metric">
-          <div class="rev-metric-top">
-            <span class="rev-value" id="rev-month-value">—</span>
-            <span class="rev-badge flat" id="rev-month-badge"></span>
-          </div>
+          <div class="rev-metric-top"><span class="rev-value" id="rev-month-value">—</span><span class="rev-badge flat" id="rev-month-badge"></span></div>
           <span class="rev-metric-label" id="rev-month-label">Umsatz diesen Monat</span>
         </div>
         <div class="rev-metric">
-          <div class="rev-metric-top">
-            <span class="rev-value" id="rev-mrr-value">—</span>
-          </div>
-          <span class="rev-metric-label" id="rev-mrr-label">MRR · wiederkehrend</span>
+          <div class="rev-metric-top"><span class="rev-value" id="rev-ytd-value">—</span></div>
+          <span class="rev-metric-label">Umsatz dieses Jahr</span>
         </div>
       </div>
       <div class="rev-chart" id="rev-chart"></div>
-    </div>
+    </section>
 
-    <!-- 2 · Monats-Kalender -->
-    <div class="card card-monthcal">
-      <div class="card-head">
-        <span class="mc-month" id="mc-month">—</span>
-        <span class="card-ico">↗</span>
+    <!-- ░ FINANZEN (Zoho) ░ -->
+    <section class="card cl-fin">
+      <div class="cl-head"><span class="cl-title">Finanzen</span><span class="cl-tag" id="fz-tag">Zoho</span></div>
+      <div class="fin-grid">
+        <div class="ins"><div class="ins-label">Umsatz YTD</div><div class="ins-num" id="fz-ytd">—</div></div>
+        <div class="ins"><div class="ins-label">Außenstände</div><div class="ins-num" id="fz-out">—</div></div>
+        <div class="ins"><div class="ins-label">Monat vs. Vormonat</div><div class="ins-row"><span class="ins-num sm" id="fz-mom">—</span><span class="ins-delta" id="fz-mom-d"></span></div></div>
+        <div class="ins"><div class="ins-label">⌀ Zahlungsdauer</div><div class="ins-row"><span class="ins-num" id="fz-days">—</span><span class="ins-unit">Tage</span></div></div>
+        <div class="ins ins-wide"><div class="ins-label">Überfällig · Aging</div><div class="agebar" id="fz-aging"></div></div>
+        <div class="ins"><div class="ins-label">MRR <span class="ins-target">Ziel 1–3k</span></div><div class="ins-num" id="fz-mrr">—</div><div class="targetbar" id="fz-mrr-bar"></div></div>
+        <div class="ins"><div class="ins-label">Offene Angebote</div><div class="ins-num" id="fz-est">—</div><div class="ins-sub" id="fz-est-sub"></div></div>
+        <div class="ins ins-wide"><div class="ins-label">Top-Kunden</div><div class="topbars" id="fz-top"></div></div>
       </div>
-      <div class="mc-grid" id="mc-grid"></div>
-      <div class="mc-total">
-        <div>
-          <div class="mc-total-val" id="mc-total-val">—</div>
-          <div class="mc-total-lbl">Umsatz diesen Monat</div>
-        </div>
-        <span class="mc-total-ico" id="mc-total-ico">—</span>
-      </div>
-    </div>
+    </section>
 
-    <!-- 3 · Diese Woche (Auslastung) -->
-    <div class="card card-week">
-      <div class="card-head">
-        <span class="card-title">Diese Woche</span>
-        <span class="card-badge" id="wk-shoots">—</span>
-      </div>
-      <div class="wk-metric">
-        <span class="wk-num" id="wk-num">—</span>
-        <span class="wk-lbl">Termine</span>
-      </div>
+    <!-- ░ ZEIT (Kalender) ░ -->
+    <section class="card cl-time">
+      <div class="cl-head"><span class="cl-title">Zeit</span><span class="cl-tag" id="tm-shoot">—</span></div>
+      <div class="ins-label" style="padding:0 2px;">Wochenlast · Termine/Tag</div>
       <div class="wk-bars" id="wk-bars"></div>
-    </div>
+      <div class="cl-sub-head"><span class="ins-label">Als Nächstes</span><span class="agenda-next" id="agenda-next" style="display:none;"></span></div>
+      <div class="agenda-body tm-agenda" id="agenda-body"><div class="state-msg">Lädt…</div></div>
+    </section>
 
-    <!-- 4 · Pipeline -->
-    <div class="card card-pipeline">
-      <div class="card-head">
-        <span class="card-title">Pipeline</span>
-        <span class="card-badge" id="pipeline-badge"></span>
-      </div>
+    <!-- ░ PIPELINE (Notion, kompakt) ░ -->
+    <section class="card cl-pipe">
+      <div class="cl-head"><span class="cl-title">Pipeline</span><span class="card-badge" id="pipeline-badge"></span></div>
       <div class="pipeline-list" id="pipeline-list">
-        <div class="pipeline-item"><span class="skel" style="width:60%;height:13px;"></span></div>
-        <div class="pipeline-item"><span class="skel" style="width:50%;height:13px;"></span></div>
+        <div class="pipeline-item"><span class="skel" style="width:60%;height:12px;"></span></div>
       </div>
-    </div>
+    </section>
 
-    <!-- 5 · Übersicht / Kennzahlen -->
-    <div class="card card-stats">
-      <div class="st-focus"><span class="st-focus-dot"></span><span id="fokus-text">—</span></div>
-      <div class="st-big"><span class="st-num" id="st-year-num">—</span><span class="card-ico">↗</span></div>
-      <div class="st-label">Umsatz <span id="st-year"></span></div>
-      <div class="st-list">
-        <div class="st-row"><span class="st-k">MRR</span><span class="st-v" id="st-mrr">—</span></div>
-        <div class="st-row"><span class="st-k">Bester Monat</span><span class="st-v" id="st-best">—</span></div>
-        <div class="st-row"><span class="st-k">Pipeline</span><span class="st-v" id="st-pipeline">—</span></div>
-        <div class="st-row"><span class="st-k">Offene Rechnungen</span><span class="st-v" id="st-zoho">—</span></div>
-        <div class="st-row"><span class="st-k">Gmail ungelesen</span><span class="st-v" id="st-gmail">—</span></div>
+    <!-- ░ REICHWEITE (Instagram, reserviert für Phase B) ░ -->
+    <section class="card cl-growth">
+      <div class="cl-head"><span class="cl-title">Reichweite</span><span class="cl-tag muted">Instagram · bald</span></div>
+      <div class="growth-grid">
+        <div class="ins ins-muted"><div class="ins-label">Follower</div><div class="ins-num" id="ig-followers">—</div></div>
+        <div class="ins ins-muted"><div class="ins-label">Reichweite 7T</div><div class="ins-num" id="ig-reach">—</div></div>
+        <div class="ins ins-muted"><div class="ins-label">Profilaufrufe</div><div class="ins-num" id="ig-views">—</div></div>
+        <div class="ins ins-muted"><div class="ins-label">Wachstum</div><div class="ins-num" id="ig-growth">—</div></div>
       </div>
-    </div>
+    </section>
 
-    <!-- 6 · Agenda -->
-    <div class="card card-agenda">
-      <div class="card-head">
-        <span class="card-title">Agenda</span>
-        <span class="agenda-next" id="agenda-next" style="display:none;"></span>
-      </div>
-      <div class="agenda-body" id="agenda-body">
-        <div class="state-msg">Lädt…</div>
-      </div>
-    </div>
+    <!-- ░ ANNUNCIATOR ░ -->
+    <section class="card cl-ann" id="annunciator">
+      <div class="lamp" data-k="overdue"><span class="lamp-led"></span><span class="lamp-txt">Überfällige Rechnung</span></div>
+      <div class="lamp" data-k="waiting"><span class="lamp-led"></span><span class="lamp-txt">Thread &gt;3 Tage offen</span></div>
+      <div class="lamp" data-k="stall"><span class="lamp-led"></span><span class="lamp-txt">Keine Akquise diese Woche</span></div>
+      <div class="lamp" data-k="shoot"><span class="lamp-led"></span><span class="lamp-txt">Dreh &lt;24 h</span></div>
+    </section>
 
   </div><!-- /.main-area -->
 
@@ -1885,7 +1991,6 @@ function updateClock() {
   const calDateEl = document.getElementById('cal-date');
   if (calDateEl) calDateEl.textContent = now.getDate() + '. ' + MONTHS[now.getMonth()];
   agendaUpdateNext();   // "Als Nächstes"-Countdown live halten
-  renderYearKpi();      // Jahresfortschritt (rendert nur bei Tageswechsel neu)
 }
 
 // ── KPI: Jahresfortschritt ───────────────────────────────────
@@ -2097,42 +2202,42 @@ function renderTrendBadge(id, cur, prev) {
   el.textContent = (pct > 0 ? '↗ +' : pct < 0 ? '↘ ' : '') + pct + ' %';
 }
 
+// ── Revenue-Datenmodell (generisch: Serie A lila, Serie B gelb) ──
+let _revData = null;       // { months:[YYYY-MM], a:[], b:[], labelA, labelB, source }
+let _revFromZoho = false;  // sobald Zoho echte Daten liefert, gewinnt Zoho
+
+function _t(id, txt) { const e = document.getElementById(id); if (e) e.textContent = txt; }
+
+function setRevData(months, a, b, labelA, labelB, source) {
+  _revData = { months, a, b, labelA, labelB, source };
+  _t('lg-a', labelA);
+  _t('lg-b', labelB);
+  _t('rev-src', source === 'Zoho' ? '· live' : '· Plan');
+  const n = months.length;
+  const cur = a[n - 1] || 0, prev = n >= 2 ? a[n - 2] : null;
+  const now = new Date();
+  _t('rev-month-value', fmtNum(cur) + ' €');
+  _t('rev-month-label', labelA + ' · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear());
+  renderTrendBadge('rev-month-badge', cur, prev);
+  let ytd = 0;
+  months.forEach((mk, i) => { if (mk.startsWith(String(now.getFullYear()))) ytd += a[i] || 0; });
+  _t('rev-ytd-value', fmtNum(ytd) + ' €');
+  renderRevenueChart();
+}
+
+// Notion-Cashflow = Fallback-Quelle (Einnahmen/Ausgaben), wenn Zoho leer
 async function loadCashflow() {
   try {
     const rows = parseNotionTable(await notionGetBlocks(TABLE.cashflow));
     _cashflowRows = rows;
-    const now    = new Date();
     const series = monthSeriesFromRows(rows);
-
-    const cur  = series[series.length - 1] || { rev: 0 };
-    const prev = series[series.length - 2];
-    const curRev = cur.rev || 0;
-
-    const setTxt = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
-    setTxt('rev-month-value', fmtNum(curRev) + ' €');
-    setTxt('rev-month-label', 'Umsatz ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear());
-    renderTrendBadge('rev-month-badge', curRev, prev ? prev.rev : null);
-
-    // Laufendes Jahr
-    const yr = now.getFullYear();
-    const ytdMonths = series.filter(s => s.year === yr);
-    const ytd       = ytdMonths.reduce((a, s) => a + (s.rev || 0), 0);
-
-    // Stats-Karte: großer Jahresumsatz + Bester Monat
-    setTxt('st-year-num', fmtNum(ytd) + ' €');
-    setTxt('st-year', yr);
-    const best = series.reduce((b, s) => (s.rev || 0) > (b.rev || 0) ? s : b, { rev: 0, mIdx: null });
-    setTxt('st-best', best.mIdx === null || !best.rev ? '—' : fmtNum(best.rev) + ' € · ' + MONTHS[best.mIdx].slice(0,3));
-
-    // Kalender-Karte: Umsatz diesen Monat
-    const cm = series.find(s => s.year === yr && s.mIdx === now.getMonth());
-    setTxt('mc-total-val', fmtNum(cm && cm.rev ? cm.rev : 0) + ' €');
-
-    renderRevenueChart();
+    const months = series.map(s => s.year + '-' + String(s.mIdx + 1).padStart(2, '0'));
+    const ein = series.map(s => s.rev || 0);
+    const aus = series.map(s => s.exp || 0);
+    window._notionRev = { months, ein, aus };
+    if (!_revFromZoho) setRevData(months, ein, aus, 'Einnahmen', 'Ausgaben', 'Notion');
   } catch (err) {
     console.error('Cashflow:', err);
-    const v = document.getElementById('rev-month-value');
-    if (v) v.textContent = '–';
   }
 }
 
@@ -2152,12 +2257,15 @@ function smoothPath(pts) {
 
 function renderRevenueChart() {
   const el = document.getElementById('rev-chart');
-  if (!el || !_cashflowRows.length) return;
+  if (!el || !_revData) return;
   const W = el.clientWidth, H = el.clientHeight;
   if (W < 40 || H < 40) { requestAnimationFrame(renderRevenueChart); return; }
 
-  let series = monthSeriesFromRows(_cashflowRows);
-  if (_revRange !== 'max' && series.length > _revRange) series = series.slice(-_revRange);
+  let { months, a, b } = _revData;
+  if (_revRange !== 'max' && months.length > _revRange) {
+    months = months.slice(-_revRange); a = a.slice(-_revRange); b = b.slice(-_revRange);
+  }
+  const mIdxOf = mk => parseInt(mk.split('-')[1], 10) - 1;
 
   const niceScale = (maxVal, ticks = 4) => {
     if (!(maxVal > 0)) return { max: 1, lines: [0, 1] };
@@ -2170,16 +2278,16 @@ function renderRevenueChart() {
   };
   const padL = 36, padR = 14, padT = 28, padB = 22;
   const innerW = W - padL - padR, innerH = H - padT - padB;
-  const n = series.length;
+  const n = months.length;
   const xAt = i => padL + (n <= 1 ? innerW / 2 : innerW * i / (n - 1));
-  const rawMax = Math.max(...series.map(s => Math.max(s.rev || 0, s.exp || 0)), 1);
+  const rawMax = Math.max(...a, ...b, 1);
   const scale  = niceScale(rawMax);
   const maxV   = scale.max;
   const yAt = v => padT + innerH * (1 - (v || 0) / maxV);
   const baseY = padT + innerH;
 
-  const revPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.rev || 0) }));
-  const expPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.exp || 0) }));
+  const revPts = a.map((v, i) => ({ x: xAt(i), y: yAt(v || 0) }));
+  const expPts = b.map((v, i) => ({ x: xAt(i), y: yAt(v || 0) }));
   const revLine  = smoothPath(revPts);
   const expLine  = smoothPath(expPts);
   const areaPath = revLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
@@ -2203,14 +2311,14 @@ function renderRevenueChart() {
   // X-Labels
   const stepLbl = n > 9 ? 2 : 1;
   let xlabels = '';
-  series.forEach((s, i) => {
+  months.forEach((mk, i) => {
     if (i % stepLbl !== 0 && i !== n - 1) return;
-    xlabels += `<text x="${xAt(i).toFixed(1)}" y="${(H-6).toFixed(1)}" fill="rgba(255,255,255,0.36)" font-size="9" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[s.mIdx].slice(0,3)}</text>`;
+    xlabels += `<text x="${xAt(i).toFixed(1)}" y="${(H-6).toFixed(1)}" fill="rgba(255,255,255,0.36)" font-size="9" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[mIdxOf(mk)].slice(0,3)}</text>`;
   });
 
   // Marker am aktuellen Monat (letzter Punkt) + Doppel-Tooltip
   const ci = n - 1, cx = xAt(ci), cyR = revPts[ci].y, cyE = expPts[ci].y;
-  const t1 = fmtNum(series[ci].rev || 0) + ' €', t2 = fmtNum(series[ci].exp || 0) + ' €';
+  const t1 = fmtNum(a[ci] || 0) + ' €', t2 = fmtNum(b[ci] || 0) + ' €';
   const pw1 = t1.length * 5.8 + 22, pw2 = t2.length * 5.8 + 22, gp = 6;
   let gx0 = cx - (pw1 + pw2 + gp) / 2;
   gx0 = Math.max(padL, Math.min(gx0, W - padR - (pw1 + pw2 + gp)));
@@ -2267,12 +2375,224 @@ function renderRevenueChart() {
 })();
 window.addEventListener('resize', () => renderRevenueChart());
 
+// ═══════════════════════════════════════════════════════════════
+// COCKPIT — Mini-SVG-Helfer
+// ═══════════════════════════════════════════════════════════════
+function miniSpark(id, values, color = '#C9B8F5') {
+  const el = document.getElementById(id); if (!el) return;
+  const W = el.clientWidth || 140, H = el.clientHeight || 26;
+  if (!values || !values.length) { el.innerHTML = ''; return; }
+  const max = Math.max(...values, 1), min = Math.min(...values, 0), pad = 3, n = values.length;
+  const xAt = i => 2 + (n <= 1 ? (W - 4) / 2 : (W - 4) * i / (n - 1));
+  const yAt = v => pad + (H - 2 * pad) * (1 - (v - min) / (max - min || 1));
+  const pts = values.map((v, i) => ({ x: xAt(i), y: yAt(v) }));
+  const line = smoothPath(pts);
+  const area = line + ` L${xAt(n - 1).toFixed(1)},${H - pad} L${(2).toFixed(1)},${H - pad} Z`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="sg_${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.32"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#sg_${id})"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+function miniArc(id, pct, label, color = '#C9B8F5') {
+  const el = document.getElementById(id); if (!el) return;
+  pct = Math.max(0, Math.min(1, pct || 0));
+  const cx = 50, cy = 56, r = 34, A0 = -132, SW = 264;
+  el.innerHTML = `<svg viewBox="0 0 100 100">
+    <path d="${_arc(cx, cy, r, A0, A0 + SW)}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9" stroke-linecap="round"/>
+    <path d="${_arc(cx, cy, r, A0, A0 + SW * pct)}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"/>
+    <text x="50" y="54" text-anchor="middle" fill="#F5F5F8" font-size="22" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${label != null ? label : Math.round(pct * 100) + '%'}</text>
+  </svg>`;
+}
+function miniPairBars(id, sent, recv) {
+  const el = document.getElementById(id); if (!el) return;
+  const max = Math.max(sent, recv, 1);
+  const h1 = Math.max(sent / max * 100, 5), h2 = Math.max(recv / max * 100, 5);
+  el.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <rect x="18" y="${(100 - h1).toFixed(1)}" width="26" height="${h1.toFixed(1)}" rx="3" fill="#C9B8F5"/>
+    <rect x="56" y="${(100 - h2).toFixed(1)}" width="26" height="${h2.toFixed(1)}" rx="3" fill="#464654"/>
+  </svg>`;
+}
+function deltaBadge(id, cur, prev) {
+  const el = document.getElementById(id); if (!el) return;
+  if (prev == null || (prev === 0 && cur === 0)) { el.className = 'ins-delta flat'; el.textContent = '±0'; return; }
+  if (prev === 0) { el.className = 'ins-delta up'; el.textContent = 'neu'; return; }
+  const pct = Math.round((cur - prev) / prev * 100);
+  el.className = 'ins-delta ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat');
+  el.textContent = (pct > 0 ? '+' : '') + pct + '%';
+}
+
+// ── Annunciator ──
+function setAnn(key, level) {  // level: false | 'amber' | 'red'
+  const el = document.querySelector(`#annunciator .lamp[data-k="${key}"]`);
+  if (!el) return;
+  el.classList.remove('on', 'amber', 'red');
+  if (level) el.classList.add('on', level);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AKQUISE — Gmail-Metriken (client-seitig, gmail.readonly)
+// ═══════════════════════════════════════════════════════════════
+async function gmGet(path) {
+  const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/' + path, { headers: { Authorization: 'Bearer ' + _googleToken } });
+  if (!r.ok) throw Object.assign(new Error('gmail ' + r.status), { status: r.status });
+  return r.json();
+}
+async function loadGmailMetrics() {
+  if (!_googleToken) return;
+  try {
+    if (!window._gmailMe) { const p = await gmGet('profile'); window._gmailMe = (p.emailAddress || '').toLowerCase(); }
+    const me = window._gmailMe, now = new Date();
+    const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7)); monday.setHours(0, 0, 0, 0);
+    const qd = d => d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+
+    // Aktivität: gesendet vs empfangen diese Woche
+    const [sentList, recvList] = await Promise.all([
+      gmGet('messages?maxResults=60&q=' + encodeURIComponent('in:sent after:' + qd(monday))),
+      gmGet('messages?maxResults=100&q=' + encodeURIComponent('in:inbox after:' + qd(monday))),
+    ]);
+    const sentIds = (sentList.messages || []).map(m => m.id);
+    miniPairBars('gm-activity', sentIds.length, (recvList.messages || []).length);
+    _t('gm-activity-sub', sentIds.length + ' gesendet · ' + (recvList.messages || []).length + ' empf.');
+
+    // Empfänger der gesendeten Mails (bounded)
+    const details = await Promise.all(sentIds.slice(0, 35).map(id =>
+      gmGet('messages/' + id + '?format=metadata&metadataHeaders=To').catch(() => null)));
+    const byEmail = {};
+    details.forEach(d => {
+      if (!d) return;
+      const to = ((d.payload?.headers || []).find(x => x.name === 'To')?.value || '').toLowerCase();
+      const email = (to.match(/[\w.+-]+@[\w.-]+/) || [])[0];
+      const date = new Date(parseInt(d.internalDate));
+      if (email && (!byEmail[email] || date < byEmail[email].date)) byEmail[email] = { email, date, threadId: d.threadId };
+    });
+    const uniq = Object.values(byEmail);
+    // Erstkontakt = kein gesendeter Mail an die Adresse VOR dieser Woche
+    const flagged = await Promise.all(uniq.map(async r => {
+      try { const p = await gmGet('messages?maxResults=1&q=' + encodeURIComponent('in:sent to:' + r.email + ' before:' + qd(monday)));
+        return { ...r, first: !(p.messages && p.messages.length) };
+      } catch { return { ...r, first: false }; }
+    }));
+    const firsts = flagged.filter(f => f.first);
+    _t('gm-first', String(firsts.length));
+    const days = new Array(7).fill(0);
+    firsts.forEach(f => { const i = Math.floor((new Date(f.date.getFullYear(), f.date.getMonth(), f.date.getDate()) - monday) / 86400000); if (i >= 0 && i < 7) days[i]++; });
+    miniSpark('gm-first-spark', days);
+    const fd = document.getElementById('gm-first-d');
+    if (fd) { fd.className = 'ins-delta ' + (firsts.length ? 'up' : 'flat'); fd.textContent = firsts.length ? 'aktiv' : 'still'; }
+
+    // Antwortrate
+    let replied = 0;
+    await Promise.all(firsts.map(async f => {
+      try { const th = await gmGet('threads/' + f.threadId + '?format=metadata&metadataHeaders=From');
+        if ((th.messages || []).some(mm => { const fr = ((mm.payload?.headers || []).find(x => x.name === 'From')?.value || '').toLowerCase(); return fr && !fr.includes(me); })) replied++;
+      } catch {}
+    }));
+    const rate = firsts.length ? replied / firsts.length : 0;
+    miniArc('gm-reply', rate, firsts.length ? Math.round(rate * 100) + '%' : '—');
+
+    // Wartende Threads (Posteingang, letzte Nachricht eingehend)
+    const inbox = await gmGet('threads?maxResults=22&q=' + encodeURIComponent('in:inbox'));
+    const waiting = [];
+    await Promise.all((inbox.threads || []).map(async t => {
+      try { const th = await gmGet('threads/' + t.id + '?format=metadata&metadataHeaders=From');
+        const msgs = th.messages || []; if (!msgs.length) return;
+        const last = msgs[msgs.length - 1];
+        const fr = ((last.payload?.headers || []).find(x => x.name === 'From')?.value || '');
+        if (fr && !fr.toLowerCase().includes(me)) {
+          const nm = (fr.match(/^"?([^"<]+?)"?\s*</) || [])[1] || fr.replace(/<.*/, '').trim() || fr;
+          waiting.push({ name: nm.trim(), date: new Date(parseInt(last.internalDate)) });
+        }
+      } catch {}
+    }));
+    waiting.sort((a, b) => a.date - b.date);
+    _t('gm-wait', String(waiting.length));
+    const wl = document.getElementById('gm-wait-list');
+    if (wl) wl.innerHTML = waiting.slice(0, 3).map(w => `<span>${esc(w.name)}</span>`).join('');
+    const oldestDays = waiting.length ? Math.floor((now - waiting[0].date) / 86400000) : 0;
+    const oEl = document.getElementById('gm-oldest');
+    if (oEl) { oEl.textContent = String(oldestDays); oEl.className = 'ins-num' + (oldestDays > 7 ? ' red' : oldestDays > 3 ? ' amber' : ''); }
+
+    setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : false));
+    setAnn('stall', firsts.length === 0 ? 'red' : false);
+  } catch (e) { console.error('GmailMetrics', e); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FINANZEN — Zoho-Metriken (server-aggregiert)
+// ═══════════════════════════════════════════════════════════════
+function renderAging(id, ag) {
+  const el = document.getElementById(id); if (!el) return;
+  ag = ag || { d15: 0, d30: 0, d30p: 0 };
+  const tot = ag.d15 + ag.d30 + ag.d30p;
+  if (!tot) { el.innerHTML = '<i style="width:100%;background:var(--card-2)"></i>'; return; }
+  el.innerHTML =
+    `<i class="a1" style="width:${(ag.d15 / tot * 100).toFixed(1)}%"></i>` +
+    `<i class="a2" style="width:${(ag.d30 / tot * 100).toFixed(1)}%"></i>` +
+    `<i class="a3" style="width:${(ag.d30p / tot * 100).toFixed(1)}%"></i>`;
+}
+function renderTopCustomers(id, list) {
+  const el = document.getElementById(id); if (!el) return;
+  list = list || [];
+  if (!list.length) { el.innerHTML = '<div class="ins-sub">noch keine</div>'; return; }
+  const max = Math.max(...list.map(c => c.value), 1);
+  el.innerHTML = list.slice(0, 3).map(c =>
+    `<div class="topbar"><span class="tb-name">${esc(c.name)}</span><span class="tb-track"><span class="tb-fill" style="width:${Math.max(c.value / max * 100, 4).toFixed(0)}%"></span></span><span class="tb-val">${fmtNum(c.value)}</span></div>`).join('');
+}
+async function loadZohoMetrics() {
+  try {
+    const token = await zohoGetToken();
+    const r = await fetch('/api/zoho', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'metrics', accessToken: token }) });
+    const d = await r.json();
+    if (!d || !d.ok) { _t('fz-tag', 'offline'); return; }
+    window._zoho = d;
+    _t('fz-ytd', fmtNum(d.revenueYTD) + ' €');
+    _t('fz-out', fmtNum(d.outstanding) + ' €');
+    _t('fz-mom', fmtNum(d.cashThisMonth) + ' €');
+    deltaBadge('fz-mom-d', d.cashThisMonth, d.cashLastMonth);
+    _t('fz-days', d.avgDaysToPay == null ? '—' : String(d.avgDaysToPay));
+    renderAging('fz-aging', d.aging);
+    _t('fz-mrr', fmtNum(d.mrr) + ' €');
+    const mb = document.getElementById('fz-mrr-bar'); if (mb) mb.innerHTML = `<i style="width:${Math.min((d.mrr || 0) / 3000 * 100, 100).toFixed(0)}%"></i>`;
+    _t('fz-est', fmtNum(d.openEstimates) + ' €');
+    _t('fz-est-sub', (d.openEstimatesCount || 0) + ' offen');
+    renderTopCustomers('fz-top', d.topCustomers);
+
+    const overdue = d.aging || { d15: 0, d30: 0, d30p: 0 };
+    setAnn('overdue', overdue.d30p > 0 ? 'red' : (overdue.d15 + overdue.d30 > 0 ? 'amber' : false));
+
+    const totalRecords = d.counts ? Object.values(d.counts).reduce((a, b) => a + b, 0) : 0;
+    if (d.errors && d.errors.length && totalRecords === 0) _t('fz-tag', 'Token erweitern');
+    else _t('fz-tag', 'Zoho');
+
+    const hasData = (d.cashSeries || []).some(v => v > 0) || (d.invSeries || []).some(v => v > 0);
+    if (hasData) { _revFromZoho = true; setRevData(d.months, d.cashSeries, d.invSeries, 'Cash', 'Fakturiert', 'Zoho'); }
+  } catch (e) { console.error('ZohoMetrics', e); _t('fz-tag', 'offline'); }
+}
+
+// ── Nächster Dreh (Kalender, 45 Tage) ──
+async function loadNextShoot() {
+  const el = document.getElementById('tm-shoot'); if (!el) return;
+  if (!_googleToken) { el.textContent = '—'; return; }
+  try {
+    const now = new Date(), end = new Date(now); end.setDate(now.getDate() + 45);
+    const evs = await fetchAllEvents(now, end);
+    const shoot = evs.map(e => ({ s: _evDate(e), sum: e.summary || '' }))
+      .filter(o => o.s && SHOOT_RE.test(o.sum) && o.s >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+      .sort((a, b) => a.s - b.s)[0];
+    if (!shoot) { el.textContent = 'kein Dreh'; setAnn('shoot', false); return; }
+    const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const d1 = new Date(shoot.s.getFullYear(), shoot.s.getMonth(), shoot.s.getDate());
+    const diff = Math.round((d1 - d0) / 86400000);
+    el.textContent = diff <= 0 ? '🎬 Dreh heute' : diff === 1 ? '🎬 Dreh morgen' : `🎬 Dreh in ${diff} T`;
+    setAnn('shoot', (shoot.s - now) <= 86400000 && shoot.s >= now ? 'amber' : false);
+  } catch (e) { console.error('NextShoot', e); }
+}
+
 // ── Alle Notion-Daten laden ───────────────────────────────────
 function refreshNotion() {
   loadPipeline();
-  loadFokus();
-  loadCashflow();
-  loadMRR();
+  loadCashflow();   // Notion-Fallback für Revenue-Chart
 }
 refreshNotion();
 setInterval(refreshNotion, 5 * 60_000);
@@ -2526,21 +2846,8 @@ function zohoRender(data) {
 function zohoRenderError() { _setSt('st-zoho', 'n. verfügbar'); }
 
 async function zohoLoad() {
-  try {
-    const token = await zohoGetToken();
-    const r = await fetch('/api/zoho', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'invoices', accessToken: token }),
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    zohoRender(await r.json());
-  } catch (err) {
-    console.error('Zoho:', err);
-    // Kein Refresh-Token gesetzt → neutral zeigen statt Fehler-Alert
-    if (ZOHO_REFRESH_TOKEN === 'DEIN_ZOHO_REFRESH_TOKEN') _setSt('st-zoho', 'nicht konfiguriert');
-    else zohoRenderError();
-  }
+  // Cockpit: server-aggregierte Metriken (Finanzen-Cluster + Revenue-Chart)
+  await loadZohoMetrics();
 }
 
 zohoLoad();
@@ -2864,8 +3171,9 @@ async function agendaLoad() {
 
     agendaRender();
     agendaUpdateNext();
-    loadMonthCal();   // Karte 2
-    loadWeekBars();   // Karte 3
+    loadWeekBars();        // Zeit-Cluster: Wochenlast
+    loadNextShoot();       // Zeit-Cluster: nächster Dreh
+    loadGmailMetrics();    // Akquise-Cluster
   } catch (e) {
     console.error('Agenda:', e);
     if (body) body.innerHTML = '<div class="state-msg">Nicht verfügbar</div>';
@@ -3042,8 +3350,7 @@ function agendaRenderLogin() {
     </div>`;
   const el = document.getElementById('agenda-next');
   if (el) el.style.display = 'none';
-  loadMonthCal();  // Monatsgitter auch ohne Login (nur ohne Markierungen)
-  loadWeekBars();
+  loadWeekBars();   // leere Wochenlast als Platzhalter
 }
 
 // Agenda alle 15 Min aktualisieren
