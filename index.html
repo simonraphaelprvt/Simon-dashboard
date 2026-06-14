@@ -18,21 +18,28 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg:             #08080D;
-    --card:           #121219;
-    --card-inner:     #1A1A23;
-    --text-primary:   #ECECF2;
-    --text-secondary: #8A8C9C;
-    --text-tertiary:  #54566A;
-    --border:         rgba(255,255,255,0.065);
-    --shadow:         0 10px 30px rgba(0,0,0,0.40), 0 1px 2px rgba(0,0,0,0.3);
-    --radius:         16px;
-    --radius-sm:      12px;
-    --accent-purple:  #9A8CF0;
+    --bg:             #050507;
+    --card:           #0F0F14;
+    --card-inner:     #18181F;
+    --card-2:         #1C1C24;
+    --text-primary:   #F5F5F8;
+    --text-secondary: #8B8B96;
+    --text-tertiary:  #55555F;
+    --border:         rgba(255,255,255,0.07);
+    --shadow:         0 12px 34px rgba(0,0,0,0.45);
+    --radius:         20px;
+    --radius-sm:      14px;
+    --accent-purple:  #BFA9F2;   /* Lavendel — Hauptlinie/Akzent */
+    --purple-deep:    #8B72E0;
+    --accent-yellow:  #E9E08C;   /* zweite Serie */
     --accent-green:   #5BBE8D;
     --accent-orange:  #E0B96A;
     --accent-blue:    #6BA3DC;
     --accent-red:     #E0716C;
+    --badge-green-bg: #AEEFC4;
+    --badge-green-fg: #11663A;
+    --badge-red-bg:   #F1C3BE;
+    --badge-red-fg:   #8A2E27;
     --grad-violet:    linear-gradient(135deg, #4A4290 0%, #6C5FBF 55%, #7E6FD0 100%);
     --grad-blue:      linear-gradient(135deg, #2E5B8F 0%, #4380B5 60%, #52A0BD 100%);
   }
@@ -57,47 +64,32 @@
     overflow: hidden;
     position: relative;
     background:
-      radial-gradient(ellipse 70% 50% at 12% -5%, rgba(124,108,210,0.16), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 100% 110%, rgba(80,120,180,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 10% -8%, rgba(120,104,206,0.10), transparent 62%),
       var(--bg);
   }
-  /* feines Punktraster als Textur-Overlay */
-  .screen::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
-    background-size: 26px 26px;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .screen > * { position: relative; z-index: 1; }
 
-  /* Hauptbereich: links Inhalt, rechts schmale Agenda-Spalte */
+  /* Hauptbereich: Cockpit-Grid (2 Reihen, wie Referenz) */
   .main-area {
     display: grid;
-    grid-template-columns: 1fr 296px;
+    grid-template-columns: 1.55fr 1.02fr 1.02fr;
+    grid-template-rows: 1.12fr 0.88fr;
     gap: 12px;
     min-height: 0;
   }
-  .main-left {
-    display: grid;
-    grid-template-rows: 1fr auto auto;  /* Revenue-Hero | KPIs | Fokus-Leiste */
-    gap: 12px;
-    min-height: 0;
-  }
-  .agenda-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-height: 0;
-  }
+  .card-revenue   { grid-column: 1; grid-row: 1; }
+  .card-monthcal  { grid-column: 2; grid-row: 1; }
+  .card-week      { grid-column: 3; grid-row: 1; }
+  .card-pipeline  { grid-column: 1; grid-row: 2; }
+  .card-stats     { grid-column: 2; grid-row: 2; }
+  .card-agenda    { grid-column: 3; grid-row: 2; }
 
   .card {
     background: var(--card);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 0.5px solid var(--border);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.045);
     overflow: hidden;
+    min-height: 0;
   }
 
   /* ─────────────────────────────────────
@@ -772,6 +764,114 @@
   }
   .gmail-login-btn:active { transform: scale(0.97); }
 
+  /* ═══════════════════════════════════════════════════════════════
+     COCKPIT-KARTEN — exakter Referenz-Stil
+  ═══════════════════════════════════════════════════════════════ */
+  .card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.2px; }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 10px; flex-shrink: 0; gap: 10px;
+  }
+  .card-ico {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;
+  }
+  .card-badge {
+    font-size: 10.5px; font-weight: 600; color: var(--text-secondary);
+    background: var(--card-inner); border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .seg { display: inline-flex; gap: 2px; background: #17171D; border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .seg button {
+    border: none; background: transparent; color: var(--text-secondary);
+    font-family: inherit; font-size: 11px; font-weight: 600;
+    padding: 4px 11px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s;
+  }
+  .seg button.active { background: #F5F5F8; color: #121216; }
+
+  /* 1 · Revenue */
+  .card-revenue { display: flex; flex-direction: column; padding: 0; }
+  .rev-top { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px 0; flex-shrink: 0; }
+  .rev-metrics { display: flex; gap: 36px; padding: 13px 18px 4px; flex-shrink: 0; }
+  .rev-metric { display: flex; flex-direction: column; gap: 5px; }
+  .rev-metric-top { display: flex; align-items: center; gap: 9px; }
+  .rev-value { font-size: 30px; font-weight: 600; letter-spacing: -1.1px; color: var(--text-primary); font-variant-numeric: tabular-nums; line-height: 1; }
+  .rev-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+  .rev-badge.up   { background: var(--badge-green-bg); color: var(--badge-green-fg); }
+  .rev-badge.down { background: var(--badge-red-bg);   color: var(--badge-red-fg); }
+  .rev-badge.flat { background: var(--card-2); color: var(--text-secondary); }
+  .rev-metric-label { font-size: 11.5px; color: var(--text-secondary); }
+  .rev-chart { flex: 1; min-height: 0; position: relative; padding: 0 4px 2px; }
+  .rev-chart svg { width: 100%; height: 100%; display: block; }
+
+  /* 2 · Monats-Kalender */
+  .card-monthcal { display: flex; flex-direction: column; padding: 0; }
+  .mc-month { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .mc-grid {
+    flex: 1; min-height: 0; display: grid;
+    grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(0, 1fr);
+    gap: 4px; padding: 2px 14px 0;
+  }
+  .mc-cell {
+    position: relative; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    background: var(--card-inner); border-radius: 8px; font-variant-numeric: tabular-nums;
+  }
+  .mc-cell.out { background: transparent; color: var(--text-tertiary); opacity: 0.35; }
+  .mc-cell.today { color: var(--text-primary); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22); }
+  .mc-cell.shoot { background: var(--accent-purple); color: #1B1630; font-weight: 700; }
+  .mc-dot { position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 3px; height: 3px; border-radius: 50%; background: var(--accent-yellow); }
+  .mc-cell.shoot .mc-dot { background: #1B1630; }
+  .mc-total { display: flex; align-items: center; justify-content: space-between; margin: 8px 12px 12px; padding: 11px 14px; background: var(--card-inner); border-radius: 14px; }
+  .mc-total-val { font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; line-height: 1; }
+  .mc-total-lbl { font-size: 10px; color: var(--text-secondary); margin-top: 3px; }
+  .mc-total-ico { min-width: 56px; text-align: right; font-size: 13px; font-weight: 700; color: var(--accent-purple); font-variant-numeric: tabular-nums; }
+
+  /* 3 · Diese Woche */
+  .card-week { display: flex; flex-direction: column; padding: 0; }
+  .wk-metric { display: flex; align-items: baseline; gap: 8px; padding: 0 18px 2px; }
+  .wk-num { font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .wk-lbl { font-size: 11px; color: var(--text-secondary); }
+  .wk-bars { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 6px; padding: 10px 16px 12px; }
+  .wk-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+  .wk-bar-track { width: 100%; flex: 1; display: flex; align-items: flex-end; min-height: 0; }
+  .wk-bar { width: 100%; border-radius: 6px; background: var(--card-2); min-height: 4px; }
+  .wk-bar.has { background: linear-gradient(180deg, #C9B8F5, #9A82E8); }
+  .wk-col.today .wk-bar.has { background: linear-gradient(180deg, #E9E08C, #D4C85E); }
+  .wk-col.today .wk-bar { background: rgba(233,224,140,0.18); }
+  .wk-day { font-size: 9px; color: var(--text-tertiary); }
+  .wk-col.today .wk-day { color: var(--text-primary); font-weight: 700; }
+
+  /* 4 · Pipeline */
+  .card-pipeline { display: flex; flex-direction: column; padding: 0; }
+  .pipeline-list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 2px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .pipeline-list::-webkit-scrollbar { display: none; }
+  .pipeline-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; flex-shrink: 0; }
+  .pipeline-info { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .pipeline-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pipeline-status { font-size: 10.5px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pipeline-amt { flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); background: var(--card-2); border-radius: 10px; padding: 8px 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* 5 · Übersicht / Kennzahlen */
+  .card-stats { display: flex; flex-direction: column; padding: 14px 16px 12px; min-height: 0; }
+  .st-focus { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-secondary); margin-bottom: 9px; min-width: 0; }
+  .st-focus-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-purple); flex-shrink: 0; }
+  .st-focus span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .st-big { display: flex; align-items: center; justify-content: space-between; }
+  .st-num { font-size: 29px; font-weight: 700; color: var(--text-primary); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .st-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .st-list { margin-top: 10px; display: flex; flex-direction: column; flex: 1; min-height: 0; justify-content: space-between; }
+  .st-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-top: 1px solid var(--border); }
+  .st-row:first-child { border-top: none; }
+  .st-k { font-size: 11.5px; color: var(--text-secondary); }
+  .st-v { font-size: 12.5px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* 6 · Agenda im Grid */
+  .card-agenda .card-head { padding-bottom: 6px; }
+  .card-agenda .agenda-next { max-width: 56%; }
+
   /* ── Morning Report Button — circular icon button ── */
   .morning-btn {
     flex-shrink: 0;
@@ -1422,116 +1522,102 @@
 
   </div>
 
-  <!-- ── HAUPTBEREICH: links Inhalt, rechts Agenda+Pipeline ── -->
+  <!-- ── COCKPIT-GRID (6 Karten) ── -->
   <div class="main-area">
 
-    <div class="main-left">
-
-      <!-- Revenue Hero (großer Flächen-Chart) -->
-      <div class="card card-revenue">
-        <div class="rev-head">
-          <div class="rev-metrics">
-            <div class="rev-metric">
-              <div class="rev-metric-top">
-                <span class="rev-value" id="rev-month-value">—</span>
-                <span class="rev-badge flat" id="rev-month-badge"></span>
-              </div>
-              <span class="rev-metric-label" id="rev-month-label">Umsatz · diesen Monat</span>
-            </div>
-            <div class="rev-metric">
-              <div class="rev-metric-top">
-                <span class="rev-value accent" id="rev-mrr-value">—</span>
-              </div>
-              <span class="rev-metric-label" id="rev-mrr-label">MRR · wiederkehrend</span>
-            </div>
-          </div>
-          <div class="rev-controls">
-            <button class="rev-exp-toggle" id="rev-exp-toggle" type="button">
-              <span class="rev-exp-dot"></span>Ausgaben
-            </button>
-            <div class="rev-toggle" id="rev-toggle">
-              <button data-range="6">6M</button>
-              <button data-range="12" class="active">12M</button>
-              <button data-range="max">Max</button>
-            </div>
-          </div>
-        </div>
-        <div class="rev-chart" id="rev-chart"></div>
-      </div>
-
-      <!-- Metrik-Kacheln -->
-      <div class="row-kpi">
-        <div class="card metric-card">
-          <div class="metric-label">Umsatz <span id="m-umsatz-year"></span></div>
-          <div class="metric-top"><span class="metric-num" id="m-umsatz-num">—</span></div>
-          <div class="metric-bar"><i id="m-umsatz-bar" style="width:0%"></i></div>
-        </div>
-        <div class="card metric-card">
-          <div class="metric-label">Bester Monat</div>
-          <div class="metric-top"><span class="metric-num" id="m-best-num">—</span></div>
-          <div class="metric-sub" id="m-best-sub">—</div>
-        </div>
-        <div class="card metric-card">
-          <div class="metric-label">Drehtage · <span id="m-shoots-month">—</span></div>
-          <div class="metric-top"><span class="metric-num" id="m-shoots-num">—</span></div>
-          <div class="metric-sub" id="m-shoots-sub">—</div>
-        </div>
-        <div class="card metric-card">
-          <div class="metric-label">Pipeline</div>
-          <div class="metric-top"><span class="metric-num" id="m-pipeline-num">—</span></div>
-          <div class="metric-sub" id="m-pipeline-sub">—</div>
+    <!-- 1 · Revenue -->
+    <div class="card card-revenue">
+      <div class="rev-top">
+        <span class="card-title">Umsatz</span>
+        <div class="seg" id="rev-toggle">
+          <button data-range="6">6M</button>
+          <button data-range="12" class="active">12M</button>
+          <button data-range="max">Max</button>
         </div>
       </div>
-
-      <!-- Fokus + Gmail + Rechnungen -->
-      <div class="row-bottom">
-        <div class="card card-fokus">
-          <span class="section-label">Fokus heute</span>
-          <div class="fokus-text" id="fokus-text">
-            <span class="skel" style="display:inline-block;width:62%;height:16px;"></span>
+      <div class="rev-metrics">
+        <div class="rev-metric">
+          <div class="rev-metric-top">
+            <span class="rev-value" id="rev-month-value">—</span>
+            <span class="rev-badge flat" id="rev-month-badge"></span>
           </div>
+          <span class="rev-metric-label" id="rev-month-label">Umsatz diesen Monat</span>
         </div>
-        <div class="card card-gmailchip" id="gmail-inner">
-          <span class="skel" style="width:70%;height:20px;"></span>
-        </div>
-        <div class="card card-gmailchip" id="zoho-inner">
-          <span class="skel" style="width:70%;height:20px;"></span>
+        <div class="rev-metric">
+          <div class="rev-metric-top">
+            <span class="rev-value" id="rev-mrr-value">—</span>
+          </div>
+          <span class="rev-metric-label" id="rev-mrr-label">MRR · wiederkehrend</span>
         </div>
       </div>
+      <div class="rev-chart" id="rev-chart"></div>
+    </div>
 
-    </div><!-- /.main-left -->
-
-    <!-- Rechte Spalte: Agenda + kompakte Pipeline -->
-    <div class="agenda-sidebar">
-
-      <div class="card card-agenda" style="flex:1.4;min-height:0;">
-        <div class="section-header">
-          <span class="section-label">Agenda</span>
-          <span class="agenda-next" id="agenda-next" style="display:none;"></span>
-        </div>
-        <div class="agenda-body" id="agenda-body">
-          <div class="state-msg">Lädt…</div>
-        </div>
+    <!-- 2 · Monats-Kalender -->
+    <div class="card card-monthcal">
+      <div class="card-head">
+        <span class="mc-month" id="mc-month">—</span>
+        <span class="card-ico">↗</span>
       </div>
-
-      <div class="card card-pipeline" style="flex:1;min-height:0;">
-        <div class="section-header">
-          <span class="section-label">Pipeline</span>
-          <span class="section-badge" id="pipeline-badge"></span>
+      <div class="mc-grid" id="mc-grid"></div>
+      <div class="mc-total">
+        <div>
+          <div class="mc-total-val" id="mc-total-val">—</div>
+          <div class="mc-total-lbl">Umsatz diesen Monat</div>
         </div>
-        <div class="pipeline-list" id="pipeline-list">
-          <div class="pipeline-item">
-            <span class="skel" style="width:72%;height:12px;"></span>
-            <span class="skel" style="width:52%;height:11px;margin-top:5px;"></span>
-          </div>
-          <div class="pipeline-item">
-            <span class="skel" style="width:64%;height:12px;"></span>
-            <span class="skel" style="width:44%;height:11px;margin-top:5px;"></span>
-          </div>
-        </div>
+        <span class="mc-total-ico" id="mc-total-ico">—</span>
       </div>
+    </div>
 
-    </div><!-- /.agenda-sidebar -->
+    <!-- 3 · Diese Woche (Auslastung) -->
+    <div class="card card-week">
+      <div class="card-head">
+        <span class="card-title">Diese Woche</span>
+        <span class="card-badge" id="wk-shoots">—</span>
+      </div>
+      <div class="wk-metric">
+        <span class="wk-num" id="wk-num">—</span>
+        <span class="wk-lbl">Termine</span>
+      </div>
+      <div class="wk-bars" id="wk-bars"></div>
+    </div>
+
+    <!-- 4 · Pipeline -->
+    <div class="card card-pipeline">
+      <div class="card-head">
+        <span class="card-title">Pipeline</span>
+        <span class="card-badge" id="pipeline-badge"></span>
+      </div>
+      <div class="pipeline-list" id="pipeline-list">
+        <div class="pipeline-item"><span class="skel" style="width:60%;height:13px;"></span></div>
+        <div class="pipeline-item"><span class="skel" style="width:50%;height:13px;"></span></div>
+      </div>
+    </div>
+
+    <!-- 5 · Übersicht / Kennzahlen -->
+    <div class="card card-stats">
+      <div class="st-focus"><span class="st-focus-dot"></span><span id="fokus-text">—</span></div>
+      <div class="st-big"><span class="st-num" id="st-year-num">—</span><span class="card-ico">↗</span></div>
+      <div class="st-label">Umsatz <span id="st-year"></span></div>
+      <div class="st-list">
+        <div class="st-row"><span class="st-k">MRR</span><span class="st-v" id="st-mrr">—</span></div>
+        <div class="st-row"><span class="st-k">Bester Monat</span><span class="st-v" id="st-best">—</span></div>
+        <div class="st-row"><span class="st-k">Pipeline</span><span class="st-v" id="st-pipeline">—</span></div>
+        <div class="st-row"><span class="st-k">Offene Rechnungen</span><span class="st-v" id="st-zoho">—</span></div>
+        <div class="st-row"><span class="st-k">Gmail ungelesen</span><span class="st-v" id="st-gmail">—</span></div>
+      </div>
+    </div>
+
+    <!-- 6 · Agenda -->
+    <div class="card card-agenda">
+      <div class="card-head">
+        <span class="card-title">Agenda</span>
+        <span class="agenda-next" id="agenda-next" style="display:none;"></span>
+      </div>
+      <div class="agenda-body" id="agenda-body">
+        <div class="state-msg">Lädt…</div>
+      </div>
+    </div>
 
   </div><!-- /.main-area -->
 
@@ -1643,7 +1729,7 @@ const TABLE = {
 // Revenue-Chart: Geschäftsstart (rollierender Zeitraum ab hier)
 const BIZ_START = { year: 2025, month: 7 }; // August 2025 (0-basiert)
 let _revRange = 12;          // aktiver Zeitraum-Filter (6 | 12 | 'max')
-let _revShowExpenses = false; // Ausgaben-Overlay an/aus
+let _revShowExpenses = true;  // Einnahmen (lila) + Ausgaben (gelb) wie Referenz
 let _cashflowRows = [];      // zuletzt geladene Cashflow-Zeilen (für Chart-Neuzeichnen)
 
 const DAYS   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -1897,10 +1983,8 @@ async function loadPipeline() {
       return m ? parseNum(m[1]) : 0;
     });
     const pipeTotal = monthly.reduce((a, b) => a + b, 0);
-    const pn = document.getElementById('m-pipeline-num');
-    const ps = document.getElementById('m-pipeline-sub');
-    if (pn) pn.textContent = fmtNum(pipeTotal) + ' €';
-    if (ps) ps.textContent = `${rows.length} ${rows.length === 1 ? 'Lead' : 'Leads'} · pro Monat`;
+    const st = document.getElementById('st-pipeline');
+    if (st) st.textContent = fmtNum(pipeTotal) + ' €';
 
     // Global für Morning Report speichern
     window._mrLeads = rows.map(row => ({
@@ -1909,17 +1993,18 @@ async function loadPipeline() {
       detail: row['Nächste Aktion'] || row['Aktion'] || '',
     }));
 
-    document.getElementById('pipeline-list').innerHTML = rows.map(row => {
-      const name   = row['Name']   || row['Titel']         || 'Unbenannt';
-      const status = row['Status'] || '';
-      const amount = row['Betrag'] || row['Amount']         || '';
+    document.getElementById('pipeline-list').innerHTML = rows.map((row, i) => {
+      const name   = row['Name']   || row['Titel']  || 'Unbenannt';
+      const status = row['Status'] || row['Nächste Aktion'] || row['Aktion'] || '';
+      const amount = row['Betrag'] || row['Amount']  || '';
+      const amt    = monthly[i] ? fmtNum(monthly[i]) + ' €' : (amount ? esc(amount) : '—');
       return `
         <div class="pipeline-item fade-in">
-          <div class="pipeline-row">
+          <div class="pipeline-info">
             <span class="pipeline-name">${esc(name)}</span>
-            ${amount ? `<span class="pipeline-amount" style="margin:0;flex-shrink:0;">${esc(amount.replace(/\s*\/\s*Monat/i,'/M'))}</span>` : ''}
+            ${status ? `<span class="pipeline-status">${esc(status)}</span>` : ''}
           </div>
-          ${status ? `<div class="pipeline-status">${esc(status)}</div>` : ''}
+          <span class="pipeline-amt">${amt}</span>
         </div>`;
     }).join('');
 
@@ -1939,6 +2024,8 @@ async function loadMRR() {
     const total = rows.reduce((s, r) => s + parseNum(r['€/Monat'] || r['Betrag'] || r['Monat'] || 0), 0);
     if (valEl) valEl.textContent = fmtNum(total) + ' €';
     if (lblEl) lblEl.textContent = `MRR · ${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`;
+    const st = document.getElementById('st-mrr');
+    if (st) st.textContent = fmtNum(total) + ' €';
     window._mrMRR = total;
   } catch (err) {
     console.error('MRR:', err);
@@ -2021,30 +2108,25 @@ async function loadCashflow() {
     const prev = series[series.length - 2];
     const curRev = cur.rev || 0;
 
-    document.getElementById('rev-month-value').textContent = fmtNum(curRev) + ' €';
-    document.getElementById('rev-month-label').textContent =
-      'Umsatz · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+    const setTxt = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+    setTxt('rev-month-value', fmtNum(curRev) + ' €');
+    setTxt('rev-month-label', 'Umsatz ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear());
     renderTrendBadge('rev-month-badge', curRev, prev ? prev.rev : null);
 
-    // Laufendes Jahr: Einnahmen / Ausgaben / Ziel
-    const ytdMonths = series.filter(s => s.year === now.getFullYear());
-    const ytd       = ytdMonths.reduce((a, s) => a + (s.rev || 0), 0);
-    const expYtd    = ytdMonths.reduce((a, s) => a + (s.exp || 0), 0);
-    const goalSum   = ytdMonths.reduce((a, s) => a + (s.goal || 0), 0);
-    const goalPct   = goalSum > 0 ? Math.round(ytd / goalSum * 100) : 0;
+    // Laufendes Jahr
     const yr = now.getFullYear();
+    const ytdMonths = series.filter(s => s.year === yr);
+    const ytd       = ytdMonths.reduce((a, s) => a + (s.rev || 0), 0);
 
-    // Kachel: Umsatz (laufendes Jahr) + Balken zum Ziel
-    const setTxt = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
-    setTxt('m-umsatz-year', yr);
-    setTxt('m-umsatz-num', fmtNum(ytd) + ' €');
-    const ub = document.getElementById('m-umsatz-bar');
-    if (ub) ub.style.width = Math.min(goalPct, 100) + '%';
-
-    // Kachel: Bester Monat (höchster Umsatz über alle Monate)
+    // Stats-Karte: großer Jahresumsatz + Bester Monat
+    setTxt('st-year-num', fmtNum(ytd) + ' €');
+    setTxt('st-year', yr);
     const best = series.reduce((b, s) => (s.rev || 0) > (b.rev || 0) ? s : b, { rev: 0, mIdx: null });
-    setTxt('m-best-num', best.mIdx === null || !best.rev ? '—' : fmtNum(best.rev) + ' €');
-    setTxt('m-best-sub', best.mIdx === null || !best.rev ? 'noch keine Daten' : MONTHS[best.mIdx] + ' ' + best.year);
+    setTxt('st-best', best.mIdx === null || !best.rev ? '—' : fmtNum(best.rev) + ' € · ' + MONTHS[best.mIdx].slice(0,3));
+
+    // Kalender-Karte: Umsatz diesen Monat
+    const cm = series.find(s => s.year === yr && s.mIdx === now.getMonth());
+    setTxt('mc-total-val', fmtNum(cm && cm.rev ? cm.rev : 0) + ' €');
 
     renderRevenueChart();
   } catch (err) {
@@ -2077,8 +2159,6 @@ function renderRevenueChart() {
   let series = monthSeriesFromRows(_cashflowRows);
   if (_revRange !== 'max' && series.length > _revRange) series = series.slice(-_revRange);
 
-  const showExp = _revShowExpenses;
-  // „Schöne" Y-Skala (0 … gerundetes Max in 4 Schritten)
   const niceScale = (maxVal, ticks = 4) => {
     if (!(maxVal > 0)) return { max: 1, lines: [0, 1] };
     const raw = maxVal / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
@@ -2088,103 +2168,81 @@ function renderRevenueChart() {
     for (let v = 0; v <= max + step * 0.001; v += step) lines.push(v);
     return { max, lines };
   };
-  const padL = 40, padR = 16, padT = 22, padB = 24;
+  const padL = 36, padR = 14, padT = 28, padB = 22;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = series.length;
   const xAt = i => padL + (n <= 1 ? innerW / 2 : innerW * i / (n - 1));
-  const rawMax = Math.max(...series.map(s => Math.max(s.rev || 0, showExp ? (s.exp || 0) : 0)), 1);
+  const rawMax = Math.max(...series.map(s => Math.max(s.rev || 0, s.exp || 0)), 1);
   const scale  = niceScale(rawMax);
   const maxV   = scale.max;
   const yAt = v => padT + innerH * (1 - (v || 0) / maxV);
+  const baseY = padT + innerH;
 
   const revPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.rev || 0) }));
   const expPts = series.map((s, i) => ({ x: xAt(i), y: yAt(s.exp || 0) }));
-
   const revLine  = smoothPath(revPts);
-  const baseY    = (padT + innerH).toFixed(1);
-  const areaPath = revLine + ` L${xAt(n-1).toFixed(1)},${baseY} L${padL.toFixed(1)},${baseY} Z`;
+  const expLine  = smoothPath(expPts);
+  const areaPath = revLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
 
-  // Technisches Gitternetz: horizontale Skalenlinien + Y-Achsenwerte
-  let grid = '';
+  // dichte „Kamm"-Linien — überall sehr fein, in der Fläche kräftiger (geclippt)
+  let comb = '', combArea = '';
+  for (let gx = padL; gx <= W - padR + 0.5; gx += 6) {
+    const x = gx.toFixed(1);
+    comb     += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${baseY.toFixed(1)}" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>`;
+    combArea += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${baseY.toFixed(1)}" stroke="rgba(201,184,245,0.14)" stroke-width="1"/>`;
+  }
+
+  // horizontale Skalenlinien + Y-Achsenwerte
+  let hgrid = '';
   scale.lines.forEach(v => {
     const gy = yAt(v);
-    grid += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,0.055)" stroke-width="1"/>`;
-    grid += `<text x="${(padL-8).toFixed(1)}" y="${(gy+3).toFixed(1)}" fill="rgba(255,255,255,0.34)" font-size="9" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">${fmtK(v)}</text>`;
-  });
-  // feine vertikale „Kamm"-Rasterlinien (dicht, wie Referenz)
-  const combStep = 7;
-  for (let gx = padL; gx <= W - padR + 0.5; gx += combStep) {
-    grid += `<line x1="${gx.toFixed(1)}" y1="${padT}" x2="${gx.toFixed(1)}" y2="${baseY}" stroke="rgba(255,255,255,0.022)" stroke-width="1"/>`;
-  }
-  // etwas kräftigere Linie je Monat
-  series.forEach((s, i) => {
-    grid += `<line x1="${xAt(i).toFixed(1)}" y1="${padT}" x2="${xAt(i).toFixed(1)}" y2="${baseY}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+    hgrid += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+    hgrid += `<text x="${(padL-7).toFixed(1)}" y="${(gy+3).toFixed(1)}" fill="rgba(255,255,255,0.32)" font-size="9" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">${fmtK(v)}</text>`;
   });
 
-  // Ausgaben-Serie (orange) — hinter der Einnahmen-Linie, mit Glow
-  let expSvg = '';
-  if (showExp) {
-    const expLine = smoothPath(expPts);
-    const expArea = expLine + ` L${xAt(n-1).toFixed(1)},${baseY} L${padL.toFixed(1)},${baseY} Z`;
-    expSvg = `
-      <path d="${expArea}" fill="url(#expGrad)"/>
-      <path d="${expLine}" fill="none" stroke="#D9A05B" stroke-width="5" stroke-opacity="0.12" stroke-linecap="round"/>
-      <path d="${expLine}" fill="none" stroke="#D9A05B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }
-
-  // X-Labels (bei vielen Monaten ausdünnen)
+  // X-Labels
   const stepLbl = n > 9 ? 2 : 1;
-  let labels = '';
+  let xlabels = '';
   series.forEach((s, i) => {
     if (i % stepLbl !== 0 && i !== n - 1) return;
-    labels += `<text x="${xAt(i).toFixed(1)}" y="${(H-7).toFixed(1)}" fill="rgba(255,255,255,0.40)" font-size="9" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[s.mIdx].slice(0,3)}</text>`;
+    xlabels += `<text x="${xAt(i).toFixed(1)}" y="${(H-6).toFixed(1)}" fill="rgba(255,255,255,0.36)" font-size="9" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[s.mIdx].slice(0,3)}</text>`;
   });
 
-  // Aktueller Monat (letzter Punkt): Marker + Pill
-  const ci = n - 1, cx = xAt(ci), cy = revPts[ci].y, cVal = series[ci].rev || 0;
-  const pillTxt = fmtNum(cVal) + ' €';
-  const pillW = Math.max(40, pillTxt.length * 6.5 + 14);
-  let pillX = cx - pillW / 2;
-  pillX = Math.max(padL, Math.min(pillX, W - padR - pillW));
-  const pillY = Math.max(padT - 2, cy - 28);
+  // Marker am aktuellen Monat (letzter Punkt) + Doppel-Tooltip
+  const ci = n - 1, cx = xAt(ci), cyR = revPts[ci].y, cyE = expPts[ci].y;
+  const t1 = fmtNum(series[ci].rev || 0) + ' €', t2 = fmtNum(series[ci].exp || 0) + ' €';
+  const pw1 = t1.length * 5.8 + 22, pw2 = t2.length * 5.8 + 22, gp = 6;
+  let gx0 = cx - (pw1 + pw2 + gp) / 2;
+  gx0 = Math.max(padL, Math.min(gx0, W - padR - (pw1 + pw2 + gp)));
+  const ty = Math.max(2, Math.min(cyR, cyE) - 27);
+  const pill = (x, w, dot, txt) => `
+    <rect x="${x.toFixed(1)}" y="${ty.toFixed(1)}" width="${w.toFixed(1)}" height="20" rx="7" fill="#191921" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+    <circle cx="${(x+11).toFixed(1)}" cy="${(ty+10).toFixed(1)}" r="3" fill="${dot}"/>
+    <text x="${(x+19).toFixed(1)}" y="${(ty+13.5).toFixed(1)}" fill="#E7E7EC" font-size="10.5" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${txt}</text>`;
+  const tips = pill(gx0, pw1, '#C9B8F5', t1) + pill(gx0 + pw1 + gp, pw2, '#E9E08C', t2);
   const marker = `
-    <line x1="${cx.toFixed(1)}" y1="${padT}" x2="${cx.toFixed(1)}" y2="${baseY}" stroke="rgba(142,132,232,0.5)" stroke-width="1" stroke-dasharray="2 3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="rgba(142,132,232,0.18)"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="#8E84E8" stroke="#0E1016" stroke-width="1.5"/>
-    <rect x="${pillX.toFixed(1)}" y="${pillY.toFixed(1)}" width="${pillW.toFixed(1)}" height="19" rx="6" fill="#221E36" stroke="rgba(142,132,232,0.45)" stroke-width="0.5"/>
-    <text x="${(pillX + pillW/2).toFixed(1)}" y="${(pillY+13).toFixed(1)}" fill="#C9C2F2" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${pillTxt}</text>`;
-
-  // Legende (nur wenn Ausgaben aktiv) — oben rechts
-  const legend = showExp ? `
-    <g font-family="Plus Jakarta Sans,sans-serif" font-size="9.5" font-weight="600">
-      <circle cx="${(W-padR-118).toFixed(1)}" cy="${(padT-12).toFixed(1)}" r="3.5" fill="#8E84E8"/>
-      <text x="${(W-padR-110).toFixed(1)}" y="${(padT-9).toFixed(1)}" fill="rgba(255,255,255,0.62)">Einnahmen</text>
-      <circle cx="${(W-padR-48).toFixed(1)}" cy="${(padT-12).toFixed(1)}" r="3.5" fill="#D9A05B"/>
-      <text x="${(W-padR-40).toFixed(1)}" y="${(padT-9).toFixed(1)}" fill="rgba(255,255,255,0.62)">Ausgaben</text>
-    </g>` : '';
+    <line x1="${cx.toFixed(1)}" y1="${padT}" x2="${cx.toFixed(1)}" y2="${baseY.toFixed(1)}" stroke="rgba(255,255,255,0.26)" stroke-width="1" stroke-dasharray="3 3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cyR.toFixed(1)}" r="5" fill="#FFFFFF" stroke="#BFA9F2" stroke-width="2"/>`;
 
   el.innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="#8E84E8" stop-opacity="0.38"/>
-          <stop offset="55%" stop-color="#6C5FBF" stop-opacity="0.12"/>
-          <stop offset="100%" stop-color="#6C5FBF" stop-opacity="0"/>
+          <stop offset="0%"  stop-color="#BFA9F2" stop-opacity="0.30"/>
+          <stop offset="60%" stop-color="#8B72E0" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#8B72E0" stop-opacity="0"/>
         </linearGradient>
-        <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="#D9A05B" stop-opacity="0.24"/>
-          <stop offset="60%" stop-color="#D9A05B" stop-opacity="0.06"/>
-          <stop offset="100%" stop-color="#D9A05B" stop-opacity="0"/>
-        </linearGradient>
+        <clipPath id="areaClip"><path d="${areaPath}"/></clipPath>
       </defs>
-      ${grid}
-      ${expSvg}
+      ${comb}
+      ${hgrid}
       <path d="${areaPath}" fill="url(#revGrad)"/>
-      <path d="${revLine}" fill="none" stroke="#8E84E8" stroke-width="5" stroke-opacity="0.13" stroke-linecap="round"/>
-      <path d="${revLine}" fill="none" stroke="#8E84E8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      ${labels}
+      <g clip-path="url(#areaClip)">${combArea}</g>
+      <path d="${expLine}" fill="none" stroke="#E9E08C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${revLine}" fill="none" stroke="#C9B8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      ${xlabels}
       ${marker}
-      ${legend}
+      ${tips}
     </svg>`;
 }
 
@@ -2325,23 +2383,13 @@ function _gmailShowRefreshHint() {
   el.appendChild(hint);
 }
 
+function _setSt(id, txt) { const e = document.getElementById(id); if (e) e.textContent = txt; }
 function gmailRenderCount(n) {
   window._mrGmail = n;
-  const display = n > 99 ? '99+' : String(n);
-  document.getElementById('gmail-inner').innerHTML = n === 0
-    ? `<span class="status-ok fade-in">✓</span><div class="status-text" style="font-size:11px;">Gmail<br>leer</div>`
-    : `<span class="status-num hot fade-in">${display}</span><div class="status-text" style="font-size:11px;">neue<br>Mails</div>`;
+  _setSt('st-gmail', n === 0 ? 'leer' : (n > 99 ? '99+' : String(n)));
 }
-
-function gmailRenderLogin() {
-  document.getElementById('gmail-inner').innerHTML =
-    `<button class="gmail-login-btn" onclick="gmailLogin()" style="white-space:nowrap;">Verbinden</button>`;
-}
-
-function gmailRenderError() {
-  document.getElementById('gmail-inner').innerHTML =
-    `<div class="status-text" style="font-size:11px;">Gmail<br>n.&nbsp;verfügbar</div>`;
-}
+function gmailRenderLogin()  { _setSt('st-gmail', 'verbinden'); }
+function gmailRenderError()  { _setSt('st-gmail', 'n. verfügbar'); }
 
 async function gmailFetch(token) {
   const r = await fetch(
@@ -2470,21 +2518,12 @@ function zohoRender(data) {
   } else {
     window._mrZoho = { count: 0, total: 0 };
   }
-  if (!list.length) {
-    document.getElementById('zoho-inner').innerHTML =
-      `<span class="status-ok fade-in">✓</span><div class="status-text" style="font-size:11px;">Rechnungen<br>bezahlt</div>`;
-    return;
-  }
+  if (!list.length) { _setSt('st-zoho', 'alles bezahlt'); return; }
   const total = list.reduce((s, inv) => s + (parseFloat(inv.balance) || 0), 0);
-  document.getElementById('zoho-inner').innerHTML = `
-    <span class="status-num amber fade-in" style="font-size:20px;">${fmtNum(total)}</span>
-    <div class="status-text" style="font-size:11px;">€ offen<br>${list.length} Rechn.</div>`;
+  _setSt('st-zoho', fmtNum(total) + ' € · ' + list.length);
 }
 
-function zohoRenderError() {
-  document.getElementById('zoho-inner').innerHTML =
-    `<div class="status-text" style="font-size:11px;">Rechnungen<br>n.&nbsp;verfügbar</div>`;
-}
+function zohoRenderError() { _setSt('st-zoho', 'n. verfügbar'); }
 
 async function zohoLoad() {
   try {
@@ -2499,12 +2538,8 @@ async function zohoLoad() {
   } catch (err) {
     console.error('Zoho:', err);
     // Kein Refresh-Token gesetzt → neutral zeigen statt Fehler-Alert
-    if (ZOHO_REFRESH_TOKEN === 'DEIN_ZOHO_REFRESH_TOKEN') {
-      document.getElementById('zoho-inner').innerHTML =
-        `<div class="status-text">Rechnungen<br>nicht konfiguriert</div>`;
-    } else {
-      zohoRenderError();
-    }
+    if (ZOHO_REFRESH_TOKEN === 'DEIN_ZOHO_REFRESH_TOKEN') _setSt('st-zoho', 'nicht konfiguriert');
+    else zohoRenderError();
   }
 }
 
@@ -2829,66 +2864,101 @@ async function agendaLoad() {
 
     agendaRender();
     agendaUpdateNext();
-    loadShoots();   // Drehtage-KPI aus demselben Token
+    loadMonthCal();   // Karte 2
+    loadWeekBars();   // Karte 3
   } catch (e) {
     console.error('Agenda:', e);
     if (body) body.innerHTML = '<div class="state-msg">Nicht verfügbar</div>';
   }
 }
 
-// ── KPI: Drehtage diesen Monat (Stichwort „Shoot/Dreh" im Titel) ──
+// ── Kalender-Helfer + Cockpit-Karten (Monat / Woche) ─────────
 const SHOOT_RE = /shoot|dreh/i;
-async function loadShoots() {
-  const numEl = document.getElementById('m-shoots-num');
-  const subEl = document.getElementById('m-shoots-sub');
-  const mEl   = document.getElementById('m-shoots-month');
-  const now   = new Date();
-  if (mEl) mEl.textContent = MONTHS[now.getMonth()].slice(0, 3) + '.';
-  if (!numEl) return;
-  if (!_googleToken) {
-    numEl.textContent = '—'; if (subEl) subEl.textContent = 'Google verbinden';
-    return;
-  }
-  try {
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0); end.setHours(23, 59, 59, 999);
-    const listRes = await fetch(
-      'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
-      { headers: { Authorization: 'Bearer ' + _googleToken } });
-    const calList = listRes.ok ? await listRes.json() : { items: [] };
-    const calIds  = [...new Set([DASHBOARD_CAL_ID, 'primary', ...(calList.items || []).map(c => c.id)])];
-    const evs = (await Promise.all(calIds.map(id => fetchEventsForDay(id, start, end)))).flat();
+function _evDate(e) {
+  if (e.start?.dateTime) return new Date(e.start.dateTime);
+  if (e.start?.date)     return new Date(e.start.date + 'T00:00');
+  return null;
+}
+async function fetchAllEvents(start, end) {
+  if (!_googleToken) return [];
+  const listRes = await fetch(
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+    { headers: { Authorization: 'Bearer ' + _googleToken } });
+  const calList = listRes.ok ? await listRes.json() : { items: [] };
+  const calIds  = [...new Set([DASHBOARD_CAL_ID, 'primary', ...(calList.items || []).map(c => c.id)])];
+  const evs = (await Promise.all(calIds.map(id => fetchEventsForDay(id, start, end)))).flat();
+  const seen = new Set();
+  return evs.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
+}
 
-    const seen = new Set();
-    const shoots = evs.filter(e => {
-      if (seen.has(e.id)) return false; seen.add(e.id);
-      return SHOOT_RE.test(e.summary || '');
-    });
-    const days = new Set(shoots.map(e => {
-      const d = e.start?.dateTime ? new Date(e.start.dateTime) : (e.start?.date ? new Date(e.start.date) : null);
-      return d ? _agDateKey(d) : null;
-    }).filter(Boolean));
-    const count = days.size;
-
-    const future = shoots
-      .map(e => ({ s: new Date(e.start?.dateTime || e.start?.date) }))
-      .filter(o => o.s >= now).sort((a, b) => a.s - b.s)[0];
-    let sub;
-    if (future) {
-      const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const d1 = new Date(future.s.getFullYear(), future.s.getMonth(), future.s.getDate());
-      const diff = Math.round((d1 - d0) / 86400000);
-      sub = diff <= 0 ? 'nächster: heute' : diff === 1 ? 'nächster: morgen' : `nächster in ${diff} Tagen`;
-    } else {
-      sub = count === 0 ? 'keiner geplant' : 'diesen Monat';
-    }
-    numEl.textContent = String(count);
-    numEl.className = 'metric-num fade-in';
-    if (subEl) subEl.textContent = sub;
-  } catch (e) {
-    console.error('Shoots:', e);
-    numEl.textContent = '—'; if (subEl) subEl.textContent = 'nicht verfügbar';
+// Karte 2 · Monats-Kalender (Event-Tage = Punkt, Drehtage = lila)
+async function loadMonthCal() {
+  const grid = document.getElementById('mc-grid');
+  const now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+  _setSt('mc-month', MONTHS[mo] + ' ' + y);
+  if (!grid) return;
+  const evMap = {};
+  if (_googleToken) {
+    try {
+      const start = new Date(y, mo, 1), end = new Date(y, mo + 1, 0); end.setHours(23, 59, 59, 999);
+      (await fetchAllEvents(start, end)).forEach(e => {
+        const d = _evDate(e);
+        if (!d || d.getFullYear() !== y || d.getMonth() !== mo) return;
+        const day = d.getDate(); (evMap[day] = evMap[day] || {}).ev = true;
+        if (SHOOT_RE.test(e.summary || '')) evMap[day].shoot = true;
+      });
+    } catch (e) { console.error('MonthCal:', e); }
   }
+  const startDow = (new Date(y, mo, 1).getDay() + 6) % 7;
+  const dim = new Date(y, mo + 1, 0).getDate(), prevDim = new Date(y, mo, 0).getDate();
+  const cells = [];
+  for (let i = startDow - 1; i >= 0; i--) cells.push({ d: prevDim - i, out: true });
+  for (let d = 1; d <= dim; d++) cells.push({ d, out: false });
+  const total = cells.length <= 35 ? 35 : 42;
+  let nd = 1; while (cells.length < total) cells.push({ d: nd++, out: true });
+  const todayD = now.getDate();
+  grid.innerHTML = cells.map(c => {
+    if (c.out) return `<div class="mc-cell out">${c.d}</div>`;
+    const info = evMap[c.d] || {}, cls = ['mc-cell'];
+    if (info.shoot) cls.push('shoot');
+    if (c.d === todayD) cls.push('today');
+    const dot = (info.ev && !info.shoot) ? '<span class="mc-dot"></span>' : '';
+    return `<div class="${cls.join(' ')}">${c.d}${dot}</div>`;
+  }).join('');
+  const sd = Object.values(evMap).filter(x => x.shoot).length;
+  _setSt('mc-total-ico', sd ? sd + (sd === 1 ? ' Dreh' : ' Drehs') : '');
+}
+
+// Karte 3 · Diese Woche (Termine je Wochentag)
+async function loadWeekBars() {
+  const wrap = document.getElementById('wk-bars');
+  if (!wrap) return;
+  const now = new Date();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7)); mon.setHours(0, 0, 0, 0);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 7); sun.setMilliseconds(-1);
+  const counts = new Array(7).fill(0); let total = 0, shoots = 0;
+  if (_googleToken) {
+    try {
+      (await fetchAllEvents(mon, sun)).forEach(e => {
+        const d = _evDate(e); if (!d) return;
+        const idx = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - mon) / 86400000);
+        if (idx < 0 || idx > 6) return;
+        counts[idx]++; total++;
+        if (SHOOT_RE.test(e.summary || '')) shoots++;
+      });
+    } catch (e) { console.error('WeekBars:', e); }
+  }
+  _setSt('wk-num', String(total));
+  _setSt('wk-shoots', shoots ? shoots + (shoots === 1 ? ' Dreh' : ' Drehs') : 'keine Drehs');
+  const max = Math.max(...counts, 1), todayIdx = (now.getDay() + 6) % 7;
+  const names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  wrap.innerHTML = counts.map((c, i) => {
+    const h = c ? Math.max(c / max * 100, 12) : 0;
+    return `<div class="wk-col${i === todayIdx ? ' today' : ''}">
+      <div class="wk-bar-track"><div class="wk-bar${c ? ' has' : ''}" style="height:${h.toFixed(0)}%"></div></div>
+      <span class="wk-day">${names[i]}</span>
+    </div>`;
+  }).join('');
 }
 
 function agendaRender() {
@@ -2972,7 +3042,8 @@ function agendaRenderLogin() {
     </div>`;
   const el = document.getElementById('agenda-next');
   if (el) el.style.display = 'none';
-  loadShoots(); // zeigt „Google verbinden"-Platzhalter
+  loadMonthCal();  // Monatsgitter auch ohne Login (nur ohne Markierungen)
+  loadWeekBars();
 }
 
 // Agenda alle 15 Min aktualisieren
