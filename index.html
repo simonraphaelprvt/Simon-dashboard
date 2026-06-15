@@ -1509,6 +1509,10 @@
   .ins-spark svg, .ins-arc svg, .ins-bars svg { width:100%; height:100%; display:block; }
   .ins-arc { flex:1; min-height:0; }
   .ins-bars { flex:1; min-height:24px; }
+  .ins-c { align-items:stretch; }
+  .ins-circle { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+  .ins-circle svg { height:100%; width:100%; display:block; }
+  .ins-side { float:right; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-secondary); font-size:9px; }
   .ins-list { display:flex; flex-direction:column; gap:1px; overflow:hidden; }
   .ins-list span { font-size:10px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ins-split { flex-direction:row; gap:10px; }
@@ -1628,27 +1632,10 @@
           <div class="ins-row"><span class="ins-num" id="gm-first">—</span><span class="ins-delta" id="gm-first-d"></span></div>
           <div class="ins-spark" id="gm-first-spark"></div>
         </div>
-        <div class="ins">
-          <div class="ins-label">Antwortrate</div>
-          <div class="ins-arc" id="gm-reply"></div>
-        </div>
-        <div class="ins">
-          <div class="ins-label">Wartende Threads</div>
-          <div class="ins-num" id="gm-wait">—</div>
-          <div class="ins-list" id="gm-wait-list"></div>
-        </div>
-        <div class="ins ins-split">
-          <div class="ins-half">
-            <div class="ins-label">Ältester offen</div>
-            <div class="ins-num" id="gm-oldest">—</div>
-            <div class="ins-sub">Tage</div>
-          </div>
-          <div class="ins-half">
-            <div class="ins-label">Aktivität</div>
-            <div class="ins-bars" id="gm-activity"></div>
-            <div class="ins-sub" id="gm-activity-sub">gesendet / empf.</div>
-          </div>
-        </div>
+        <div class="ins ins-c"><div class="ins-label">Antwortrate</div><div class="ins-circle" id="gm-reply"></div></div>
+        <div class="ins ins-c"><div class="ins-label">Wartende Threads</div><div class="ins-circle" id="gm-wait-c"></div></div>
+        <div class="ins ins-c"><div class="ins-label">Ältester offen</div><div class="ins-circle" id="gm-oldest-c"></div></div>
+        <div class="ins"><div class="ins-label">Aktivität · gesendet/empf.</div><div class="ins-bars" id="gm-activity"></div></div>
       </div>
     </section>
 
@@ -1678,14 +1665,12 @@
     <section class="card cl-fin">
       <div class="cl-head"><span class="cl-title">Finanzen</span><span class="cl-tag" id="fz-tag">Zoho</span></div>
       <div class="fin-grid">
-        <div class="ins"><div class="ins-label">Umsatz YTD</div><div class="ins-num" id="fz-ytd">—</div></div>
-        <div class="ins"><div class="ins-label">Außenstände</div><div class="ins-num" id="fz-out">—</div></div>
-        <div class="ins"><div class="ins-label">Monat vs. Vormonat</div><div class="ins-row"><span class="ins-num sm" id="fz-mom">—</span><span class="ins-delta" id="fz-mom-d"></span></div></div>
-        <div class="ins"><div class="ins-label">⌀ Zahlungsdauer</div><div class="ins-row"><span class="ins-num" id="fz-days">—</span><span class="ins-unit">Tage</span></div></div>
-        <div class="ins ins-wide"><div class="ins-label">Überfällig · Aging</div><div class="agebar" id="fz-aging"></div></div>
-        <div class="ins"><div class="ins-label">MRR <span class="ins-target">Ziel 1–3k</span></div><div class="ins-num" id="fz-mrr">—</div><div class="targetbar" id="fz-mrr-bar"></div></div>
-        <div class="ins"><div class="ins-label">Offene Angebote</div><div class="ins-num" id="fz-est">—</div><div class="ins-sub" id="fz-est-sub"></div></div>
-        <div class="ins ins-wide"><div class="ins-label">Top-Kunden</div><div class="topbars" id="fz-top"></div></div>
+        <div class="ins ins-c"><div class="ins-label">Umsatz YTD · Ziel</div><div class="ins-circle" id="fz-ytd-c"></div></div>
+        <div class="ins ins-c"><div class="ins-label">MRR · Ziel 3k</div><div class="ins-circle" id="fz-mrr-c"></div></div>
+        <div class="ins ins-c"><div class="ins-label">Außenstände</div><div class="ins-circle" id="fz-out-c"></div></div>
+        <div class="ins ins-c"><div class="ins-label">⌀ Zahlung</div><div class="ins-circle" id="fz-days-c"></div></div>
+        <div class="ins ins-wide"><div class="ins-label">Überfällig · Aging <span id="fz-mom-side" class="ins-side"></span></div><div class="agebar" id="fz-aging"></div></div>
+        <div class="ins ins-wide"><div class="ins-label">Top-Kunden <span id="fz-est-side" class="ins-side"></span></div><div class="topbars" id="fz-top"></div></div>
       </div>
     </section>
 
@@ -2506,12 +2491,17 @@ async function loadGmailMetrics() {
       } catch {}
     }));
     waiting.sort((a, b) => a.date - b.date);
-    _t('gm-wait', String(waiting.length));
-    const wl = document.getElementById('gm-wait-list');
-    if (wl) wl.innerHTML = waiting.slice(0, 3).map(w => `<span>${esc(w.name)}</span>`).join('');
     const oldestDays = waiting.length ? Math.floor((now - waiting[0].date) / 86400000) : 0;
-    const oEl = document.getElementById('gm-oldest');
-    if (oEl) { oEl.textContent = String(oldestDays); oEl.className = 'ins-num' + (oldestDays > 7 ? ' red' : oldestDays > 3 ? ' amber' : ''); }
+    // Ring: Anzahl wartender Threads (Vollausschlag bei 8)
+    renderRing('gm-wait-c', {
+      pct: Math.min(waiting.length / 8, 1),
+      top: String(waiting.length),
+      sub: waiting.length ? 'offen' : 'sauber',
+      color: waiting.length ? '#E0B96A' : '#5BBE8D',
+    });
+    // Arc: Alter des ältesten Threads (Vollausschlag bei 14 T)
+    miniArc('gm-oldest-c', Math.min(oldestDays / 14, 1), oldestDays + ' T',
+      oldestDays > 7 ? '#E0716C' : oldestDays > 3 ? '#E0B96A' : '#5BBE8D');
 
     setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : false));
     setAnn('stall', firsts.length === 0 ? 'red' : false);
@@ -2546,17 +2536,43 @@ async function loadZohoMetrics() {
     const d = await r.json();
     if (!d || !d.ok) { _t('fz-tag', 'offline'); return; }
     window._zoho = d;
-    _t('fz-ytd', fmtNum(d.revenueYTD) + ' €');
-    _t('fz-out', fmtNum(d.outstanding) + ' €');
-    _t('fz-mom', fmtNum(d.cashThisMonth) + ' €');
-    deltaBadge('fz-mom-d', d.cashThisMonth, d.cashLastMonth);
-    _t('fz-days', d.avgDaysToPay == null ? '—' : String(d.avgDaysToPay));
+
+    // Jahresziel aus Notion-Ziel ableiten (sonst 12.000)
+    let goal = 12000;
+    try { const s = monthSeriesFromRows(_cashflowRows || []).filter(x => x.year === new Date().getFullYear());
+      const g = s.reduce((a, x) => a + (x.goal || 0), 0); if (g > 0) goal = g; } catch {}
+
+    // Ring: Umsatz YTD vs. Jahresziel
+    renderRing('fz-ytd-c', {
+      pct: goal ? d.revenueYTD / goal : 0,
+      top: fmtK(d.revenueYTD) + '€',
+      sub: goal ? Math.round(d.revenueYTD / goal * 100) + '% v. ' + fmtK(goal) : 'YTD',
+      color: '#C9B8F5',
+    });
+    // Ring: MRR vs. Ziel 3k
+    renderRing('fz-mrr-c', {
+      pct: Math.min((d.mrr || 0) / 3000, 1),
+      top: fmtK(d.mrr) + '€',
+      sub: 'MRR / 3k',
+      color: '#8B72E0',
+    });
+    // Donut: Außenstände vs. erhalten (YTD)
+    renderDonut('fz-out-c', {
+      segs: [{ val: d.outstanding, color: '#E0B96A' }, { val: Math.max(d.revenueYTD, 1), color: '#6C5FBF' }],
+      top: fmtK(d.outstanding) + '€',
+      sub: 'offen',
+      topColor: d.outstanding > 0 ? '#E0B96A' : '#5BBE8D',
+    });
+    // Arc: ⌀ Zahlungsdauer (Vollausschlag 30 T)
+    miniArc('fz-days-c', d.avgDaysToPay == null ? 0 : Math.min(d.avgDaysToPay / 30, 1),
+      d.avgDaysToPay == null ? '—' : d.avgDaysToPay + ' T',
+      (d.avgDaysToPay || 0) > 30 ? '#E0716C' : '#C9B8F5');
+
     renderAging('fz-aging', d.aging);
-    _t('fz-mrr', fmtNum(d.mrr) + ' €');
-    const mb = document.getElementById('fz-mrr-bar'); if (mb) mb.innerHTML = `<i style="width:${Math.min((d.mrr || 0) / 3000 * 100, 100).toFixed(0)}%"></i>`;
-    _t('fz-est', fmtNum(d.openEstimates) + ' €');
-    _t('fz-est-sub', (d.openEstimatesCount || 0) + ' offen');
     renderTopCustomers('fz-top', d.topCustomers);
+    // Seiten-Infos in den Chart-Labels
+    deltaBadge('fz-mom-side', d.cashThisMonth, d.cashLastMonth);
+    _t('fz-est-side', d.openEstimatesCount ? fmtK(d.openEstimates) + '€ Angebote' : '');
 
     const overdue = d.aging || { d15: 0, d30: 0, d30p: 0 };
     setAnn('overdue', overdue.d30p > 0 ? 'red' : (overdue.d15 + overdue.d30 > 0 ? 'amber' : false));
