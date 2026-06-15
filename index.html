@@ -2377,6 +2377,30 @@ function miniArc(id, pct, label, color = '#C9B8F5') {
     <text x="50" y="54" text-anchor="middle" fill="#F5F5F8" font-size="22" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${label != null ? label : Math.round(pct * 100) + '%'}</text>
   </svg>`;
 }
+// Einheitliches Mess-Instrument: 270°-Skala mit Ticks, Zeiger, Lünette
+function renderInstrument(id, { pct, value, sub, color }) {
+  const el = document.getElementById(id); if (!el) return;
+  pct = Math.max(0, Math.min(1, pct || 0));
+  const cx = 50, cy = 51, r = 33, A0 = -135, SW = 270, ang = A0 + SW * pct;
+  let ticks = '';
+  for (let i = 0; i <= 40; i++) {
+    const d = A0 + SW * i / 40, major = i % 5 === 0;
+    const ro = r + 8, ri = r + (major ? 2 : 4.5);
+    const [ox, oy] = _gp(cx, cy, ro, d), [ix, iy] = _gp(cx, cy, ri, d);
+    ticks += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke="rgba(255,255,255,${major ? 0.34 : 0.13})" stroke-width="${major ? 1.4 : 0.7}"/>`;
+  }
+  const [nx, ny] = _gp(cx, cy, r - 3, ang), [bx, by] = _gp(cx, cy, r - 17, ang);
+  el.innerHTML = `<svg viewBox="0 0 100 100">
+    <circle cx="${cx}" cy="${cy}" r="${r + 13}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    ${ticks}
+    <path d="${_arc(cx, cy, r, A0, A0 + SW)}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="5" stroke-linecap="round"/>
+    <path d="${_arc(cx, cy, r, A0, ang)}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
+    <line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="${color}" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="2.6" fill="#fff"/>
+    <text x="50" y="${cy + 1}" text-anchor="middle" fill="#F5F5F8" font-size="19" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${value}</text>
+    <text x="50" y="${cy + 12}" text-anchor="middle" fill="#8B8B96" font-size="7.5" font-weight="600" font-family="Plus Jakarta Sans,sans-serif">${sub || ''}</text>
+  </svg>`;
+}
 function miniPairBars(id, sent, recv) {
   const el = document.getElementById(id); if (!el) return;
   const max = Math.max(sent, recv, 1);
@@ -2445,11 +2469,10 @@ async function loadGmailMetrics() {
       } catch { return { ...r, first: false }; }
     }));
     const firsts = flagged.filter(f => f.first);
-    // Ring: Erstkontakte diese Woche (Vollausschlag bei Ziel 5)
-    renderRing('gm-first-c', {
-      pct: Math.min(firsts.length / 5, 1),
-      top: String(firsts.length),
-      sub: firsts.length ? 'diese Woche' : 'noch keiner',
+    renderInstrument('gm-first-c', {
+      pct: firsts.length / 5,
+      value: String(firsts.length),
+      sub: 'Ziel 5/Wo',
       color: firsts.length ? '#C9B8F5' : '#E0716C',
     });
 
@@ -2461,7 +2484,12 @@ async function loadGmailMetrics() {
       } catch {}
     }));
     const rate = firsts.length ? replied / firsts.length : 0;
-    miniArc('gm-reply', rate, firsts.length ? Math.round(rate * 100) + '%' : '—');
+    renderInstrument('gm-reply', {
+      pct: rate,
+      value: firsts.length ? Math.round(rate * 100) + '%' : '—',
+      sub: firsts.length ? replied + '/' + firsts.length : 'keine Kont.',
+      color: '#C9B8F5',
+    });
 
     // Wartende Threads (Posteingang, letzte Nachricht eingehend)
     const inbox = await gmGet('threads?maxResults=22&q=' + encodeURIComponent('in:inbox'));
@@ -2479,16 +2507,18 @@ async function loadGmailMetrics() {
     }));
     waiting.sort((a, b) => a.date - b.date);
     const oldestDays = waiting.length ? Math.floor((now - waiting[0].date) / 86400000) : 0;
-    // Ring: Anzahl wartender Threads (Vollausschlag bei 8)
-    renderRing('gm-wait-c', {
-      pct: Math.min(waiting.length / 8, 1),
-      top: String(waiting.length),
+    renderInstrument('gm-wait-c', {
+      pct: waiting.length / 8,
+      value: String(waiting.length),
       sub: waiting.length ? 'offen' : 'sauber',
       color: waiting.length ? '#E0B96A' : '#5BBE8D',
     });
-    // Arc: Alter des ältesten Threads (Vollausschlag bei 14 T)
-    miniArc('gm-oldest-c', Math.min(oldestDays / 14, 1), oldestDays + ' T',
-      oldestDays > 7 ? '#E0716C' : oldestDays > 3 ? '#E0B96A' : '#5BBE8D');
+    renderInstrument('gm-oldest-c', {
+      pct: oldestDays / 14,
+      value: oldestDays + ' T',
+      sub: 'ältester',
+      color: oldestDays > 7 ? '#E0716C' : oldestDays > 3 ? '#E0B96A' : '#5BBE8D',
+    });
 
     setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : false));
     setAnn('stall', firsts.length === 0 ? 'red' : false);
@@ -2529,37 +2559,30 @@ async function loadZohoMetrics() {
     try { const s = monthSeriesFromRows(_cashflowRows || []).filter(x => x.year === new Date().getFullYear());
       const g = s.reduce((a, x) => a + (x.goal || 0), 0); if (g > 0) goal = g; } catch {}
 
-    // Ring: Umsatz YTD vs. Jahresziel
-    renderRing('fz-ytd-c', {
+    renderInstrument('fz-ytd-c', {
       pct: goal ? d.revenueYTD / goal : 0,
-      top: fmtK(d.revenueYTD) + '€',
+      value: fmtK(d.revenueYTD) + '€',
       sub: goal ? Math.round(d.revenueYTD / goal * 100) + '% v. ' + fmtK(goal) : 'YTD',
       color: '#C9B8F5',
     });
-    // Ring: MRR vs. Ziel 3k
-    renderRing('fz-mrr-c', {
-      pct: Math.min((d.mrr || 0) / 3000, 1),
-      top: fmtK(d.mrr) + '€',
-      sub: 'MRR / 3k',
+    renderInstrument('fz-mrr-c', {
+      pct: (d.mrr || 0) / 3000,
+      value: fmtK(d.mrr) + '€',
+      sub: Math.round((d.mrr || 0) / 3000 * 100) + '% v. 3k',
       color: '#8B72E0',
     });
-    // Donut: Außenstände vs. erhalten (YTD)
-    renderDonut('fz-out-c', {
-      segs: [{ val: d.outstanding, color: '#E0B96A' }, { val: Math.max(d.revenueYTD, 1), color: '#6C5FBF' }],
-      top: fmtK(d.outstanding) + '€',
+    renderInstrument('fz-out-c', {
+      pct: d.revenueYTD + d.outstanding ? d.outstanding / (d.outstanding + d.revenueYTD) : 0,
+      value: fmtK(d.outstanding) + '€',
       sub: 'offen',
-      topColor: d.outstanding > 0 ? '#E0B96A' : '#5BBE8D',
+      color: d.outstanding > 0 ? '#E0B96A' : '#5BBE8D',
     });
-    // Arc: ⌀ Zahlungsdauer (Vollausschlag 30 T)
-    miniArc('fz-days-c', d.avgDaysToPay == null ? 0 : Math.min(d.avgDaysToPay / 30, 1),
-      d.avgDaysToPay == null ? '—' : d.avgDaysToPay + ' T',
-      (d.avgDaysToPay || 0) > 30 ? '#E0716C' : '#C9B8F5');
-
-    renderAging('fz-aging', d.aging);
-    renderTopCustomers('fz-top', d.topCustomers);
-    // Seiten-Infos in den Chart-Labels
-    deltaBadge('fz-mom-side', d.cashThisMonth, d.cashLastMonth);
-    _t('fz-est-side', d.openEstimatesCount ? fmtK(d.openEstimates) + '€ Angebote' : '');
+    renderInstrument('fz-days-c', {
+      pct: d.avgDaysToPay == null ? 0 : d.avgDaysToPay / 30,
+      value: d.avgDaysToPay == null ? '—' : d.avgDaysToPay + ' T',
+      sub: '⌀ Zahlung',
+      color: (d.avgDaysToPay || 0) > 30 ? '#E0716C' : '#C9B8F5',
+    });
 
     const overdue = d.aging || { d15: 0, d30: 0, d30p: 0 };
     setAnn('overdue', overdue.d30p > 0 ? 'red' : (overdue.d15 + overdue.d30 > 0 ? 'amber' : false));
