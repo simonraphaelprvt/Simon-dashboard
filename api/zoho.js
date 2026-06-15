@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
 
   const CLIENT_ID     = process.env.ZOHO_CLIENT_ID;
   const CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET;
-  const ORG_ID        = process.env.ZOHO_ORG_ID || '';
+  const ORG_ID        = process.env.ZOHO_ORG_ID || '20108471590';
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     return res.status(500).json({ error: 'ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET nicht konfiguriert' });
@@ -139,7 +139,7 @@ module.exports = async function handler(req, res) {
         const st = (inv.status || '').toLowerCase();
         statusCount[st] = (statusCount[st] || 0) + 1;
         const bal = num(inv.balance);
-        if (['sent', 'overdue', 'partially_paid', 'viewed'].includes(st)) outstanding += bal;
+        if (['sent', 'overdue', 'partially_paid', 'viewed', 'unpaid'].includes(st)) outstanding += bal;
         if (st === 'overdue' && inv.due_date) {
           const age = Math.floor((now - new Date(inv.due_date)) / 86400000);
           if (age <= 15) aging.d15 += bal; else if (age <= 30) aging.d30 += bal; else aging.d30p += bal;
