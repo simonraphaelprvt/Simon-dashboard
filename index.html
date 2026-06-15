@@ -2381,24 +2381,24 @@ function miniArc(id, pct, label, color = '#C9B8F5') {
 function renderInstrument(id, { pct, value, sub, color }) {
   const el = document.getElementById(id); if (!el) return;
   pct = Math.max(0, Math.min(1, pct || 0));
-  const cx = 50, cy = 51, r = 33, A0 = -135, SW = 270, ang = A0 + SW * pct;
+  const cx = 50, cy = 50, r = 38, A0 = -135, SW = 270, ang = A0 + SW * pct;
   let ticks = '';
   for (let i = 0; i <= 40; i++) {
     const d = A0 + SW * i / 40, major = i % 5 === 0;
-    const ro = r + 8, ri = r + (major ? 2 : 4.5);
+    const ro = 48, ri = major ? 42 : 44.5;
     const [ox, oy] = _gp(cx, cy, ro, d), [ix, iy] = _gp(cx, cy, ri, d);
     ticks += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke="rgba(255,255,255,${major ? 0.34 : 0.13})" stroke-width="${major ? 1.4 : 0.7}"/>`;
   }
-  const [nx, ny] = _gp(cx, cy, r - 3, ang), [bx, by] = _gp(cx, cy, r - 17, ang);
+  const [nx, ny] = _gp(cx, cy, r - 2, ang), [bx, by] = _gp(cx, cy, r - 13, ang);
   el.innerHTML = `<svg viewBox="0 0 100 100">
-    <circle cx="${cx}" cy="${cy}" r="${r + 13}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <circle cx="${cx}" cy="${cy}" r="49" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
     ${ticks}
     <path d="${_arc(cx, cy, r, A0, A0 + SW)}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="5" stroke-linecap="round"/>
     <path d="${_arc(cx, cy, r, A0, ang)}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
-    <line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="${color}" stroke-width="2.6" stroke-linecap="round"/>
-    <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="2.6" fill="#fff"/>
-    <text x="50" y="${cy + 1}" text-anchor="middle" fill="#F5F5F8" font-size="19" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${value}</text>
-    <text x="50" y="${cy + 12}" text-anchor="middle" fill="#8B8B96" font-size="7.5" font-weight="600" font-family="Plus Jakarta Sans,sans-serif">${sub || ''}</text>
+    <line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="${color}" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="2.4" fill="#fff"/>
+    <text x="50" y="48" text-anchor="middle" fill="#F5F5F8" font-size="16" font-weight="700" letter-spacing="-0.5" font-family="Plus Jakarta Sans,sans-serif">${value}</text>
+    <text x="50" y="59" text-anchor="middle" fill="#8B8B96" font-size="7" font-weight="600" font-family="Plus Jakarta Sans,sans-serif">${sub || ''}</text>
   </svg>`;
 }
 function miniPairBars(id, sent, recv) {
