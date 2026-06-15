@@ -1501,7 +1501,10 @@
   .cl-head-right { display:flex; align-items:center; gap:12px; }
   .cl-legend { display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--text-secondary); }
   .lg-dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
-  .lg-dot.lg-cash { background:#C9B8F5; } .lg-dot.lg-inv { background:#E0716C; margin-left:6px; }
+  .lg-dot.lg-cash { background:#C9B8F5; }
+  .lg-dot.lg-inv { background:#E9E08C; margin-left:6px; }
+  .lg-dot.lg-red { background:#E0716C; margin-left:6px; }
+  #lg-b-wrap { display:inline; }
   .rev-src { color:var(--text-tertiary); margin-left:8px; font-size:9px; }
   .cl-sub-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0 4px; }
 
@@ -1562,32 +1565,37 @@
   /* WACHSTUM */
   .growth-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:8px; }
 
-  /* ANNUNCIATOR — Avionik-Legend-Lights */
-  .cl-ann { flex-direction:row !important; align-items:stretch; gap:8px; padding:6px 10px !important; }
+  /* ANNUNCIATOR — runde Cockpit-Kontrolllampen (grün/orange/rot) */
+  .cl-ann { flex-direction:row !important; align-items:center; gap:6px; padding:0 12px !important; }
   .lamp {
-    flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
-    font-family:ui-monospace,Menlo,monospace; font-size:9.5px; font-weight:600; letter-spacing:0.09em;
-    text-transform:uppercase; color:var(--text-tertiary);
-    border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.012);
-    transition:color .25s, background .25s, border-color .25s, box-shadow .25s;
+    flex:1; display:flex; align-items:center; justify-content:center; gap:9px;
+    font-family:ui-monospace,Menlo,monospace; font-size:9px; font-weight:600; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text-tertiary); transition:color .3s;
   }
   .lamp-led {
-    width:7px; height:7px; border-radius:1.5px; background:#2A2A33;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.07); flex-shrink:0; transition:background .25s, box-shadow .25s;
+    width:15px; height:15px; border-radius:50%; flex-shrink:0;
+    background:radial-gradient(circle at 36% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0) 46%), #23232b;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 -2px 3px rgba(0,0,0,0.55);
+    transition:background .3s, box-shadow .3s;
   }
   .lamp-txt { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .lamp.amber {
-    color:var(--accent-orange); border-color:rgba(224,185,106,0.55); background:rgba(224,185,106,0.10);
-    box-shadow:0 0 12px rgba(224,185,106,0.16), inset 0 0 9px rgba(224,185,106,0.07);
+  .lamp.green { color:#B9C4BC; }
+  .lamp.green .lamp-led {
+    background:radial-gradient(circle at 36% 30%, rgba(255,255,255,0.75), rgba(255,255,255,0) 46%), #3BB873;
+    box-shadow:0 0 9px rgba(91,190,141,0.55), inset 0 0 0 1px rgba(255,255,255,0.22);
   }
-  .lamp.amber .lamp-led { background:var(--accent-orange); box-shadow:0 0 7px rgba(224,185,106,0.9); }
-  .lamp.red {
-    color:var(--accent-red); border-color:rgba(224,113,108,0.6); background:rgba(224,113,108,0.12);
-    box-shadow:0 0 14px rgba(224,113,108,0.20), inset 0 0 9px rgba(224,113,108,0.09);
-    animation:lampPulse 1.4s ease-in-out infinite;
+  .lamp.amber { color:var(--accent-orange); }
+  .lamp.amber .lamp-led {
+    background:radial-gradient(circle at 36% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0) 46%), #E0A23A;
+    box-shadow:0 0 11px rgba(224,185,106,0.7), inset 0 0 0 1px rgba(255,255,255,0.25);
   }
-  .lamp.red .lamp-led { background:var(--accent-red); box-shadow:0 0 8px rgba(224,113,108,1); }
-  @keyframes lampPulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+  .lamp.red { color:var(--accent-red); }
+  .lamp.red .lamp-led {
+    background:radial-gradient(circle at 36% 30%, rgba(255,255,255,0.85), rgba(255,255,255,0) 46%), #E04A44;
+    box-shadow:0 0 13px rgba(224,113,108,0.85), inset 0 0 0 1px rgba(255,255,255,0.28);
+    animation:lampPulse 1.3s ease-in-out infinite;
+  }
+  @keyframes lampPulse { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
 
   /* Pipeline — Avionik-Radar */
   .radar { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:2px 0; }
@@ -1607,6 +1615,36 @@
   }
   .radar-legend span { display:inline-flex; align-items:center; gap:4px; }
   .radar-legend i { width:6px; height:6px; border-radius:50%; display:inline-block; }
+
+  /* Aviation-Button (HUD-Stil, abgeschrägte Ecken) */
+  .cl-pipe { position:relative; }
+  .av-btn {
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:ui-monospace,Menlo,monospace; font-size:9px; font-weight:700; letter-spacing:0.12em;
+    color:var(--accent-orange); background:rgba(224,185,106,0.08);
+    border:1px solid rgba(224,185,106,0.45); padding:5px 9px; cursor:pointer;
+    clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+    transition:background .2s, box-shadow .2s, transform .1s;
+  }
+  .av-btn:hover  { background:rgba(224,185,106,0.16); box-shadow:0 0 10px rgba(224,185,106,0.25); }
+  .av-btn:active { transform:scale(0.96); }
+  .av-btn-ic { font-size:11px; line-height:1; }
+  .av-btn.ghost { color:var(--text-secondary); background:transparent; border-color:var(--border); }
+  .av-btn.solid { color:#171206; background:var(--accent-orange); border-color:var(--accent-orange); }
+  .pipe-editor {
+    position:absolute; inset:8px; z-index:5; display:flex; flex-direction:column; padding:12px;
+    background:rgba(11,11,15,0.97); border:1px solid rgba(224,185,106,0.3); border-radius:12px;
+  }
+  .pipe-editor[hidden] { display:none; }
+  .pipe-editor-head { font-family:ui-monospace,Menlo,monospace; font-size:10px; font-weight:700; letter-spacing:0.14em; color:var(--accent-orange); margin-bottom:9px; }
+  .pipe-editor-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; scrollbar-width:none; }
+  .pipe-editor-list::-webkit-scrollbar { display:none; }
+  .pipe-row { display:flex; align-items:center; gap:8px; }
+  .pipe-row .pr-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .pipe-row .pr-name { flex:1; font-size:11px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pipe-row input { width:78px; background:var(--card-inner); border:1px solid var(--border); border-radius:7px; color:var(--text-primary); font-family:ui-monospace,Menlo,monospace; font-size:11px; padding:5px 8px; text-align:right; outline:none; }
+  .pipe-row input:focus { border-color:rgba(224,185,106,0.5); }
+  .pipe-editor-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 
   /* Revenue-Cluster: Kopf + Metriken kompakter im Cockpit */
   .cl-rev .rev-metrics { padding:6px 2px 4px; gap:30px; }
@@ -1684,7 +1722,7 @@
       <div class="cl-head">
         <span class="cl-title">Umsatz</span>
         <div class="cl-head-right">
-          <span class="cl-legend"><i class="lg-dot lg-cash"></i><span id="lg-a">Cash</span><span id="lg-b-wrap" style="display:none"><i class="lg-dot lg-inv"></i><span id="lg-b">Ausgaben</span></span><span id="rev-src" class="rev-src"></span></span>
+          <span class="cl-legend"><i class="lg-dot lg-cash"></i><span id="lg-a">Cash</span><i class="lg-dot lg-inv"></i><span id="lg-b">Fakturiert</span><span id="lg-b-wrap" style="display:none"><i class="lg-dot lg-red"></i><span id="lg-exp">Ausgaben</span></span><span id="rev-src" class="rev-src"></span></span>
           <button class="rev-exp-toggle" id="rev-exp-toggle" type="button" role="switch" aria-pressed="false"><span class="rev-exp-knob"></span>Ausgaben</button>
           <div class="seg" id="rev-toggle"><button data-range="6">6M</button><button data-range="12" class="active">12M</button><button data-range="max">Max</button></div>
         </div>
@@ -1724,7 +1762,13 @@
 
     <!-- ░ PIPELINE — Avionik-Radar ░ -->
     <section class="card cl-pipe">
-      <div class="cl-head"><span class="cl-title">Pipeline</span><span class="card-badge" id="pipeline-badge"></span></div>
+      <div class="cl-head">
+        <span class="cl-title">Pipeline</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="card-badge" id="pipeline-badge"></span>
+          <button class="av-btn" id="pipe-edit-btn" type="button" title="€/Monat je Kunde setzen"><span class="av-btn-ic">⊹</span>WERTE</button>
+        </div>
+      </div>
       <div class="radar" id="pipeline-radar"></div>
       <div class="radar-legend">
         <span><i style="background:#5BBE8D"></i>aktiv</span>
@@ -1732,14 +1776,22 @@
         <span><i style="background:#E0B96A"></i>Kontakt</span>
         <span><i style="background:#8B8B96"></i>on hold</span>
       </div>
+      <div class="pipe-editor" id="pipe-editor" hidden>
+        <div class="pipe-editor-head">€ / MONAT JE KUNDE</div>
+        <div class="pipe-editor-list" id="pipe-editor-list"></div>
+        <div class="pipe-editor-actions">
+          <button class="av-btn ghost" id="pipe-cancel" type="button">ABBRECHEN</button>
+          <button class="av-btn solid" id="pipe-save" type="button">SPEICHERN</button>
+        </div>
+      </div>
     </section>
 
     <!-- ░ ANNUNCIATOR ░ -->
     <section class="card cl-ann" id="annunciator">
-      <div class="lamp" data-k="overdue"><span class="lamp-led"></span><span class="lamp-txt">Überfällige Rechnung</span></div>
-      <div class="lamp" data-k="waiting"><span class="lamp-led"></span><span class="lamp-txt">Thread &gt;3 Tage offen</span></div>
-      <div class="lamp" data-k="stall"><span class="lamp-led"></span><span class="lamp-txt">Keine Akquise diese Woche</span></div>
-      <div class="lamp" data-k="shoot"><span class="lamp-led"></span><span class="lamp-txt">Dreh &lt;24 h</span></div>
+      <div class="lamp green" data-k="overdue"><span class="lamp-led"></span><span class="lamp-txt">Überfällige Rechnung</span></div>
+      <div class="lamp green" data-k="waiting"><span class="lamp-led"></span><span class="lamp-txt">Thread &gt;3 Tage offen</span></div>
+      <div class="lamp green" data-k="stall"><span class="lamp-led"></span><span class="lamp-txt">Keine Akquise diese Woche</span></div>
+      <div class="lamp green" data-k="shoot"><span class="lamp-led"></span><span class="lamp-txt">Dreh &lt;24 h</span></div>
     </section>
 
   </div><!-- /.main-area -->
@@ -2106,9 +2158,10 @@ function renderPipelineRadar(leads) {
     const ang = (i * 137.5 + 20) % 360, r = ringR[l.stage];
     const [nx, ny] = _gp(cx, cy, r, ang);
     const side = nx > 50 ? -1 : 1, tx = nx + side * 3.4, anchor = side > 0 ? 'start' : 'end';
+    const valLine = l.value ? `<text x="${tx.toFixed(1)}" y="${(ny + 6).toFixed(1)}" text-anchor="${anchor}" fill="${l.color}" font-size="3.6" font-weight="700" font-family="ui-monospace,Menlo,monospace">${fmtK(l.value)}€/M</text>` : '';
     nodes += `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="5" fill="none" stroke="${l.color}" stroke-opacity="0.30" stroke-width="0.8"/>
       <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="2.5" fill="${l.color}"/>
-      <text x="${tx.toFixed(1)}" y="${(ny + 1.5).toFixed(1)}" text-anchor="${anchor}" fill="#C9CAD4" font-size="4.1" font-family="ui-monospace,Menlo,monospace" letter-spacing="-0.2">${esc(l.name).slice(0, 16)}</text>`;
+      <text x="${tx.toFixed(1)}" y="${(ny + 1.5).toFixed(1)}" text-anchor="${anchor}" fill="#C9CAD4" font-size="4.1" font-family="ui-monospace,Menlo,monospace" letter-spacing="-0.2">${esc(l.name).slice(0, 16)}</text>${valLine}`;
   });
   el.innerHTML = `<div class="radar-face">
     <svg viewBox="0 0 100 100">${grid}</svg>
@@ -2130,8 +2183,6 @@ async function loadPipeline() {
       const m = s.match(/([\d.][\d.,]*)\s*€\s*\/?\s*Monat/i) || s.match(/([\d.][\d.,]*)\s*€/);
       return m ? parseNum(m[1]) : 0;
     });
-    const st = document.getElementById('st-pipeline');
-    if (st) st.textContent = fmtNum(monthly.reduce((a, b) => a + b, 0)) + ' €';
 
     window._mrLeads = rows.map(row => ({
       name:   row['Name']   || row['Titel']   || 'Unbenannt',
@@ -2139,11 +2190,17 @@ async function loadPipeline() {
       detail: row['Nächste Aktion'] || row['Aktion'] || '',
     }));
 
-    const leads = rows.map(row => {
+    // manuell gesetzte €/Monat-Werte (Aviation-Button) haben Vorrang vor Notion
+    let pv = {}; try { pv = JSON.parse(localStorage.getItem('pipeline_values') || '{}'); } catch {}
+    const leads = rows.map((row, i) => {
       const name = row['Name'] || row['Titel'] || 'Unbenannt';
       const status = row['Status'] || row['Nächste Aktion'] || row['Aktion'] || '';
-      return { name, ...classifyLead(status) };
+      const value = pv[name] != null ? pv[name] : (monthly[i] || 0);
+      return { name, value, ...classifyLead(status) };
     });
+    window._pipeLeads = leads;
+    const st = document.getElementById('st-pipeline');
+    if (st) st.textContent = fmtNum(leads.reduce((a, l) => a + (l.value || 0), 0)) + ' €';
     renderPipelineRadar(leads);
   } catch (err) {
     console.error('Pipeline:', err);
@@ -2234,58 +2291,49 @@ function renderTrendBadge(id, cur, prev) {
 }
 
 // ── Revenue-Datenmodell (generisch: Serie A lila, Serie B gelb) ──
-let _revData = null;       // { months:[YYYY-MM], a:[], b:[], labelA, labelB, source }
-let _revFromZoho = false;  // sobald Zoho echte Daten liefert, gewinnt Zoho
+// Revenue-Datenquellen getrennt: Notion (Einnahmen/Ausgaben) + Zoho (cash/invoiced)
+let _notionMonthly = null;  // { months:[ym], ein:{ym:v}, aus:{ym:v} }
+let _zohoSeries    = null;  // { months:[ym], cash:[], inv:[] } — nur wenn echte Daten
 
 function _t(id, txt) { const e = document.getElementById(id); if (e) e.textContent = txt; }
-
 function updateRevLegend() {
-  const w = document.getElementById('lg-b-wrap');
+  const w = document.getElementById('lg-b-wrap');   // rote Ausgaben-Legende
   if (w) w.style.display = _revShowExpenses ? '' : 'none';
 }
-function setRevData(months, a, b, labelA, labelB, source) {
-  _revData = { months, a, b, labelA, labelB, source };
-  _t('lg-a', labelA);
-  _t('lg-b', labelB);
-  updateRevLegend();
-  _t('rev-src', source === 'Zoho' ? '· live' : '· Plan');
-  const n = months.length;
-  const cur = a[n - 1] || 0, prev = n >= 2 ? a[n - 2] : null;
-  const now = new Date();
-  _t('rev-month-value', fmtNum(cur) + ' €');
-  _t('rev-month-label', labelA + ' · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear());
-  renderTrendBadge('rev-month-badge', cur, prev);
-  let ytd = 0;
-  months.forEach((mk, i) => { if (mk.startsWith(String(now.getFullYear()))) ytd += a[i] || 0; });
-  _t('rev-ytd-value', fmtNum(ytd) + ' €');
+function setNotionRev(months, ein, aus) {
+  const e = {}, a = {};
+  months.forEach((m, i) => { e[m] = ein[i] || 0; a[m] = aus[i] || 0; });
+  _notionMonthly = { months, ein: e, aus: a };
+  renderRevenueChart();
+}
+function setZohoRev(months, cash, inv) {
+  _zohoSeries = { months, cash, inv };
   renderRevenueChart();
 }
 
-// Notion-Cashflow = Fallback-Quelle (Einnahmen/Ausgaben), wenn Zoho leer
+// Notion-Cashflow laden → Quelle für Ausgaben (immer) + Fallback für Einnahmen
 async function loadCashflow() {
   try {
     const rows = parseNotionTable(await notionGetBlocks(TABLE.cashflow));
     _cashflowRows = rows;
     const series = monthSeriesFromRows(rows);
     const months = series.map(s => s.year + '-' + String(s.mIdx + 1).padStart(2, '0'));
-    const ein = series.map(s => s.rev || 0);
-    const aus = series.map(s => s.exp || 0);
-    window._notionRev = { months, ein, aus };
-    if (!_revFromZoho) setRevData(months, ein, aus, 'Einnahmen', 'Ausgaben', 'Notion');
+    setNotionRev(months, series.map(s => s.rev || 0), series.map(s => s.exp || 0));
   } catch (err) {
     console.error('Cashflow:', err);
   }
 }
 
-// ── Großer Revenue-Area-Chart (SVG, smooth, mit Ziel-Linie) ──
-function smoothPath(pts) {
+// ── Glatte Kurve; Variante mit Clamp hält die Kurve zwischen loY..hiY ──
+function smoothPath(pts, loY, hiY) {
   if (!pts.length) return '';
   if (pts.length < 2) return `M${pts[0].x},${pts[0].y}`;
+  const clamp = (loY != null) ? (y => Math.max(loY, Math.min(hiY, y))) : (y => y);
   let d = `M${pts[0].x},${pts[0].y}`;
   for (let i = 0; i < pts.length - 1; i++) {
     const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-    const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+    const c1x = p1.x + (p2.x - p0.x) / 6, c1y = clamp(p1.y + (p2.y - p0.y) / 6);
+    const c2x = p2.x - (p3.x - p1.x) / 6, c2y = clamp(p2.y - (p3.y - p1.y) / 6);
     d += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
   }
   return d;
@@ -2293,62 +2341,77 @@ function smoothPath(pts) {
 
 function renderRevenueChart() {
   const el = document.getElementById('rev-chart');
-  if (!el || !_revData) return;
+  if (!el) return;
   const W = el.clientWidth, H = el.clientHeight;
   if (W < 40 || H < 40) { requestAnimationFrame(renderRevenueChart); return; }
 
-  let { months, a, b } = _revData;
+  // Quellen: Zoho (cash/fakturiert) wenn echte Daten, sonst Notion-Plan (Einnahmen)
+  const zohoLive = _zohoSeries && (_zohoSeries.cash.some(v => v > 0) || _zohoSeries.inv.some(v => v > 0));
+  let months;
+  if (zohoLive) months = _zohoSeries.months.slice();
+  else if (_notionMonthly) months = _notionMonthly.months.slice();
+  else return;
+  const nm = _notionMonthly || { ein: {}, aus: {} };
+  let a = months.map((m, i) => zohoLive ? (_zohoSeries.cash[i] || 0) : (nm.ein[m] || 0)); // Cash / Einnahmen
+  let b = months.map((m, i) => zohoLive ? (_zohoSeries.inv[i] || 0)  : (nm.ein[m] || 0)); // Fakturiert (Plan: = Einnahmen)
+  let c = months.map(m => nm.aus[m] || 0);                                                // Ausgaben (immer Notion)
+
   if (_revRange !== 'max' && months.length > _revRange) {
-    months = months.slice(-_revRange); a = a.slice(-_revRange); b = b.slice(-_revRange);
+    const k = -_revRange; months = months.slice(k); a = a.slice(k); b = b.slice(k); c = c.slice(k);
   }
-  const mIdxOf = mk => parseInt(mk.split('-')[1], 10) - 1;
+  const n = months.length, mIdxOf = mk => parseInt(mk.split('-')[1], 10) - 1;
+  const showExp = _revShowExpenses;
+
+  // Kopf-Metriken + Legende (Cash)
+  const now = new Date();
+  const cur = a[n - 1] || 0, prev = n >= 2 ? a[n - 2] : null;
+  _t('rev-month-value', fmtNum(cur) + ' €');
+  _t('rev-month-label', (zohoLive ? 'Cash' : 'Einnahmen') + ' · ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear());
+  renderTrendBadge('rev-month-badge', cur, prev);
+  let ytd = 0; months.forEach((m, i) => { if (m.startsWith(String(now.getFullYear()))) ytd += a[i] || 0; });
+  _t('rev-ytd-value', fmtNum(ytd) + ' €');
+  _t('lg-a', zohoLive ? 'Cash' : 'Einnahmen');
+  _t('lg-b', zohoLive ? 'Fakturiert' : 'Plan');
+  _t('lg-exp', 'Ausgaben');
+  _t('rev-src', zohoLive ? '· live' : '· Plan');
+  updateRevLegend();
 
   const niceScale = (maxVal, ticks = 4) => {
     if (!(maxVal > 0)) return { max: 1, lines: [0, 1] };
     const raw = maxVal / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
     const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
-    const max = Math.ceil(maxVal / step) * step;
-    const lines = [];
+    const max = Math.ceil(maxVal / step) * step, lines = [];
     for (let v = 0; v <= max + step * 0.001; v += step) lines.push(v);
     return { max, lines };
   };
   const padL = 36, padR = 14, padT = 28, padB = 22;
   const innerW = W - padL - padR, innerH = H - padT - padB;
-  const n = months.length;
   const xAt = i => padL + (n <= 1 ? innerW / 2 : innerW * i / (n - 1));
-  const rawMax = Math.max(...a, ...b, 1);
-  const scale  = niceScale(rawMax);
-  const maxV   = scale.max;
+  const rawMax = Math.max(...a, ...b, showExp ? Math.max(...c, 0) : 0, 1);
+  const scale = niceScale(rawMax), maxV = scale.max;
   const yAt = v => padT + innerH * (1 - (v || 0) / maxV);
   const baseY = padT + innerH;
+  const P = arr => arr.map((v, i) => ({ x: xAt(i), y: Math.min(yAt(Math.max(0, v || 0)), baseY) }));
+  const cashPts = P(a), invPts = P(b), expPts = P(c);
+  // geclampte Kurven → liegen auf der 0-Linie auf, kein Clipping nötig
+  const cashLine = smoothPath(cashPts, padT, baseY);
+  const invLine  = smoothPath(invPts, padT, baseY);
+  const expLine  = smoothPath(expPts, padT, baseY);
+  const cashArea = cashLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
+  const expAreaP = expLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
 
-  const showExp = _revShowExpenses;
-  // Werte auf >=0 clampen, Punkte nie unter die 0-Basislinie (baseY)
-  const clampY = v => Math.min(yAt(Math.max(0, v || 0)), baseY);
-  const revPts = a.map((v, i) => ({ x: xAt(i), y: clampY(v) }));
-  const expPts = b.map((v, i) => ({ x: xAt(i), y: clampY(v) }));
-  const revLine  = smoothPath(revPts);
-  const expLine  = smoothPath(expPts);
-  const areaPath = revLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
-  const expArea  = expLine + ` L${xAt(n-1).toFixed(1)},${baseY.toFixed(1)} L${padL.toFixed(1)},${baseY.toFixed(1)} Z`;
-
-  // dichte „Kamm"-Linien — überall sehr fein, in der Fläche kräftiger (geclippt)
   let comb = '', combArea = '';
   for (let gx = padL; gx <= W - padR + 0.5; gx += 6) {
     const x = gx.toFixed(1);
     comb     += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${baseY.toFixed(1)}" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>`;
     combArea += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${baseY.toFixed(1)}" stroke="rgba(201,184,245,0.14)" stroke-width="1"/>`;
   }
-
-  // horizontale Skalenlinien + Y-Achsenwerte
   let hgrid = '';
   scale.lines.forEach(v => {
     const gy = yAt(v);
     hgrid += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
     hgrid += `<text x="${(padL-7).toFixed(1)}" y="${(gy+3).toFixed(1)}" fill="rgba(255,255,255,0.32)" font-size="9" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif">${fmtK(v)}</text>`;
   });
-
-  // X-Labels
   const stepLbl = n > 9 ? 2 : 1;
   let xlabels = '';
   months.forEach((mk, i) => {
@@ -2356,25 +2419,21 @@ function renderRevenueChart() {
     xlabels += `<text x="${xAt(i).toFixed(1)}" y="${(H-6).toFixed(1)}" fill="rgba(255,255,255,0.36)" font-size="9" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif">${MONTHS[mIdxOf(mk)].slice(0,3)}</text>`;
   });
 
-  // Marker am aktuellen Monat (letzter Punkt) + Tooltip(s)
-  const ci = n - 1, cx = xAt(ci), cyR = revPts[ci].y, cyE = expPts[ci].y;
-  const t1 = fmtNum(a[ci] || 0) + ' €', t2 = fmtNum(b[ci] || 0) + ' €';
+  // Tooltips: Cash + Fakturiert immer, Ausgaben nur wenn an
+  const ci = n - 1, cx = xAt(ci), cyR = cashPts[ci].y;
+  const series = [{ v: a[ci] || 0, dot: '#C9B8F5' }, { v: b[ci] || 0, dot: '#E9E08C' }];
+  if (showExp) series.push({ v: c[ci] || 0, dot: '#E0716C' });
   const pill = (x, w, dot, txt, ty) => `
-    <rect x="${x.toFixed(1)}" y="${ty.toFixed(1)}" width="${w.toFixed(1)}" height="20" rx="7" fill="#191921" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
-    <circle cx="${(x+11).toFixed(1)}" cy="${(ty+10).toFixed(1)}" r="3" fill="${dot}"/>
-    <text x="${(x+19).toFixed(1)}" y="${(ty+13.5).toFixed(1)}" fill="#E7E7EC" font-size="10.5" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${txt}</text>`;
-  let tips;
-  if (showExp) {
-    const pw1 = t1.length * 5.8 + 22, pw2 = t2.length * 5.8 + 22, gp = 6;
-    let gx0 = cx - (pw1 + pw2 + gp) / 2;
-    gx0 = Math.max(padL, Math.min(gx0, W - padR - (pw1 + pw2 + gp)));
-    const ty = Math.max(2, Math.min(cyR, cyE) - 27);
-    tips = pill(gx0, pw1, '#C9B8F5', t1, ty) + pill(gx0 + pw1 + gp, pw2, '#E0716C', t2, ty);
-  } else {
-    const pw1 = t1.length * 5.8 + 22;
-    let gx0 = Math.max(padL, Math.min(cx - pw1 / 2, W - padR - pw1));
-    tips = pill(gx0, pw1, '#C9B8F5', t1, Math.max(2, cyR - 27));
-  }
+    <rect x="${x.toFixed(1)}" y="${ty.toFixed(1)}" width="${w.toFixed(1)}" height="19" rx="6.5" fill="#191921" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+    <circle cx="${(x+10).toFixed(1)}" cy="${(ty+9.5).toFixed(1)}" r="2.8" fill="${dot}"/>
+    <text x="${(x+17).toFixed(1)}" y="${(ty+13).toFixed(1)}" fill="#E7E7EC" font-size="10" font-weight="700" font-family="Plus Jakarta Sans,sans-serif">${fmtK(txt)}€</text>`;
+  const ws = series.map(s => String(fmtK(s.v)).length * 6 + 24), gp = 5;
+  const totW = ws.reduce((x, y) => x + y, 0) + gp * (series.length - 1);
+  let gx0 = Math.max(padL, Math.min(cx - totW / 2, W - padR - totW));
+  const ty0 = Math.max(2, cyR - 26);
+  let tips = '', ox = gx0;
+  series.forEach((s, i) => { tips += pill(ox, ws[i], s.dot, s.v, ty0); ox += ws[i] + gp; });
+
   const marker = `
     <line x1="${cx.toFixed(1)}" y1="${padT}" x2="${cx.toFixed(1)}" y2="${baseY.toFixed(1)}" stroke="rgba(255,255,255,0.26)" stroke-width="1" stroke-dasharray="3 3"/>
     <circle cx="${cx.toFixed(1)}" cy="${cyR.toFixed(1)}" r="5" fill="#FFFFFF" stroke="#BFA9F2" stroke-width="2"/>`;
@@ -2383,26 +2442,20 @@ function renderRevenueChart() {
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="#BFA9F2" stop-opacity="0.30"/>
-          <stop offset="60%" stop-color="#8B72E0" stop-opacity="0.08"/>
-          <stop offset="100%" stop-color="#8B72E0" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#BFA9F2" stop-opacity="0.30"/><stop offset="60%" stop-color="#8B72E0" stop-opacity="0.08"/><stop offset="100%" stop-color="#8B72E0" stop-opacity="0"/>
         </linearGradient>
         <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="#E0716C" stop-opacity="0.26"/>
-          <stop offset="70%" stop-color="#E0716C" stop-opacity="0.05"/>
-          <stop offset="100%" stop-color="#E0716C" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#E0716C" stop-opacity="0.22"/><stop offset="70%" stop-color="#E0716C" stop-opacity="0.04"/><stop offset="100%" stop-color="#E0716C" stop-opacity="0"/>
         </linearGradient>
-        <clipPath id="areaClip"><path d="${areaPath}"/></clipPath>
-        <clipPath id="plotClip"><rect x="${padL}" y="${(padT-3).toFixed(1)}" width="${innerW.toFixed(1)}" height="${(innerH+3).toFixed(1)}"/></clipPath>
+        <clipPath id="areaClip"><path d="${cashArea}"/></clipPath>
       </defs>
       ${comb}
       ${hgrid}
-      <g clip-path="url(#plotClip)">
-        <path d="${areaPath}" fill="url(#revGrad)"/>
-        <g clip-path="url(#areaClip)">${combArea}</g>
-        ${showExp ? `<path d="${expArea}" fill="url(#expGrad)"/><path d="${expLine}" fill="none" stroke="#E0716C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-        <path d="${revLine}" fill="none" stroke="#C9B8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
+      <path d="${cashArea}" fill="url(#revGrad)"/>
+      <g clip-path="url(#areaClip)">${combArea}</g>
+      ${showExp ? `<path d="${expAreaP}" fill="url(#expGrad)"/><path d="${expLine}" fill="none" stroke="#E0716C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+      <path d="${invLine}" fill="none" stroke="#E9E08C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${cashLine}" fill="none" stroke="#C9B8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
       ${xlabels}
       ${marker}
       ${tips}
@@ -2431,6 +2484,34 @@ function renderRevenueChart() {
   });
 })();
 window.addEventListener('resize', () => renderRevenueChart());
+
+// ── Pipeline: €/Monat je Kunde setzen (Aviation-Button + Editor) ──
+(function wirePipeEditor() {
+  const btn = document.getElementById('pipe-edit-btn');
+  const ed  = document.getElementById('pipe-editor');
+  const list = document.getElementById('pipe-editor-list');
+  if (!btn || !ed || !list) return;
+  btn.addEventListener('click', () => {
+    const leads = window._pipeLeads || [];
+    list.innerHTML = leads.length ? leads.map((l, i) =>
+      `<div class="pipe-row"><span class="pr-dot" style="background:${l.color}"></span><span class="pr-name">${esc(l.name)}</span><input type="number" inputmode="numeric" data-i="${i}" value="${l.value || ''}" placeholder="0"></div>`
+    ).join('') : '<div class="state-msg">Keine Leads</div>';
+    ed.hidden = false;
+  });
+  const close = () => { ed.hidden = true; };
+  document.getElementById('pipe-cancel').addEventListener('click', close);
+  document.getElementById('pipe-save').addEventListener('click', () => {
+    const leads = window._pipeLeads || [];
+    const pv = {};
+    list.querySelectorAll('input').forEach(inp => {
+      const i = +inp.dataset.i, v = parseFloat(inp.value);
+      if (leads[i] && !isNaN(v) && v > 0) pv[leads[i].name] = v;
+    });
+    localStorage.setItem('pipeline_values', JSON.stringify(pv));
+    close();
+    loadPipeline();
+  });
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // COCKPIT — Mini-SVG-Helfer
@@ -2504,11 +2585,11 @@ function deltaBadge(id, cur, prev) {
 }
 
 // ── Annunciator ──
-function setAnn(key, level) {  // level: false | 'amber' | 'red'
+function setAnn(key, level) {  // level: 'green' | 'amber' | 'red'
   const el = document.querySelector(`#annunciator .lamp[data-k="${key}"]`);
   if (!el) return;
-  el.classList.remove('on', 'amber', 'red');
-  if (level) el.classList.add('on', level);
+  el.classList.remove('green', 'amber', 'red');
+  el.classList.add(level || 'green');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2604,8 +2685,8 @@ async function loadGmailMetrics() {
       color: oldestDays > 7 ? '#E0716C' : oldestDays > 3 ? '#E0B96A' : '#5BBE8D',
     });
 
-    setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : false));
-    setAnn('stall', firsts.length === 0 ? 'red' : false);
+    setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : 'green'));
+    setAnn('stall', firsts.length === 0 ? 'red' : 'green');
   } catch (e) { console.error('GmailMetrics', e); }
 }
 
@@ -2669,14 +2750,13 @@ async function loadZohoMetrics() {
     });
 
     const overdue = d.aging || { d15: 0, d30: 0, d30p: 0 };
-    setAnn('overdue', overdue.d30p > 0 ? 'red' : (overdue.d15 + overdue.d30 > 0 ? 'amber' : false));
+    setAnn('overdue', overdue.d30p > 0 ? 'red' : (overdue.d15 + overdue.d30 > 0 ? 'amber' : 'green'));
 
     const totalRecords = d.counts ? Object.values(d.counts).reduce((a, b) => a + b, 0) : 0;
     if (d.errors && d.errors.length && totalRecords === 0) _t('fz-tag', 'Token erweitern');
     else _t('fz-tag', 'Zoho');
 
-    const hasData = (d.cashSeries || []).some(v => v > 0) || (d.invSeries || []).some(v => v > 0);
-    if (hasData) { _revFromZoho = true; setRevData(d.months, d.cashSeries, d.invSeries, 'Cash', 'Fakturiert', 'Zoho'); }
+    if (d.months && d.cashSeries) setZohoRev(d.months, d.cashSeries, d.invSeries || []);
   } catch (e) { console.error('ZohoMetrics', e); _t('fz-tag', 'offline'); }
 }
 
@@ -2690,12 +2770,12 @@ async function loadNextShoot() {
     const shoot = evs.map(e => ({ s: _evDate(e), sum: e.summary || '' }))
       .filter(o => o.s && SHOOT_RE.test(o.sum) && o.s >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
       .sort((a, b) => a.s - b.s)[0];
-    if (!shoot) { el.textContent = 'kein Dreh'; setAnn('shoot', false); return; }
+    if (!shoot) { el.textContent = 'kein Dreh'; setAnn('shoot', 'green'); return; }
     const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const d1 = new Date(shoot.s.getFullYear(), shoot.s.getMonth(), shoot.s.getDate());
     const diff = Math.round((d1 - d0) / 86400000);
     el.textContent = diff <= 0 ? '🎬 Dreh heute' : diff === 1 ? '🎬 Dreh morgen' : `🎬 Dreh in ${diff} T`;
-    setAnn('shoot', (shoot.s - now) <= 86400000 && shoot.s >= now ? 'amber' : false);
+    setAnn('shoot', (shoot.s - now) <= 86400000 && shoot.s >= now ? 'amber' : 'green');
   } catch (e) { console.error('NextShoot', e); }
 }
 
@@ -2793,7 +2873,7 @@ async function _googleSilentRefresh() {
     console.log('[Auth] Token still erneuert ✓');
     // UI im Hintergrund aktualisieren
     try { gmailRenderCount(await gmailFetch(token)); } catch {}
-    agendaLoad();
+    loadGoogleData();
   } else {
     // Stilles Refresh fehlgeschlagen → dezenter Hinweis ohne UI zu brechen
     console.warn('[Auth] Stilles Refresh fehlgeschlagen');
@@ -2849,7 +2929,7 @@ async function gmailLoad() {
     _googleScheduleRefresh(stored.expires); // Refresh-Timer (neu) starten
     try {
       gmailRenderCount(await gmailFetch(stored.token));
-      agendaLoad();
+      loadGoogleData();
       return;
     } catch (e) {
       if (e.status === 401) { gmailTokenClear(); _googleToken = null; }
@@ -2882,7 +2962,7 @@ async function gmailLoad() {
     gmailTokenSave(token, 3600);
     _googleToken = token;
     try { gmailRenderCount(await gmailFetch(token)); } catch { gmailRenderError(); }
-    agendaLoad();
+    loadGoogleData();
     return;
   }
 
@@ -2902,7 +2982,7 @@ function gmailLogin() {
       _googleToken = r.access_token;
       try { gmailRenderCount(await gmailFetch(r.access_token)); }
       catch { gmailRenderError(); }
-      agendaLoad();
+      loadGoogleData();
     },
   }).requestAccessToken({ prompt: 'consent' });
 }
@@ -3251,6 +3331,14 @@ function _agDur(ms) {
   return rest ? `${h} h ${rest} min` : `${h} h`;
 }
 
+// Lädt alle Google-Daten ENTKOPPELT: Gmail (Akquise) läuft unabhängig von
+// der Kalender-Freigabe — ein Kalender-403 darf die Gmail-Instrumente nie blockieren.
+function loadGoogleData() {
+  if (!_googleToken) { agendaRenderLogin(); return; }
+  loadGmailMetrics();   // Akquise-Cluster (eigener try/catch)
+  agendaLoad();         // Kalender/Agenda (eigener try/catch, 403 nur hier)
+}
+
 async function agendaLoad() {
   if (!_googleToken) { agendaRenderLogin(); return; }
   todayLoad(); // Heute-Termine für Morning Report parallel laden
@@ -3284,7 +3372,6 @@ async function agendaLoad() {
     agendaUpdateNext();
     loadWeekBars();        // Zeit-Cluster: Wochenlast
     loadNextShoot();       // Zeit-Cluster: nächster Dreh
-    loadGmailMetrics();    // Akquise-Cluster
   } catch (e) {
     console.error('Agenda:', e);
     if (body) body.innerHTML = '<div class="state-msg">Nicht verfügbar</div>';
@@ -3477,7 +3564,7 @@ function agendaRenderReconnect() {
 }
 
 // Agenda alle 15 Min aktualisieren
-setInterval(() => { if (_googleToken) agendaLoad(); }, 15 * 60_000);
+setInterval(() => { if (_googleToken) loadGoogleData(); }, 15 * 60_000);
 
 // ═════════════════════════════════════════════════════════════
 // KALENDER-DEBUG — URL: ?debug
