@@ -1562,10 +1562,16 @@
   .topbar .tb-val { font-size:9.5px; color:var(--text-primary); font-weight:600; font-variant-numeric:tabular-nums; }
 
   /* ZEIT */
-  .cl-time .wk-bars { flex:0 0 64px; min-height:0; padding:6px 0 2px; }
+  .cl-time .wk-bars { flex:0 0 56px; min-height:0; padding:6px 0 2px; }
   .tm-agenda { flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; padding:0; }
   .tm-agenda::-webkit-scrollbar { display:none; }
   .tm-agenda .agenda-day + .agenda-day { margin-top:5px; }
+  /* Kalender-Embed (öffentlich, dunkel invertiert) */
+  .tm-cal { flex:1; min-height:0; border-radius:10px; overflow:hidden; background:#0c0c10; }
+  .cal-embed {
+    width:100%; height:100%; border:0; display:block;
+    filter: invert(0.92) hue-rotate(180deg) saturate(0.9) contrast(0.95);
+  }
 
   /* WACHSTUM */
   .growth-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:8px; }
@@ -1749,7 +1755,11 @@
       <div class="ins-label" style="padding:0 2px;">Wochenlast · Termine/Tag</div>
       <div class="wk-bars" id="wk-bars"></div>
       <div class="cl-sub-head"><span class="ins-label">Als Nächstes</span><span class="agenda-next" id="agenda-next" style="display:none;"></span></div>
-      <div class="agenda-body tm-agenda" id="agenda-body"><div class="state-msg">Lädt…</div></div>
+      <div class="tm-cal">
+        <iframe class="cal-embed" id="cal-embed" loading="lazy"
+          src="https://calendar.google.com/calendar/embed?src=simon-raphael.moser%40web.de&ctz=Europe%2FBerlin&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23FFFFFF"></iframe>
+      </div>
+      <div class="agenda-body tm-agenda" id="agenda-body" hidden></div>
     </section>
 
     <!-- ░ PIPELINE — Avionik-Radar ░ -->
@@ -3317,8 +3327,9 @@ async function agendaLoad() {
       'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
       { headers: { Authorization: 'Bearer ' + _googleToken } }
     );
-    if (listRes.status === 401) { gmailTokenClear(); _googleToken = null; agendaRenderLogin(); return; }
-    if (listRes.status === 403) { agendaRenderReconnect(); return; } // Token ohne Kalender-Scope
+    if (listRes.status === 401) { gmailTokenClear(); _googleToken = null; }
+    // 403 (kein Kalender-Scope) wird ignoriert — Kalender läuft über den öffentlichen Embed;
+    // Wochenlast/nächster Dreh bleiben dann nur leer.
     const calList = listRes.ok ? await listRes.json() : { items: [] };
     const calIds  = [...new Set([DASHBOARD_CAL_ID, 'primary', ...(calList.items || []).map(c => c.id)])];
 
