@@ -1773,7 +1773,7 @@
       <div class="radar-legend">
         <span><i style="background:#5BBE8D"></i>aktiv</span>
         <span><i style="background:#E9E08C"></i>Verhandlung</span>
-        <span><i style="background:#E0B96A"></i>Kontakt</span>
+        <span><i style="background:#E5944A"></i>Kontakt</span>
         <span><i style="background:#8B8B96"></i>on hold</span>
       </div>
       <div class="pipe-editor" id="pipe-editor" hidden>
@@ -2139,11 +2139,11 @@ window._mrEvents = [];
 // Lead-Status → Radar-Stufe (0=innen/aktiv … 3=außen/kalt) + Heat-Farbe
 function classifyLead(status) {
   const s = (status || '').toLowerCase();
-  if (/aktiv|abgeschloss|kunde|testmonat|läuft|gewonnen|on.?board/.test(s)) return { stage: 0, color: '#5BBE8D' };
-  if (/verhandl|angebot|budget|pitch|deal|vertrag|preis/.test(s))            return { stage: 1, color: '#E9E08C' };
-  if (/kontakt|offen|rückmeld|warten|lead|anfrage/.test(s))                  return { stage: 2, color: '#E0B96A' };
-  if (/hold|pause|kalt|abgesagt|verloren|tot/.test(s))                       return { stage: 3, color: '#8B8B96' };
-  return { stage: 2, color: '#E0B96A' };
+  if (/aktiv|abgeschloss|kunde|testmonat|läuft|gewonnen|on.?board/.test(s)) return { stage: 0, color: '#5BBE8D' }; // aktiv = grün
+  if (/verhandl|angebot|budget|pitch|deal|vertrag|preis/.test(s))            return { stage: 1, color: '#E9E08C' }; // Verhandlung = gelb
+  if (/kontakt|offen|rückmeld|warten|lead|anfrage/.test(s))                  return { stage: 2, color: '#E5944A' }; // Kontakt = orange
+  if (/hold|pause|kalt|abgesagt|verloren|tot/.test(s))                       return { stage: 3, color: '#8B8B96' }; // on hold = grau
+  return { stage: 2, color: '#E5944A' };
 }
 function renderPipelineRadar(leads) {
   const el = document.getElementById('pipeline-radar'); if (!el) return;
@@ -2196,7 +2196,9 @@ async function loadPipeline() {
       const name = row['Name'] || row['Titel'] || 'Unbenannt';
       const status = row['Status'] || row['Nächste Aktion'] || row['Aktion'] || '';
       const value = pv[name] != null ? pv[name] : (monthly[i] || 0);
-      return { name, value, ...classifyLead(status) };
+      // JMV = aktiver Kunde (Deal abgeschlossen) → innerster Ring, grün
+      const cls = /jmv/i.test(name) ? { stage: 0, color: '#5BBE8D' } : classifyLead(status);
+      return { name, value, ...cls };
     });
     window._pipeLeads = leads;
     const st = document.getElementById('st-pipeline');
@@ -2559,6 +2561,7 @@ function renderInstrument(id, { pct, value, sub, color }) {
     <circle cx="${cx}" cy="${cy}" r="49" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
     ${ticks}
     <path d="${_arc(cx, cy, r, A0, A0 + SW)}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="5" stroke-linecap="round"/>
+    <path d="${_arc(cx, cy, r, A0, ang)}" fill="none" stroke="${color}" stroke-width="9" stroke-opacity="0.16" stroke-linecap="round"/>
     <path d="${_arc(cx, cy, r, A0, ang)}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
     <line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="${color}" stroke-width="2.4" stroke-linecap="round"/>
     <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="2.4" fill="#fff"/>
@@ -2638,7 +2641,7 @@ async function loadGmailMetrics() {
       pct: firsts.length / 5,
       value: String(firsts.length),
       sub: 'Ziel 5/Wo',
-      color: firsts.length ? '#C9B8F5' : '#E0716C',
+      color: firsts.length ? '#6FB0A6' : '#DB6B66',
     });
 
     // Antwortrate
@@ -2653,7 +2656,7 @@ async function loadGmailMetrics() {
       pct: rate,
       value: firsts.length ? Math.round(rate * 100) + '%' : '—',
       sub: firsts.length ? replied + '/' + firsts.length : 'keine Kont.',
-      color: '#C9B8F5',
+      color: rate >= 0.5 ? '#6FB0A6' : rate > 0 ? '#D9A85E' : '#5E6577',
     });
 
     // Wartende Threads (Posteingang, letzte Nachricht eingehend)
@@ -2676,13 +2679,13 @@ async function loadGmailMetrics() {
       pct: waiting.length / 8,
       value: String(waiting.length),
       sub: waiting.length ? 'offen' : 'sauber',
-      color: waiting.length ? '#E0B96A' : '#5BBE8D',
+      color: waiting.length ? '#D9A85E' : '#5BBE8D',
     });
     renderInstrument('gm-oldest-c', {
       pct: oldestDays / 14,
       value: oldestDays + ' T',
       sub: 'ältester',
-      color: oldestDays > 7 ? '#E0716C' : oldestDays > 3 ? '#E0B96A' : '#5BBE8D',
+      color: oldestDays > 7 ? '#DB6B66' : oldestDays > 3 ? '#D9A85E' : '#5BBE8D',
     });
 
     setAnn('waiting', oldestDays > 7 ? 'red' : (waiting.some(w => (now - w.date) / 86400000 > 3) ? 'amber' : 'green'));
@@ -2728,7 +2731,7 @@ async function loadZohoMetrics() {
       pct: goal ? d.revenueYTD / goal : 0,
       value: fmtK(d.revenueYTD) + '€',
       sub: goal ? Math.round(d.revenueYTD / goal * 100) + '% v. ' + fmtK(goal) : 'YTD',
-      color: '#C9B8F5',
+      color: '#9A8CF0',
     });
     renderInstrument('fz-mrr-c', {
       pct: (d.mrr || 0) / 3000,
@@ -2740,13 +2743,13 @@ async function loadZohoMetrics() {
       pct: d.revenueYTD + d.outstanding ? d.outstanding / (d.outstanding + d.revenueYTD) : 0,
       value: fmtK(d.outstanding) + '€',
       sub: 'offen',
-      color: d.outstanding > 0 ? '#E0B96A' : '#5BBE8D',
+      color: d.outstanding > 0 ? '#D9A85E' : '#5BBE8D',
     });
     renderInstrument('fz-days-c', {
       pct: d.avgDaysToPay == null ? 0 : d.avgDaysToPay / 30,
       value: d.avgDaysToPay == null ? '—' : d.avgDaysToPay + ' T',
       sub: '⌀ Zahlung',
-      color: (d.avgDaysToPay || 0) > 30 ? '#E0716C' : '#C9B8F5',
+      color: (d.avgDaysToPay || 0) > 30 ? '#DB6B66' : (d.avgDaysToPay || 0) > 14 ? '#D9A85E' : '#5BBE8D',
     });
 
     const overdue = d.aging || { d15: 0, d30: 0, d30p: 0 };
