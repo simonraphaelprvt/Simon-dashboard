@@ -367,6 +367,11 @@
   .rev-exp-toggle.active .rev-exp-knob { background: rgba(224,113,108,0.28); border-color: rgba(224,113,108,0.5); }
   .rev-exp-toggle.active .rev-exp-knob::after { transform: translateX(11px); background: var(--accent-red); }
   .rev-exp-toggle:active { transform: scale(0.97); }
+  /* Pipeline-Toggle (€): amber statt rot */
+  .pipe-tgl { font-size: 12px; }
+  .pipe-tgl.active { color: var(--accent-orange); }
+  .pipe-tgl.active .rev-exp-knob { background: rgba(224,185,106,0.28); border-color: rgba(224,185,106,0.5); }
+  .pipe-tgl.active .rev-exp-knob::after { background: var(--accent-orange); }
   .rev-toggle {
     display: flex;
     gap: 2px;
@@ -1751,10 +1756,7 @@
     <section class="card cl-pipe">
       <div class="cl-head">
         <span class="cl-title">Pipeline</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="card-badge" id="pipeline-badge"></span>
-          <button class="av-btn" id="pipe-val-btn" type="button" aria-pressed="false" title="€/Monat-Werte ein-/ausblenden"><span class="av-btn-ic">€</span>/M</button>
-        </div>
+        <button class="rev-exp-toggle pipe-tgl" id="pipe-val-btn" type="button" role="switch" aria-pressed="false" title="€/Monat-Werte ein-/ausblenden"><span class="rev-exp-knob"></span>€</button>
       </div>
       <div class="radar" id="pipeline-radar"></div>
       <div class="radar-legend">
@@ -2154,8 +2156,6 @@ async function loadPipeline() {
   const radar = document.getElementById('pipeline-radar');
   try {
     const rows = parseNotionTable(await notionGetBlocks(TABLE.pipeline));
-    document.getElementById('pipeline-badge').textContent =
-      rows.length ? rows.length + (rows.length === 1 ? ' Lead' : ' Leads') : '';
     if (!rows.length) { if (radar) radar.innerHTML = '<div class="state-msg">Keine Leads</div>'; return; }
 
     const monthly = rows.map(r => {
