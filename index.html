@@ -1614,7 +1614,7 @@
   .radar-face svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
   .radar-sweep {
     position:absolute; inset:0; border-radius:50%; pointer-events:none;
-    background:conic-gradient(from 0deg, rgba(91,190,141,0.30), rgba(91,190,141,0.05) 32deg, transparent 72deg, transparent 360deg);
+    background:conic-gradient(from 0deg, rgba(91,190,141,0) 0deg, rgba(91,190,141,0.05) 12deg, rgba(91,190,141,0.22) 60deg, rgba(91,190,141,0.42) 70deg, rgba(91,190,141,0) 71deg, transparent 360deg);
     -webkit-mask:radial-gradient(circle, #000 98%, transparent 100%);
     mask:radial-gradient(circle, #000 98%, transparent 100%);
     animation:radarSpin 4.5s linear infinite;
@@ -1643,6 +1643,18 @@
     color:var(--accent-orange); background:rgba(224,185,106,0.12);
     border-color:rgba(224,185,106,0.5); box-shadow:0 0 9px rgba(224,185,106,0.18);
   }
+
+  /* Mini Google-Login-Button (nur Anmeldung) */
+  .g-login {
+    width:17px; height:17px; border-radius:50%; flex-shrink:0;
+    border:1px solid var(--border); background:rgba(255,255,255,0.03);
+    color:var(--text-tertiary); font-size:9px; font-weight:700; font-family:inherit; line-height:1;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:color .2s, border-color .2s, box-shadow .2s, transform .1s;
+  }
+  .g-login:hover  { color:var(--accent-purple); border-color:rgba(159,140,240,0.45); }
+  .g-login:active { transform:scale(0.9); }
+  .g-login.connected { color:var(--accent-green); border-color:rgba(91,190,141,0.5); box-shadow:0 0 7px rgba(91,190,141,0.3); }
 
   /* Revenue-Cluster: Kopf + Metriken kompakter im Cockpit */
   .cl-rev .rev-metrics { padding:6px 2px 4px; gap:30px; }
@@ -1706,7 +1718,7 @@
 
     <!-- ░ AKQUISE (Gmail) — größter Cluster ░ -->
     <section class="card cl-acq">
-      <div class="cl-head"><span class="cl-title">Akquise</span><span class="cl-tag">Gmail</span></div>
+      <div class="cl-head"><span class="cl-title">Akquise</span><div style="display:flex;align-items:center;gap:6px;"><span class="cl-tag">Gmail</span><button class="g-login" id="google-login-btn" type="button" title="Mit Google anmelden" onclick="gmailLogin()">G</button></div></div>
       <div class="dial-grid">
         <div class="g"><div class="g-svg" id="gm-first-c"></div><div class="g-lbl">Erstkontakte/Wo</div></div>
         <div class="g"><div class="g-svg" id="gm-reply"></div><div class="g-lbl">Antwortrate</div></div>
@@ -2868,11 +2880,16 @@ function _gmailShowRefreshHint() {
 }
 
 function _setSt(id, txt) { const e = document.getElementById(id); if (e) e.textContent = txt; }
+function _gLoginState(connected) {
+  const b = document.getElementById('google-login-btn');
+  if (b) { b.classList.toggle('connected', connected); b.title = connected ? 'Google verbunden' : 'Mit Google anmelden'; }
+}
 function gmailRenderCount(n) {
   window._mrGmail = n;
   _setSt('st-gmail', n === 0 ? 'leer' : (n > 99 ? '99+' : String(n)));
+  _gLoginState(true);
 }
-function gmailRenderLogin()  { _setSt('st-gmail', 'verbinden'); }
+function gmailRenderLogin()  { _setSt('st-gmail', 'verbinden'); _gLoginState(false); }
 function gmailRenderError()  { _setSt('st-gmail', 'n. verfügbar'); }
 
 async function gmailFetch(token) {
