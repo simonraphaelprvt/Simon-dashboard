@@ -1548,6 +1548,11 @@
   .ins-hero .ins-num { font-size:34px; }
 
   /* AKQUISE ⇄ TODOS — Ansichtswechsel (Crossfade) + Indikator */
+  .cl-acq { position:relative; }
+  .acq-tgl { position:absolute; bottom:10px; right:12px; z-index:3; }
+  .acq-tgl.active { color:var(--accent-orange); }
+  .acq-tgl.active .rev-exp-knob { background:rgba(224,185,106,0.28); border-color:rgba(224,185,106,0.5); }
+  .acq-tgl.active .rev-exp-knob::after { background:var(--accent-orange); }
   .acq-body { position:relative; flex:1; min-height:0; }
   .acq-view { position:absolute; inset:0; display:flex; flex-direction:column; min-height:0;
     opacity:0; pointer-events:none; transition:opacity .55s ease; }
@@ -1782,6 +1787,7 @@
           </div>
         </div>
       </div>
+      <button class="rev-exp-toggle acq-tgl" id="acq-toggle-btn" type="button" role="switch" aria-pressed="false" title="Ansicht umschalten (Akquise / Aufgaben)" onclick="acqManualToggle()"><span class="rev-exp-knob"></span></button>
     </section>
 
     <!-- ░ REVENUE (Zoho live · Notion-Fallback) ░ -->
@@ -2892,10 +2898,20 @@ function acqSetView(view) {
     d.classList.toggle('active', d.dataset.view === view));
   const title = document.getElementById('acq-title');
   if (title) title.textContent = isTodos ? 'Aufgaben' : 'Akquise';
+  const tgl = document.getElementById('acq-toggle-btn');
+  if (tgl) { tgl.classList.toggle('active', isTodos); tgl.setAttribute('aria-pressed', isTodos ? 'true' : 'false'); }
   if (isTodos) fetchTodos();
 }
 function acqToggleView() { acqSetView(_acqView === 'dials' ? 'todos' : 'dials'); }
-setInterval(acqToggleView, ACQ_SWITCH_MS);
+
+// Selbst-rescheduling: ein manueller Klick (acqManualToggle) setzt den Takt zurück
+let _acqTimer = null;
+function acqScheduleSwitch() {
+  if (_acqTimer) clearTimeout(_acqTimer);
+  _acqTimer = setTimeout(() => { acqToggleView(); acqScheduleSwitch(); }, ACQ_SWITCH_MS);
+}
+function acqManualToggle() { acqToggleView(); acqScheduleSwitch(); }
+acqScheduleSwitch();
 setInterval(() => { if (_acqView === 'todos') fetchTodos(); }, TODO_REFRESH_MS);
 
 // ── Wake Lock (iPad-Display bleibt an) ───────────────────────
