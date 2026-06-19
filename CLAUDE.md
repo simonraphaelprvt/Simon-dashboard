@@ -5,7 +5,7 @@ Zwei Vollbild-Screens, umschaltbar: **Business** (dunkles Cockpit) + **Privat** 
 
 ## Stack
 - **Single-file `index.html`** (~4000 Zeilen, HTML+CSS+JS, plain, KEIN Framework/Build/Bundler).
-- Serverless unter `api/`: `notion.js` (Notion-Proxy), `zoho.js` (Zoho-Invoice-Proxy, action `refresh|invoices|metrics`).
+- Serverless unter `api/`: `notion.js` (Notion-Proxy), `zoho.js` (Zoho-Invoice-Proxy, action `refresh|invoices|metrics`), `todos.js` (Todo-Store, GET/POST).
 - `morningReport.css` / `morningReport.js` = Voice-Morning-Report-Overlay (separat geladen).
 - Fonts: Plus Jakarta Sans + DM Sans (Google Fonts), Playfair Display (Privat), `ui-monospace` (Radar/Lampen).
 
@@ -29,6 +29,7 @@ Zwei Vollbild-Screens, umschaltbar: **Business** (dunkles Cockpit) + **Privat** 
 - **Pipeline-Radar**: konzentrische Stufen (außen kalt → innen aktiv), rotierender Sweep (helle Kante vorn), Knoten farbig nach Status (`classifyLead`), JMV per Name-Override = aktiv/grün. €-Wert-Toggle (Standard aus).
 - **Kalender**: läuft über **öffentlichen web.de-Embed** (dunkel invertiert), NICHT die API.
 - **Privat-Screen**: Habits, Italienisch-Heatmap, Lebenswochen, Mini-Kalender — unverändert seit längerem, funktioniert.
+- **Akquise-Feld ⇄ Todos**: `.cl-acq` blendet alle 5 Min (`ACQ_SWITCH_MS`) per Crossfade zwischen Gauges und Todo-Liste (Aviation-Style, monospace/LED) um. Indikator-Punkte im Header, Titel wechselt Akquise/Aufgaben. Todos live aus `/api/todos`. Steuer-JS: `acqSetView`/`acqToggleView`/`fetchTodos`. Speicher = Notion-DB „Dashboard Todos" unter der Pipeline-Seite (auto-angelegt). Schreib-Key per Header `x-api-key` (Fallback im Code, optional `TODO_API_KEY` als Env). Für Siri/Shortcuts: POST `{"task":"…"}`.
 
 ## Offene nächste Schritte
 1. **Zoho aktivieren**: Simon muss `ZOHO_CLIENT_ID` (`1000.ITJCFIQHY59PVL0LB1WPJ8TI87XEVG`) + `ZOHO_CLIENT_SECRET` in Vercel-Env setzen + redeployen. Bis dahin: `/api/zoho refresh` → `invalid_client`, Finanz-Gauges = 0/„Token erweitern", Chart auf Notion-Fallback.
