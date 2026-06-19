@@ -1547,6 +1547,42 @@
   .acq-grid .ins-split { grid-column:1 / -1; }
   .ins-hero .ins-num { font-size:34px; }
 
+  /* AKQUISE ⇄ TODOS — Ansichtswechsel (Crossfade) + Indikator */
+  .acq-body { position:relative; flex:1; min-height:0; }
+  .acq-view { position:absolute; inset:0; display:flex; flex-direction:column; min-height:0;
+    opacity:0; pointer-events:none; transition:opacity .55s ease; }
+  .acq-view.is-active { opacity:1; pointer-events:auto; }
+  .acq-view-dials .dial-grid { height:100%; }
+  .acq-ind { display:inline-flex; align-items:center; gap:5px; }
+  .acq-dot { width:6px; height:6px; border-radius:50%; background:var(--text-tertiary); opacity:0.45;
+    transition:opacity .3s, background .3s, box-shadow .3s; }
+  .acq-dot.active { opacity:1; background:var(--accent-orange); box-shadow:0 0 6px rgba(224,185,106,0.6); }
+
+  /* TODO-Display (Aviation-Style: monospaced, Trennlinien, LED-Punkte) */
+  .todo-meta { font-family:ui-monospace,Menlo,monospace; font-size:8.5px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--text-tertiary); padding:0 2px 7px; flex-shrink:0;
+    border-bottom:1px solid var(--border); }
+  .todo-meta:empty { display:none; }
+  .todo-list { flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; }
+  .todo-list::-webkit-scrollbar { display:none; }
+  .todo-row { display:grid; grid-template-columns:11px 1fr auto; align-items:center; gap:11px;
+    padding:8px 2px; border-bottom:1px solid var(--border); }
+  .todo-row:last-child { border-bottom:0; }
+  .todo-led { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--accent-orange);
+    box-shadow:0 0 5px rgba(224,185,106,0.55), inset 0 0 0 1px rgba(255,255,255,0.12); }
+  .todo-led.done { background:var(--accent-green); box-shadow:0 0 5px rgba(91,190,141,0.5), inset 0 0 0 1px rgba(255,255,255,0.12); }
+  .todo-text { font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:0.01em;
+    color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .todo-row.done .todo-text { color:var(--text-tertiary); text-decoration:line-through; }
+  .todo-time { font-family:ui-monospace,Menlo,monospace; font-size:9px; color:var(--text-tertiary);
+    font-variant-numeric:tabular-nums; white-space:nowrap; flex-shrink:0; }
+  .todo-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
+    font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:0.22em;
+    text-transform:uppercase; color:var(--text-secondary); }
+  .todo-empty-led { width:11px; height:11px; border-radius:50%; background:var(--accent-green);
+    box-shadow:0 0 8px rgba(91,190,141,0.6), inset 0 0 0 1px rgba(255,255,255,0.15); }
+  .todo-empty.err .todo-empty-led { background:var(--accent-red); box-shadow:0 0 8px rgba(224,113,108,0.6); }
+
   /* FINANZEN-Grid */
   .fin-grid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:8px; }
   .fin-grid .ins-wide { grid-column:1 / -1; }
@@ -1716,14 +1752,35 @@
   <!-- ── COCKPIT-GRID (6 Karten) ── -->
   <div class="main-area cockpit">
 
-    <!-- ░ AKQUISE (Gmail) — größter Cluster ░ -->
+    <!-- ░ AKQUISE (Gmail) + TODOS — wechselt alle 5 Min ░ -->
     <section class="card cl-acq">
-      <div class="cl-head"><span class="cl-title">Akquise</span><button class="g-login" id="google-login-btn" type="button" title="Mit Google anmelden" onclick="gmailLogin()">G</button></div>
-      <div class="dial-grid">
-        <div class="g"><div class="g-svg" id="gm-first-c"></div><div class="g-lbl">Erstkontakte/Wo</div></div>
-        <div class="g"><div class="g-svg" id="gm-reply"></div><div class="g-lbl">Antwortrate</div></div>
-        <div class="g"><div class="g-svg" id="gm-wait-c"></div><div class="g-lbl">Wartende Threads</div></div>
-        <div class="g"><div class="g-svg" id="gm-oldest-c"></div><div class="g-lbl">Ältester offen</div></div>
+      <div class="cl-head">
+        <span class="cl-title" id="acq-title">Akquise</span>
+        <div class="cl-head-right">
+          <span class="acq-ind" id="acq-ind" title="Aktive Ansicht">
+            <i class="acq-dot active" data-view="dials"></i>
+            <i class="acq-dot" data-view="todos"></i>
+          </span>
+          <button class="g-login" id="google-login-btn" type="button" title="Mit Google anmelden" onclick="gmailLogin()">G</button>
+        </div>
+      </div>
+      <div class="acq-body" id="acq-body">
+        <!-- Ansicht 1: Akquise-Gauges (unverändert) -->
+        <div class="acq-view acq-view-dials is-active" id="acq-view-dials">
+          <div class="dial-grid">
+            <div class="g"><div class="g-svg" id="gm-first-c"></div><div class="g-lbl">Erstkontakte/Wo</div></div>
+            <div class="g"><div class="g-svg" id="gm-reply"></div><div class="g-lbl">Antwortrate</div></div>
+            <div class="g"><div class="g-svg" id="gm-wait-c"></div><div class="g-lbl">Wartende Threads</div></div>
+            <div class="g"><div class="g-svg" id="gm-oldest-c"></div><div class="g-lbl">Ältester offen</div></div>
+          </div>
+        </div>
+        <!-- Ansicht 2: Todos (Aviation-Style, live aus /api/todos) -->
+        <div class="acq-view acq-view-todos" id="acq-view-todos">
+          <div class="todo-meta" id="todo-meta"></div>
+          <div class="todo-list" id="todo-list">
+            <div class="todo-empty"><span class="todo-empty-led"></span>LADE…</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2772,6 +2829,74 @@ function refreshNotion() {
 }
 refreshNotion();
 setInterval(refreshNotion, 5 * 60_000);
+
+// ── AKQUISE ⇄ TODOS: Ansichtswechsel + Todo-Display ──────────
+// Das Akquise-Feld wechselt automatisch zwischen den Gauges und der
+// Todo-Liste (live aus /api/todos). Intervall hier zentral einstellbar:
+const ACQ_SWITCH_MS   = 5 * 60_000;   // ← Wechsel-Intervall (5 Minuten)
+const TODO_REFRESH_MS = 90_000;       // Todos nachladen, solange sichtbar
+let _acqView = 'dials';
+
+function acqEsc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+}
+function acqTodoTime(iso) {
+  const d = new Date(iso), now = new Date();
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2, '0');
+  return d.toDateString() === now.toDateString()
+    ? `${p(d.getHours())}:${p(d.getMinutes())}`
+    : `${p(d.getDate())}.${p(d.getMonth() + 1)}`;
+}
+function renderTodos(todos) {
+  const list = document.getElementById('todo-list');
+  const meta = document.getElementById('todo-meta');
+  if (!list) return;
+  if (!todos.length) {
+    if (meta) meta.textContent = '';
+    list.innerHTML = '<div class="todo-empty"><span class="todo-empty-led"></span>ALL CLEAR</div>';
+    return;
+  }
+  const open = todos.filter(t => t.status !== 'erledigt').length;
+  const done = todos.length - open;
+  if (meta) meta.textContent = done ? `${open} OFFEN · ${done} ERLEDIGT` : `${open} OFFEN`;
+  list.innerHTML = todos.map(t => {
+    const isDone = t.status === 'erledigt';
+    return `<div class="todo-row${isDone ? ' done' : ''}">`
+      + `<span class="todo-led${isDone ? ' done' : ''}"></span>`
+      + `<span class="todo-text">${acqEsc(t.text || '—')}</span>`
+      + `<span class="todo-time">${acqTodoTime(t.createdAt)}</span>`
+      + `</div>`;
+  }).join('');
+}
+async function fetchTodos() {
+  const list = document.getElementById('todo-list');
+  if (!list) return;
+  try {
+    const r = await fetch('/api/todos', { cache: 'no-store' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || r.status);
+    renderTodos(d.todos || []);
+  } catch (e) {
+    const meta = document.getElementById('todo-meta');
+    if (meta) meta.textContent = '';
+    list.innerHTML = '<div class="todo-empty err"><span class="todo-empty-led"></span>OFFLINE</div>';
+  }
+}
+function acqSetView(view) {
+  _acqView = view;
+  const isTodos = view === 'todos';
+  document.getElementById('acq-view-dials')?.classList.toggle('is-active', !isTodos);
+  document.getElementById('acq-view-todos')?.classList.toggle('is-active', isTodos);
+  document.querySelectorAll('#acq-ind .acq-dot').forEach(d =>
+    d.classList.toggle('active', d.dataset.view === view));
+  const title = document.getElementById('acq-title');
+  if (title) title.textContent = isTodos ? 'Aufgaben' : 'Akquise';
+  if (isTodos) fetchTodos();
+}
+function acqToggleView() { acqSetView(_acqView === 'dials' ? 'todos' : 'dials'); }
+setInterval(acqToggleView, ACQ_SWITCH_MS);
+setInterval(() => { if (_acqView === 'todos') fetchTodos(); }, TODO_REFRESH_MS);
 
 // ── Wake Lock (iPad-Display bleibt an) ───────────────────────
 let wakeLock = null;
