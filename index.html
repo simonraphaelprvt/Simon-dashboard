@@ -1571,16 +1571,21 @@
   .todo-list { flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; }
   .todo-list::-webkit-scrollbar { display:none; }
   .todo-row { display:grid; grid-template-columns:11px 1fr auto; align-items:center; gap:11px;
-    padding:8px 2px; border-bottom:1px solid var(--border); }
+    padding:8px 2px; border-bottom:1px solid var(--border); cursor:pointer;
+    -webkit-tap-highlight-color:transparent; transition:background .15s; }
   .todo-row:last-child { border-bottom:0; }
+  .todo-row:active { background:rgba(255,255,255,0.05); }
+  .todo-row:focus-visible { outline:1px solid var(--border); outline-offset:-1px; }
   .todo-led { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--accent-orange);
     box-shadow:0 0 5px rgba(224,185,106,0.55), inset 0 0 0 1px rgba(255,255,255,0.12); }
-  .todo-led.done { background:var(--accent-green); box-shadow:0 0 5px rgba(91,190,141,0.5), inset 0 0 0 1px rgba(255,255,255,0.12); }
+  .todo-led.done { background:var(--accent-green); box-shadow:0 0 6px rgba(91,190,141,0.65), inset 0 0 0 1px rgba(255,255,255,0.14); }
   .todo-text { font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:0.01em;
     color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .todo-row.done .todo-text { color:var(--text-tertiary); text-decoration:line-through; }
   .todo-time { font-family:ui-monospace,Menlo,monospace; font-size:9px; color:var(--text-tertiary);
     font-variant-numeric:tabular-nums; white-space:nowrap; flex-shrink:0; }
+  .todo-flag { font-family:ui-monospace,Menlo,monospace; font-size:8px; font-weight:700;
+    letter-spacing:0.14em; color:var(--accent-green); white-space:nowrap; flex-shrink:0;
+    border:1px solid rgba(91,190,141,0.45); border-radius:4px; padding:1px 5px; }
   .todo-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
     font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:0.22em;
     text-transform:uppercase; color:var(--text-secondary); }
@@ -2841,6 +2846,7 @@ setInterval(refreshNotion, 5 * 60_000);
 // Todo-Liste (live aus /api/todos). Intervall hier zentral einstellbar:
 const ACQ_SWITCH_MS   = 5 * 60_000;   // ← Wechsel-Intervall (5 Minuten)
 const TODO_REFRESH_MS = 90_000;       // Todos nachladen, solange sichtbar
+const TODO_UI_KEY     = 'dshui_6eed2b413f983489868084853c9847ef'; // nur Status umschalten
 let _acqView = 'dials';
 
 function acqEsc(s) {
@@ -2866,14 +2872,33 @@ function renderTodos(todos) {
   const open = todos.filter(t => t.status !== 'erledigt').length;
   const done = todos.length - open;
   if (meta) meta.textContent = done ? `${open} OFFEN · ${done} ERLEDIGT` : `${open} OFFEN`;
-  list.innerHTML = todos.map(t => {
+  // Offene zuerst, erledigte darunter (stabil sortiert)
+  const sorted = todos.slice().sort((a, b) =>
+    (a.status === 'erledigt' ? 1 : 0) - (b.status === 'erledigt' ? 1 : 0));
+  list.innerHTML = sorted.map(t => {
     const isDone = t.status === 'erledigt';
-    return `<div class="todo-row${isDone ? ' done' : ''}">`
+    const right = isDone
+      ? `<span class="todo-flag">ERLEDIGT</span>`
+      : `<span class="todo-time">${acqTodoTime(t.createdAt)}</span>`;
+    return `<div class="todo-row${isDone ? ' done' : ''}" role="button" tabindex="0"`
+      + ` onclick="todoToggle('${t.id}','${t.status}')" title="Antippen: Status umschalten">`
       + `<span class="todo-led${isDone ? ' done' : ''}"></span>`
       + `<span class="todo-text">${acqEsc(t.text || '—')}</span>`
-      + `<span class="todo-time">${acqTodoTime(t.createdAt)}</span>`
+      + right
       + `</div>`;
   }).join('');
+}
+async function todoToggle(id, status) {
+  const next = status === 'erledigt' ? 'offen' : 'erledigt';
+  try {
+    const r = await fetch('/api/todos', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-ui-key': TODO_UI_KEY },
+      body: JSON.stringify({ id, status: next }),
+    });
+    if (!r.ok) throw new Error(r.status);
+  } catch (e) { /* Fehler schlucken — nächster Refresh korrigiert die Anzeige */ }
+  fetchTodos();
 }
 async function fetchTodos() {
   const list = document.getElementById('todo-list');
@@ -2913,6 +2938,18 @@ function acqScheduleSwitch() {
 function acqManualToggle() { acqToggleView(); acqScheduleSwitch(); }
 acqScheduleSwitch();
 setInterval(() => { if (_acqView === 'todos') fetchTodos(); }, TODO_REFRESH_MS);
+
+// Mitternachts-Reset: kurz nach 00:00 (lokal) einen Abruf erzwingen — der Server
+// archiviert dabei erledigte Todos vom Vortag. Backstop zum Cleanup-on-GET.
+function _msToMidnight() {
+  const next = new Date();
+  next.setHours(24, 0, 5, 0); // 00:00:05 lokaler Zeit
+  return next - Date.now();
+}
+function scheduleMidnightCleanup() {
+  setTimeout(() => { fetchTodos(); scheduleMidnightCleanup(); }, _msToMidnight());
+}
+scheduleMidnightCleanup();
 
 // ── Wake Lock (iPad-Display bleibt an) ───────────────────────
 let wakeLock = null;

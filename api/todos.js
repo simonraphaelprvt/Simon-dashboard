@@ -14,9 +14,18 @@ const NOTION_VER    = '2022-06-28';
 const PARENT_PAGE_ID = process.env.NOTION_TODOS_PARENT || '34b5f290ef7181d68ab4e00967e47bde';
 const DB_TITLE       = 'Dashboard Todos';
 
-// Schreib-Key. Per Env überschreibbar; Fallback fest im Code (wie ZOHO-Token),
-// damit der Endpoint sofort nach dem Deploy funktioniert.
+// Schreib-Key (Erstellen via Siri/Shortcuts). Per Env überschreibbar; Fallback
+// fest im Code (wie ZOHO-Token), damit es sofort nach dem Deploy funktioniert.
 const API_KEY = process.env.TODO_API_KEY || 'dsh_8f64c0cd0acdc8245c52422646b91029c5c8b4ef1f2644c9';
+
+// UI-Key (nur zum Umschalten offen/erledigt aus dem Dashboard). Bewusst getrennt
+// vom Schreib-Key: liegt im Frontend, kann also keine neuen Todos anlegen.
+const UI_KEY = process.env.TODO_UI_KEY || 'dshui_6eed2b413f983489868084853c9847ef';
+
+// Lokales Datum (Europe/Berlin) als YYYY-MM-DD — für den Mitternachts-Cleanup.
+function berlinDate(d) {
+  return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' });
+}
 
 // DB-ID innerhalb einer warmen Instanz cachen (spart den Find-Aufruf).
 let _cachedDbId = process.env.NOTION_TODOS_DB_ID || null;
@@ -81,8 +90,8 @@ function mapPage(p) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, x-ui-key');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -93,7 +102,7 @@ module.exports = async function handler(req, res) {
   try {
     const dbId = await ensureDb();
 
-    // ── GET: Todos auflisten (offen, kein Key — wird auch von der UI genutzt) ──
+    // ── GET: Todos auflisten + Mitternachts-Cleanup (kein Key, auch für UI) ──
     if (req.method === 'GET') {
       const qRes = await notion(`databases/${dbId}/query`, {
         method: 'POST',
@@ -101,8 +110,51 @@ module.exports = async function handler(req, res) {
       });
       const q = await qRes.json();
       if (!qRes.ok) throw new Error(`Notion (Query): ${q.message || qRes.status}`);
-      const todos = (q.results || []).map(mapPage);
-      return res.status(200).json({ ok: true, count: todos.length, todos });
+
+      // Selbstheilender Reset: erledigte Todos von einem früheren Tag (Berlin)
+      // werden archiviert → verschwinden ab Mitternacht. Offene bleiben immer.
+      const today = berlinDate(Date.now());
+      const keep = [], stale = [];
+      for (const p of q.results || []) {
+        const status = p.properties?.Status?.select?.name || 'offen';
+        if (status === 'erledigt' && berlinDate(p.last_edited_time) < today) stale.push(p.id);
+        else keep.push(p);
+      }
+      if (stale.length) {
+        await Promise.all(stale.map(id =>
+          notion(`pages/${id}`, { method: 'PATCH', body: { archived: true } }).catch(() => {})));
+      }
+
+      const todos = keep.map(mapPage);
+      return res.status(200).json({ ok: true, count: todos.length, cleaned: stale.length, todos });
+    }
+
+    // ── PATCH: Status umschalten offen ⇄ erledigt (UI-Key) ──
+    if (req.method === 'PATCH') {
+      const key = req.headers['x-ui-key'];
+      if (!key || key !== UI_KEY) {
+        return res.status(401).json({ error: 'Ungültiger oder fehlender UI-Key (Header x-ui-key)' });
+      }
+
+      let body = req.body;
+      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+      body = body || {};
+
+      const id = String(body.id ?? '').trim();
+      const status = String(body.status ?? '').trim();
+      if (!id) return res.status(400).json({ error: 'Feld "id" fehlt' });
+      if (status !== 'offen' && status !== 'erledigt') {
+        return res.status(400).json({ error: 'Feld "status" muss "offen" oder "erledigt" sein' });
+      }
+
+      const upd = await notion(`pages/${id}`, {
+        method: 'PATCH',
+        body: { properties: { Status: { select: { name: status } } } },
+      });
+      const page = await upd.json();
+      if (!upd.ok) throw new Error(`Notion (Status setzen): ${page.message || upd.status}`);
+
+      return res.status(200).json({ ok: true, todo: mapPage(page) });
     }
 
     // ── POST: neuen Todo anlegen (geschützt) ──
