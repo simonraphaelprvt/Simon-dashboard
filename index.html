@@ -1778,10 +1778,10 @@
         <!-- Ansicht 1: Akquise-Gauges (unverändert) -->
         <div class="acq-view acq-view-dials is-active" id="acq-view-dials">
           <div class="dial-grid">
-            <div class="g"><div class="g-svg" id="gm-first-c"></div><div class="g-lbl">Erstkontakte/Wo</div></div>
-            <div class="g"><div class="g-svg" id="gm-reply"></div><div class="g-lbl">Antwortrate</div></div>
-            <div class="g"><div class="g-svg" id="gm-wait-c"></div><div class="g-lbl">Wartende Threads</div></div>
-            <div class="g"><div class="g-svg" id="gm-oldest-c"></div><div class="g-lbl">Ältester offen</div></div>
+            <div class="g"><div class="g-svg" id="ld-neu"></div><div class="g-lbl">Offen / Neu</div></div>
+            <div class="g"><div class="g-svg" id="ld-ang"></div><div class="g-lbl">Angeschrieben</div></div>
+            <div class="g"><div class="g-svg" id="ld-term"></div><div class="g-lbl">Termine</div></div>
+            <div class="g"><div class="g-svg" id="ld-kunde"></div><div class="g-lbl">Kunden</div></div>
           </div>
         </div>
         <!-- Ansicht 2: Todos (Aviation-Style, live aus /api/todos) -->
@@ -2743,6 +2743,47 @@ async function loadGmailMetrics() {
     setAnn('stall', firsts.length === 0 ? 'red' : 'green');
   } catch (e) { console.error('GmailMetrics', e); }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// AKQUISE — Lead Radar Pipeline (Notion, ersetzt die Gmail-Tachos)
+// ═══════════════════════════════════════════════════════════════
+const LEAD_DB_ID = '8960e2760b474af1b1df5585cd439894';
+async function loadLeadMetrics() {
+  try {
+    let cursor = null, rows = [];
+    for (let i = 0; i < 6; i++) {              // bis 600 Leads paginieren
+      const body = { page_size: 100 };
+      if (cursor) body.start_cursor = cursor;
+      const r = await fetch('/api/notion?endpoint=' + encodeURIComponent('databases/' + LEAD_DB_ID + '/query'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      if (!r.ok || !Array.isArray(d.results)) break;
+      rows = rows.concat(d.results);
+      if (d.has_more) cursor = d.next_cursor; else break;
+    }
+    const sel = (p, k) => (p.properties?.[k]?.select?.name) || null;
+    let neu = 0, ang = 0, term = 0, kunde = 0, abgelehnt = 0;
+    for (const p of rows) {
+      switch (sel(p, 'Status')) {
+        case 'Neu':           neu++;       break;
+        case 'Angeschrieben': ang++;       break;
+        case 'Termin':        term++;      break;
+        case 'Kunde':         kunde++;     break;
+        case 'Abgelehnt':     abgelehnt++; break;
+      }
+    }
+    const contacted = ang + term + kunde + abgelehnt;          // alles außer „Neu"
+    const conv  = contacted ? Math.round(kunde / contacted * 100) : 0;
+    const scale = Math.max(rows.length, 1);                    // Anteil an der Pipeline
+    renderInstrument('ld-neu',   { pct: neu / scale,   value: String(neu),   sub: neu ? 'anzurufen' : 'leer',  color: neu ? '#E8AC42' : '#5BBE8D' });
+    renderInstrument('ld-ang',   { pct: ang / scale,   value: String(ang),   sub: 'in Kontakt',                color: ang ? '#E9E08C' : '#5E6577' });
+    renderInstrument('ld-term',  { pct: term / scale,  value: String(term),  sub: 'Termine',                   color: term ? '#E5944A' : '#5E6577' });
+    renderInstrument('ld-kunde', { pct: kunde / scale, value: String(kunde), sub: contacted ? conv + '% conv' : 'Kunden', color: kunde ? '#5BBE8D' : '#5E6577' });
+  } catch (e) { console.error('LeadMetrics', e); }
+}
+loadLeadMetrics();
+setInterval(loadLeadMetrics, 5 * 60_000);
 
 // ═══════════════════════════════════════════════════════════════
 // FINANZEN — Zoho-Metriken (server-aggregiert)
