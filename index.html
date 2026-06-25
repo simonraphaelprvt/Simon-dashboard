@@ -1851,8 +1851,8 @@
       <div class="radar" id="pipeline-radar"></div>
       <div class="radar-legend">
         <span><i style="background:#5BBE8D"></i>aktiv</span>
-        <span><i style="background:#E9E08C"></i>Verhandlung</span>
-        <span><i style="background:#E5944A"></i>Kontakt</span>
+        <span><i style="background:#E5944A"></i>Verhandlung</span>
+        <span><i style="background:#E9E08C"></i>Kontakt</span>
         <span><i style="background:#8B8B96"></i>on hold</span>
       </div>
     </section>
@@ -2212,10 +2212,10 @@ let _pipeShowValues = false;  // €/Monat-Werte am Radar — Standard AUS, per 
 function classifyLead(status) {
   const s = (status || '').toLowerCase();
   if (/aktiv|abgeschloss|kunde|testmonat|läuft|gewonnen|on.?board/.test(s)) return { stage: 0, color: '#5BBE8D' }; // aktiv = grün
-  if (/verhandl|angebot|budget|pitch|deal|vertrag|preis/.test(s))            return { stage: 1, color: '#E9E08C' }; // Verhandlung = gelb
-  if (/kontakt|offen|rückmeld|warten|lead|anfrage/.test(s))                  return { stage: 2, color: '#E5944A' }; // Kontakt = orange
+  if (/verhandl|angebot|budget|pitch|deal|vertrag|preis/.test(s))            return { stage: 1, color: '#E5944A' }; // Verhandlung = orange
+  if (/kontakt|offen|rückmeld|warten|lead|anfrage/.test(s))                  return { stage: 2, color: '#E9E08C' }; // Kontakt = gelb
   if (/hold|pause|kalt|abgesagt|verloren|tot/.test(s))                       return { stage: 3, color: '#8B8B96' }; // on hold = grau
-  return { stage: 2, color: '#E5944A' };
+  return { stage: 2, color: '#E9E08C' };
 }
 function renderPipelineRadar(leads) {
   const el = document.getElementById('pipeline-radar'); if (!el) return;
