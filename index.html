@@ -2776,10 +2776,10 @@ async function loadLeadMetrics() {
     const contacted = ang + term + kunde + abgelehnt;          // alles außer „Neu"
     const conv  = contacted ? Math.round(kunde / contacted * 100) : 0;
     const scale = Math.max(rows.length, 1);                    // Anteil an der Pipeline
-    renderInstrument('ld-neu',   { pct: neu / scale,   value: String(neu),   sub: neu ? 'anzurufen' : 'leer',  color: neu ? '#E8AC42' : '#5BBE8D' });
-    renderInstrument('ld-ang',   { pct: ang / scale,   value: String(ang),   sub: 'in Kontakt',                color: ang ? '#E9E08C' : '#5E6577' });
-    renderInstrument('ld-term',  { pct: term / scale,  value: String(term),  sub: 'Termine',                   color: term ? '#E5944A' : '#5E6577' });
-    renderInstrument('ld-kunde', { pct: kunde / scale, value: String(kunde), sub: contacted ? conv + '% conv' : 'Kunden', color: kunde ? '#5BBE8D' : '#5E6577' });
+    renderInstrument('ld-neu',   { pct: neu / scale,   value: String(neu),   sub: neu ? 'anzurufen' : 'leer',  color: '#E07B39' }); // Dunkelorange
+    renderInstrument('ld-ang',   { pct: ang / scale,   value: String(ang),   sub: 'in Kontakt',                color: '#9B8CF0' }); // Lila
+    renderInstrument('ld-term',  { pct: term / scale,  value: String(term),  sub: 'Termine',                   color: '#6FB7E8' }); // Hellblau
+    renderInstrument('ld-kunde', { pct: kunde / scale, value: String(kunde), sub: contacted ? conv + '% conv' : 'Kunden', color: '#7BD4A0' }); // Hellgrün
   } catch (e) { console.error('LeadMetrics', e); }
 }
 loadLeadMetrics();
